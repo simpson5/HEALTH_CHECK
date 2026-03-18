@@ -1,0 +1,32 @@
+{
+  "profile": {
+    "name": "Simpson",
+    "medication": "마운자로 2.5mg",
+    "medication_start": "2026-03-10",
+    "exercise": "경사 트레드밀 아침 30분 + 저녁 20~30분"
+  },
+  "records": [
+    {
+      "date": "2026-03-11",
+      "day": 2,
+      "inbody_score": 44,
+      "body_composition": {
+        "weight_kg": 113.1,
+        "muscle_kg": 34.5,
+        "fat_kg": 52.6
+      },
+      "obesity": {
+        "bmi": 38.7,
+        "body_fat_pct": 46.5
+      },
+      "abdominal": {
+        "visceral_fat_level": 20
+      },
+      "metabolic": {
+        "bmr_kcal": 1677
+      },
+      "body_type": "과체중 고도비만형(C자)",
+      "memo": "마운자로 2일차, 인바디 기록 시작"
+    }
+  ]
+}

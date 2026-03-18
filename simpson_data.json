@@ -1,0 +1,149 @@
+{
+  "_readme": "Simpson 건강관리 데이터 원본. 클로드가 직접 관리.",
+
+  "profile": {
+    "name": "Simpson",
+    "goal_weight_kg": 80,
+    "start_weight_kg": 113.1,
+    "medication": "마운자로 (티르제파타이드)",
+    "medication_start": "2026-03-10",
+    "exercise": {
+      "cardio": "경사 트레드밀 아침 30분 + 저녁 20~30분",
+      "strength": ["레그 컬", "레그 익스텐션", "체스트 프레스", "오버헤드 프레스", "랫 풀다운"]
+    },
+    "daily_targets": {
+      "protein_g": 110,
+      "calories_kcal": 1800
+    }
+  },
+
+  "food_categories": {
+    "meal": ["아침", "점심", "저녁"],
+    "snack": ["간식"],
+    "drink": ["음료"],
+    "supplement": ["보충제"]
+  },
+
+  "format_rules": {
+    "_note": "이 양식은 고정입니다. 매 세션에서 반드시 이 구조를 유지하세요.",
+    "inbody_record": "date, day_since_start, weight_kg, muscle_kg, fat_kg, fat_pct, bmi, bmr_kcal, visceral_fat_level, inbody_score, weight_change_kg, muscle_change_kg, fat_change_kg, photo, memo",
+    "diet_record": "date, time, category, meal_type, food_name, quantity, calories_kcal, protein_g, carbs_g, fat_g, photo, memo",
+    "exercise_record": "date, type(cardio|strength), exercise_name, duration_min|sets, reps, weight_kg, calories_burned, memo",
+    "medication_record": "date, dose, change_reason, side_effects, memo",
+    "weekly_analysis": "week_start, week_end, weight_change, muscle_change, fat_change, avg_protein, avg_calories, exercise_count, analysis, recommendations"
+  },
+
+  "medication_records": [
+    {
+      "date": "2026-03-10",
+      "dose": "2.5mg",
+      "change_reason": "투약 시작",
+      "side_effects": null,
+      "memo": "마운자로 첫 투약"
+    }
+  ],
+
+  "inbody_records": [
+    {
+      "date": "2026-03-11",
+      "day_since_start": 2,
+      "weight_kg": 113.1,
+      "muscle_kg": 34.5,
+      "fat_kg": 52.6,
+      "fat_pct": 46.5,
+      "bmi": 38.7,
+      "bmr_kcal": 1677,
+      "visceral_fat_level": 20,
+      "inbody_score": 44,
+      "weight_change_kg": null,
+      "muscle_change_kg": null,
+      "fat_change_kg": null,
+      "photo": null,
+      "memo": "마운자로 2일차, 기록 시작"
+    },
+    {
+      "date": "2026-03-18",
+      "day_since_start": 9,
+      "weight_kg": 108.7,
+      "muscle_kg": 32.3,
+      "fat_kg": 51.8,
+      "fat_pct": 47.7,
+      "bmi": 37.2,
+      "bmr_kcal": 1599,
+      "visceral_fat_level": 20,
+      "inbody_score": 40,
+      "weight_change_kg": -4.4,
+      "muscle_change_kg": -2.2,
+      "fat_change_kg": -0.8,
+      "photo": null,
+      "memo": "근손실 경고: 지방보다 근육이 더 빠짐. 단백질 섭취 강화 필요."
+    }
+  ],
+
+  "diet_records": [
+    {
+      "date": "2026-03-18",
+      "time": "아침",
+      "category": "meal",
+      "meal_type": "아침",
+      "food_name": "굶음",
+      "quantity": null,
+      "calories_kcal": 0,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "photo": null,
+      "memo": "마운자로 식욕 억제로 아침 건너뜀"
+    },
+    {
+      "date": "2026-03-18",
+      "time": "12:00",
+      "category": "meal",
+      "meal_type": "점심",
+      "food_name": "김치찌개 + 공기밥",
+      "quantity": "0.5인분",
+      "calories_kcal": 325,
+      "protein_g": 10.0,
+      "carbs_g": 44.0,
+      "fat_g": 9.5,
+      "photo": null,
+      "memo": "0.5인분 추정. 밥 포함"
+    },
+    {
+      "date": "2026-03-18",
+      "time": "14:28",
+      "category": "drink",
+      "meal_type": "음료",
+      "food_name": "아이스 아메리카노 (메가커피)",
+      "quantity": "1잔",
+      "calories_kcal": 5,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "photo": "photos/2026-03-18_간식_아메리카노.jpg",
+      "memo": ""
+    }
+  ],
+
+  "exercise_records": [],
+
+  "weekly_analysis": [
+    {
+      "week_start": "2026-03-11",
+      "week_end": "2026-03-18",
+      "weight_change_kg": -4.4,
+      "muscle_change_kg": -2.2,
+      "fat_change_kg": -0.8,
+      "avg_protein_g": null,
+      "avg_calories_kcal": null,
+      "exercise_count": null,
+      "analysis": "체중 -4.4kg 감량 성공. 그러나 근손실(-2.2kg)이 지방감소(-0.8kg)보다 크다. 체지방률 오히려 46.5%→47.7% 상승.",
+      "recommendations": [
+        "단백질 하루 110g 이상 필수 (현재 심각하게 부족)",
+        "근력운동 빠짐없이 수행",
+        "마운자로 식욕 억제로 못 먹더라도 단백질 쉐이크라도 섭취",
+        "다음 주 인바디에서 골격근량 유지 여부 확인"
+      ]
+    }
+  ]
+}

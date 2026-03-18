@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>머신 운동 가이드</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0f0f13;
+    --card: #1a1a22;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #888;
+    --border: #2a2a35;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 20px 16px 60px;
+  }
+
+  header {
+    text-align: center;
+    padding: 32px 0 28px;
+  }
+
+  header .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  header h1 {
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+
+  header h1 span {
+    color: var(--accent);
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+
+  .card:active {
+    transform: scale(0.98);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 18px 14px;
+    cursor: pointer;
+  }
+
+  .num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    font-weight: 900;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card:nth-child(2) .num { background: #ff6b35; }
+  .card:nth-child(3) .num { background: #47c8ff; color: #000; }
+  .card:nth-child(4) .num { background: #b47fff; color: #000; }
+  .card:nth-child(5) .num { background: #47ffb4; color: #000; }
+
+  .card-title {
+    flex: 1;
+  }
+
+  .card-title h2 {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .card-title .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    background: rgba(232,255,71,0.12);
+    color: var(--accent);
+  }
+
+  .card:nth-child(2) .tag { background: rgba(255,107,53,0.12); color: #ff6b35; }
+  .card:nth-child(3) .tag { background: rgba(71,200,255,0.12); color: #47c8ff; }
+  .card:nth-child(4) .tag { background: rgba(180,127,255,0.12); color: #b47fff; }
+  .card:nth-child(5) .tag { background: rgba(71,255,180,0.12); color: #47ffb4; }
+
+  .card-body {
+    padding: 0 18px 18px;
+    display: none;
+  }
+
+  .card-body.open {
+    display: block;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 16px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  .steps {
+    list-style: none;
+    margin-bottom: 16px;
+  }
+
+  .steps li {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #ccc;
+    margin-bottom: 8px;
+  }
+
+  .step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .card:nth-child(2) .step-num { color: #ff6b35; }
+  .card:nth-child(3) .step-num { color: #47c8ff; }
+  .card:nth-child(4) .step-num { color: #b47fff; }
+  .card:nth-child(5) .step-num { color: #47ffb4; }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .chip {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--border);
+    color: #aaa;
+  }
+
+  .rec-box {
+    background: rgba(232,255,71,0.06);
+    border: 1px solid rgba(232,255,71,0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #ccc;
+  }
+
+  .card:nth-child(2) .rec-box { background: rgba(255,107,53,0.06); border-color: rgba(255,107,53,0.15); }
+  .card:nth-child(3) .rec-box { background: rgba(71,200,255,0.06); border-color: rgba(71,200,255,0.15); }
+  .card:nth-child(4) .rec-box { background: rgba(180,127,255,0.06); border-color: rgba(180,127,255,0.15); }
+  .card:nth-child(5) .rec-box { background: rgba(71,255,180,0.06); border-color: rgba(71,255,180,0.15); }
+
+  .rec-box strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .card:nth-child(2) .rec-box strong { color: #ff6b35; }
+  .card:nth-child(3) .rec-box strong { color: #47c8ff; }
+  .card:nth-child(4) .rec-box strong { color: #b47fff; }
+  .card:nth-child(5) .rec-box strong { color: #47ffb4; }
+
+  .arrow {
+    font-size: 18px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    margin-left: auto;
+  }
+
+  .arrow.open {
+    transform: rotate(180deg);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Simpson · 머신 운동 가이드</div>
+  <h1>기본 5가지<br><span>머신 운동</span></h1>
+</header>
+
+<div class="cards">
+
+  <!-- 1. 레그 컬 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">1</div>
+      <div class="card-title">
+        <h2>레그 컬</h2>
+        <div class="sub">Leg Curl · 햄스트링</div>
+      </div>
+      <div class="tag">하체 뒤</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">누운 상태 또는 앉은 상태에서 무릎을 굽혀 허벅지 뒤쪽(햄스트링)을 수축시키는 운동. 레그 프레스나 스쿼트로 잘 안 쓰이는 뒤쪽 근육을 집중 자극.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>패드가 발목 바로 위에 오도록 조절</span></li>
+        <li><div class="step-num">2</div><span>엉덩이를 시트에 밀착, 허리 뜨지 않게</span></li>
+        <li><div class="step-num">3</div><span>무릎을 끝까지 굽힐 때 1초 멈춤</span></li>
+        <li><div class="step-num">4</div><span>천천히 내려오기 (2~3초)</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">햄스트링</div>
+        <div class="chip">종아리 보조</div>
+      </div>
+      <div class="rec-box"><strong>추천 세트:</strong> 3세트 × 12~15회<br>처음엔 가벼운 무게로 자세 먼저 익히기</div>
+    </div>
+  </div>
+
+  <!-- 2. 레그 익스텐션 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">2</div>
+      <div class="card-title">
+        <h2>레그 익스텐션</h2>
+        <div class="sub">Leg Extension · 대퇴사두근</div>
+      </div>
+      <div class="tag">하체 앞</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">앉은 자세에서 다리를 앞으로 쭉 펴는 동작. 허벅지 앞쪽(대퇴사두근)을 집중 자극. 레그 컬과 세트로 하면 앞뒤 균형 잡힘.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>패드를 발등 위에 오도록 조절</span></li>
+        <li><div class="step-num">2</div><span>등받이에 등을 완전히 붙이기</span></li>
+        <li><div class="step-num">3</div><span>다리 완전히 펼 때 허벅지 앞 조이기 1초</span></li>
+        <li><div class="step-num">4</div><span>무릎 통증 있으면 가동 범위 줄이기</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">대퇴사두근</div>
+        <div class="chip">무릎 주변 강화</div>
+      </div>
+      <div class="rec-box"><strong>추천 세트:</strong> 3세트 × 12~15회<br>113kg 체중 → 무릎 부담 주의, 과한 중량 금지</div>
+    </div>
+  </div>
+
+  <!-- 3. 체스트 프레스 머신 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">3</div>
+      <div class="card-title">
+        <h2>체스트 프레스</h2>
+        <div class="sub">Chest Press Machine · 가슴</div>
+      </div>
+      <div class="tag">상체 앞</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">앉아서 앞으로 미는 동작으로 가슴(대흉근), 어깨 앞쪽, 삼두근을 자극. 바벨 벤치프레스보다 안전하고 부상 위험이 낮아 머신 입문에 최적.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>핸들이 가슴 중앙 높이에 오도록 시트 조절</span></li>
+        <li><div class="step-num">2</div><span>등을 등받이에 밀착, 허리 아치 유지</span></li>
+        <li><div class="step-num">3</div><span>밀 때 가슴 근육 쥐어짜는 느낌</span></li>
+        <li><div class="step-num">4</div><span>팔꿈치 완전히 펴지 말고 살짝 굽힌 상태 유지</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">대흉근</div>
+        <div class="chip">전면 삼각근</div>
+        <div class="chip">삼두근</div>
+      </div>
+      <div class="rec-box"><strong>추천 세트:</strong> 3세트 × 10~12회<br>가슴에 자극이 느껴지는 무게로 설정</div>
+    </div>
+  </div>
+
+  <!-- 4. 오버헤드 프레스 머신 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">4</div>
+      <div class="card-title">
+        <h2>오버헤드 프레스</h2>
+        <div class="sub">Overhead Press Machine · 어깨</div>
+      </div>
+      <div class="tag">어깨</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">머리 위로 밀어올리는 동작으로 어깨(삼각근) 전체를 자극. 어깨 라인을 만드는 핵심 운동. 머신이라 프리웨이트보다 안전하게 수행 가능.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>팔꿈치가 어깨 높이와 나란히 오도록 시트 조절</span></li>
+        <li><div class="step-num">2</div><span>허리가 과하게 젖혀지지 않게 복부 살짝 긴장</span></li>
+        <li><div class="step-num">3</div><span>천장을 향해 수직으로 밀어올리기</span></li>
+        <li><div class="step-num">4</div><span>내릴 때 어깨 으쓱 올리지 않기</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">삼각근 전·중·후면</div>
+        <div class="chip">승모근 상부</div>
+        <div class="chip">삼두근</div>
+      </div>
+      <div class="rec-box"><strong>추천 세트:</strong> 3세트 × 10~12회<br>어깨 충돌증후군 있으면 가동 범위 줄이기</div>
+    </div>
+  </div>
+
+  <!-- 5. 랫 풀다운 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">5</div>
+      <div class="card-title">
+        <h2>랫 풀다운</h2>
+        <div class="sub">Lat Pulldown · 등 넓이근</div>
+      </div>
+      <div class="tag">등</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">위에서 아래로 바를 가슴 쪽으로 당기는 동작. 등 넓이근(광배근)을 자극해서 등을 넓고 역삼각형으로 만드는 운동. 턱걸이를 못해도 할 수 있는 버전.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>허벅지 패드를 허벅지에 딱 맞게 조절</span></li>
+        <li><div class="step-num">2</div><span>바를 어깨 너비보다 약간 넓게 잡기</span></li>
+        <li><div class="step-num">3</div><span>가슴을 살짝 내밀고 바를 쇄골 쪽으로 당기기</span></li>
+        <li><div class="step-num">4</div><span>겨드랑이를 조이는 느낌으로 등 수축</span></li>
+        <li><div class="step-num">5</div><span>올릴 때 팔만 올리지 말고 등 늘이는 느낌</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">광배근</div>
+        <div class="chip">이두근 보조</div>
+        <div class="chip">후면 삼각근</div>
+      </div>
+      <div class="rec-box"><strong>추천 세트:</strong> 3세트 × 10~12회<br>등에 자극이 안 오면 무게 낮추고 자세 집중</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>탭하면 펼쳐집니다 · Simpson 전용 가이드</footer>
+
+<script>
+  function toggle(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('.arrow');
+    body.classList.toggle('open');
+    arrow.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
