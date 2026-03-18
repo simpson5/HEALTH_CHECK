@@ -152,7 +152,9 @@
 </div>
 
 <button class="cam-btn" onclick="document.getElementById('camInput').click()">📷</button>
+<button class="cam-btn" style="bottom:134px;background:var(--purple);box-shadow:0 4px 16px rgba(180,127,255,0.3);font-size:18px;" onclick="document.getElementById('fileInput').click()">📁</button>
 <input type="file" id="camInput" class="cam-input" accept="image/*" capture="environment" onchange="uploadPhoto(this)">
+<input type="file" id="fileInput" class="cam-input" accept="image/*" onchange="uploadPhoto(this)">
 <div class="upload-toast" id="uploadToast"></div>
 
 <div class="bottom-nav">
