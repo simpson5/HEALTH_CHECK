@@ -52,6 +52,19 @@ async def save_exercise(request: Request):
         json.dump(data, f, ensure_ascii=False, indent=2)
     return JSONResponse({"ok": True})
 
+@app.delete("/api/exercise")
+async def delete_exercise(request: Request):
+    body = await request.json()
+    with open(DATA_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    data["exercise_records"] = [
+        r for r in data["exercise_records"]
+        if not (r.get("date") == body.get("date") and r.get("start_time") == body.get("start_time"))
+    ]
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return JSONResponse({"ok": True})
+
 @app.get("/api/photos")
 def list_photos():
     files = sorted(os.listdir(PHOTOS_DIR), reverse=True)

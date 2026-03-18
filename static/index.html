@@ -480,7 +480,10 @@ function renderExercise(data){
       if(rec.total_volume_kg||rec.total_calories_burned){
         exDetailHtml+=`<div style="text-align:center;font-size:12px;margin:8px 0;"><span style="color:var(--accent)">볼륨 ${(rec.total_volume_kg||0).toLocaleString()}kg</span> · <span style="color:var(--orange)">~${rec.total_calories_burned||0}kcal</span> · <span style="color:var(--muted)">${rec.total_duration_min||'?'}분</span></div>`;
       }
-      exDetailHtml+=`<a href="/workout-session.html?edit=${rec.date}&start=${rec.start_time}" style="display:block;text-align:center;font-size:12px;color:var(--accent);margin-bottom:10px;">✏️ 수정하기</a>`;
+      exDetailHtml+=`<div style="display:flex;justify-content:center;gap:16px;margin-bottom:10px;">
+        <a href="/workout-session.html?edit=${rec.date}&start=${rec.start_time}" style="font-size:12px;color:var(--accent);text-decoration:none;">✏️ 수정</a>
+        <a href="#" onclick="deleteExRecord('${rec.date}','${rec.start_time}');return false;" style="font-size:12px;color:var(--red);text-decoration:none;">🗑️ 삭제</a>
+      </div>`;
     });
   }
 
@@ -506,6 +509,15 @@ function renderExercise(data){
         <div style="font-size:11px;color:var(--muted);margin-top:6px;"><a href="/workout.html" style="color:var(--accent);">자세 가이드 보기 →</a></div>
       </div>
     </div>`;
+}
+
+async function deleteExRecord(date,startTime){
+  if(!confirm('이 운동 기록을 삭제할까요?')) return;
+  await fetch('/api/exercise',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({date,start_time:startTime})});
+  const res=await fetch('/api/data');
+  DATA=await res.json();
+  renderExercise(DATA);
+  renderHome(DATA);
 }
 
 function moveExDate(dir){
