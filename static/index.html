@@ -154,7 +154,7 @@
 <button class="cam-btn" onclick="document.getElementById('camInput').click()">📷</button>
 <button class="cam-btn" style="bottom:134px;background:var(--purple);box-shadow:0 4px 16px rgba(180,127,255,0.3);font-size:18px;" onclick="document.getElementById('fileInput').click()">📁</button>
 <input type="file" id="camInput" class="cam-input" accept="image/*" capture="environment" onchange="uploadPhoto(this)">
-<input type="file" id="fileInput" class="cam-input" accept="image/*" onchange="uploadPhoto(this)">
+<input type="file" id="fileInput" class="cam-input" accept="image/*,.csv,.txt,.xlsx" onchange="uploadPhoto(this)">
 <div class="upload-toast" id="uploadToast"></div>
 
 <div class="bottom-nav">
@@ -533,7 +533,7 @@ async function uploadPhoto(input){
   try{
     const res=await fetch('/api/photo',{method:'POST',body:fd});
     const d=await res.json();
-    if(d.ok){toast.textContent='📷 업로드 완료!';toast.style.display='block';toast.style.background='var(--green)';setTimeout(()=>{toast.style.display='none';},2500);}
+    if(d.ok){const icon=d.type==='image'?'📷':'📄';toast.textContent=`${icon} 업로드 완료! ${d.filename}`;toast.style.display='block';toast.style.background='var(--green)';setTimeout(()=>{toast.style.display='none';},2500);}
   }catch(e){toast.textContent='업로드 실패';toast.style.background='var(--red)';toast.style.display='block';setTimeout(()=>{toast.style.display='none';},2500);}
   input.value='';
 }
