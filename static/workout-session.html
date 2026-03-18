@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>운동 기록</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Bebas+Neue&display=swap');
+  :root{--bg:#0a0a0f;--card:#13131c;--card2:#1a1a26;--accent:#00e5ff;--green:#00ff88;--red:#ff4466;--orange:#ff8c00;--purple:#b47fff;--yellow:#ffcc00;--text:#eeeeff;--muted:#666688;--border:#22223a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:20px;-webkit-tap-highlight-color:transparent;}
+
+  .header{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border);}
+  .back-btn{background:none;border:none;color:var(--accent);font-size:20px;cursor:pointer;padding:4px 8px;}
+  .header-title{font-size:16px;font-weight:700;flex:1;}
+  .header-time{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);}
+
+  /* 운동 선택 */
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .ex-list{padding:16px;}
+  .ex-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.1s;}
+  .ex-item:active{transform:scale(0.98);}
+  .ex-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .ex-icon.strength{background:rgba(0,229,255,0.1);}
+  .ex-icon.cardio{background:rgba(255,140,0,0.1);}
+  .ex-info{flex:1;}
+  .ex-name{font-size:14px;font-weight:700;}
+  .ex-target{font-size:11px;color:var(--muted);margin-top:2px;}
+  .ex-done{color:var(--green);font-size:14px;}
+  .ex-prev{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  .section-label{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding:0 16px;}
+
+  /* 세트 기록 */
+  .exercise-header{padding:16px;text-align:center;border-bottom:1px solid var(--border);}
+  .exercise-header h2{font-size:18px;font-weight:900;}
+  .exercise-header .target{font-size:12px;color:var(--muted);margin-top:4px;}
+  .exercise-header .prev-record{font-size:12px;color:var(--accent);margin-top:8px;background:rgba(0,229,255,0.08);display:inline-block;padding:4px 12px;border-radius:20px;}
+
+  .sets-table{padding:16px;}
+  .sets-header{display:grid;grid-template-columns:40px 1fr 1fr 50px;gap:8px;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-align:center;}
+  .set-row{display:grid;grid-template-columns:40px 1fr 1fr 50px;gap:8px;margin-bottom:8px;align-items:center;}
+  .set-num{text-align:center;font-weight:700;font-size:14px;color:var(--muted);}
+  .set-input{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;font-size:16px;font-weight:700;color:var(--text);width:100%;font-family:'Noto Sans KR',sans-serif;}
+  .set-input:focus{border-color:var(--accent);outline:none;}
+  .set-check{width:44px;height:44px;border-radius:12px;border:2px solid var(--border);background:var(--card2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.15s;}
+  .set-check.done{background:var(--green);border-color:var(--green);color:#000;}
+
+  .add-set-btn{width:100%;padding:12px;background:var(--card2);border:1px dashed var(--border);border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-top:4px;}
+  .add-set-btn:active{background:var(--card);}
+
+  /* 유산소 */
+  .cardio-form{padding:16px;}
+  .cardio-field{margin-bottom:16px;}
+  .cardio-label{font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .cardio-input{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:20px;font-weight:700;color:var(--text);width:100%;font-family:'Noto Sans KR',sans-serif;}
+  .cardio-input:focus{border-color:var(--accent);outline:none;}
+  .cardio-unit{font-size:12px;color:var(--muted);text-align:center;margin-top:4px;}
+
+  /* 버튼 */
+  .bottom-actions{padding:16px;display:flex;gap:10px;}
+  .btn{flex:1;padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;border:none;font-family:'Noto Sans KR',sans-serif;transition:transform 0.1s;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent);color:#000;}
+  .btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+  .btn-finish{background:var(--green);color:#000;}
+  .btn-danger{background:var(--red);color:#fff;}
+
+  .start-btn{margin:16px;padding:18px;border-radius:14px;background:var(--accent);color:#000;font-size:16px;font-weight:900;text-align:center;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+  .start-btn:active{transform:scale(0.97);}
+
+  /* 완료 화면 */
+  .summary{padding:20px 16px;text-align:center;}
+  .summary-emoji{font-size:48px;margin-bottom:12px;}
+  .summary-title{font-size:22px;font-weight:900;margin-bottom:4px;}
+  .summary-duration{font-size:14px;color:var(--muted);margin-bottom:20px;}
+  .summary-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;text-align:left;}
+  .summary-card .s-name{font-size:13px;font-weight:700;}
+  .summary-card .s-detail{font-size:12px;color:var(--muted);margin-top:2px;}
+  .summary-totals{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;margin:16px 0;text-align:center;}
+  .summary-totals .t-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .summary-totals .t-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);}
+</style>
+</head>
+<body>
+
+<!-- ===== 운동 선택 ===== -->
+<div class="view active" id="view-select">
+  <div class="header">
+    <button class="back-btn" onclick="location.href='/'">←</button>
+    <div class="header-title">운동 기록</div>
+    <div class="header-time" id="timerDisplay">00:00</div>
+  </div>
+  <div class="ex-list">
+    <div class="section-label" style="padding:0;margin-top:8px;">근력</div>
+    <div id="strengthList"></div>
+    <div class="section-label" style="padding:0;margin-top:16px;">유산소</div>
+    <div id="cardioList"></div>
+  </div>
+  <div class="bottom-actions">
+    <button class="btn btn-finish" onclick="finishWorkout()">운동 완료</button>
+  </div>
+</div>
+
+<!-- ===== 세트 기록 (근력) ===== -->
+<div class="view" id="view-strength">
+  <div class="header">
+    <button class="back-btn" onclick="showView('select')">←</button>
+    <div class="header-title" id="strengthTitle"></div>
+  </div>
+  <div class="exercise-header">
+    <h2 id="strengthName"></h2>
+    <div class="target" id="strengthTarget"></div>
+    <div class="prev-record" id="strengthPrev" style="display:none"></div>
+  </div>
+  <div class="sets-table">
+    <div class="sets-header"><div>세트</div><div>KG</div><div>회</div><div>완료</div></div>
+    <div id="setsContainer"></div>
+    <button class="add-set-btn" onclick="addSet()">+ 세트 추가</button>
+  </div>
+  <div class="bottom-actions">
+    <button class="btn btn-secondary" onclick="showView('select')">← 목록</button>
+  </div>
+</div>
+
+<!-- ===== 유산소 기록 ===== -->
+<div class="view" id="view-cardio">
+  <div class="header">
+    <button class="back-btn" onclick="showView('select')">←</button>
+    <div class="header-title">경사 트레드밀</div>
+  </div>
+  <div class="cardio-form">
+    <div class="cardio-field">
+      <div class="cardio-label">시간</div>
+      <input class="cardio-input" id="cardioMin" type="number" inputmode="numeric" placeholder="30" value="">
+      <div class="cardio-unit">분</div>
+    </div>
+    <div class="cardio-field">
+      <div class="cardio-label">경사</div>
+      <input class="cardio-input" id="cardioIncline" type="number" inputmode="decimal" placeholder="12" value="">
+      <div class="cardio-unit">%</div>
+    </div>
+    <div class="cardio-field">
+      <div class="cardio-label">속도</div>
+      <input class="cardio-input" id="cardioSpeed" type="number" inputmode="decimal" step="0.1" placeholder="5.5" value="">
+      <div class="cardio-unit">km/h</div>
+    </div>
+  </div>
+  <div class="bottom-actions">
+    <button class="btn btn-secondary" onclick="showView('select')">← 목록</button>
+    <button class="btn btn-primary" onclick="saveCardio()">완료</button>
+  </div>
+</div>
+
+<!-- ===== 운동 완료 ===== -->
+<div class="view" id="view-done">
+  <div class="summary" id="summaryContent"></div>
+  <div class="bottom-actions">
+    <button class="btn btn-finish" onclick="saveToServer()" id="saveBtn">저장하기</button>
+  </div>
+</div>
+
+<script>
+let DATA=null;
+let session={startTime:null,exercises:[]};
+let currentExId=null;
+let timerInterval=null;
+
+// 초기화
+async function init(){
+  const res=await fetch('/api/data');
+  DATA=await res.json();
+
+  // 로컬 세션 복구
+  const saved=localStorage.getItem('workout_session');
+  if(saved){
+    const parsed=JSON.parse(saved);
+    if(parsed.date===new Date().toISOString().slice(0,10)){
+      session=parsed;
+    } else {
+      localStorage.removeItem('workout_session');
+    }
+  }
+
+  if(!session.startTime){
+    session.startTime=new Date().toISOString();
+    session.date=new Date().toISOString().slice(0,10);
+  }
+
+  startTimer();
+  renderExList();
+}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    const elapsed=Math.floor((Date.now()-new Date(session.startTime))/1000);
+    const m=String(Math.floor(elapsed/60)).padStart(2,'0');
+    const s=String(elapsed%60).padStart(2,'0');
+    document.getElementById('timerDisplay').textContent=`${m}:${s}`;
+  },1000);
+}
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+}
+
+function saveSession(){
+  localStorage.setItem('workout_session',JSON.stringify(session));
+}
+
+// 이전 기록 찾기
+function getLastRecord(exId){
+  const recs=(DATA.exercise_records||[]).slice().reverse();
+  for(const r of recs){
+    const ex=(r.exercises||[]).find(e=>e.id===exId);
+    if(ex) return ex;
+  }
+  return null;
+}
+
+// 운동 목록 렌더
+function renderExList(){
+  const lib=DATA.exercise_library||[];
+  const sHtml=lib.filter(e=>e.type==='strength').map(e=>{
+    const done=session.exercises.find(s=>s.id===e.id);
+    const prev=getLastRecord(e.id);
+    let prevText='';
+    if(prev&&prev.sets){
+      const lastSet=prev.sets[prev.sets.length-1];
+      prevText=`지난번: ${lastSet.kg}kg × ${lastSet.reps}회 × ${prev.sets.length}세트`;
+    }
+    return `<div class="ex-item" onclick="openStrength('${e.id}')">
+      <div class="ex-icon strength">🏋️</div>
+      <div class="ex-info">
+        <div class="ex-name">${e.name}</div>
+        <div class="ex-target">${e.target.join(', ')}</div>
+        ${done?`<div class="ex-prev" style="color:var(--green)">✓ ${done.sets.filter(s=>s.completed).length}세트 완료</div>`
+              :prevText?`<div class="ex-prev">${prevText}</div>`:''}
+      </div>
+      ${done?'<div class="ex-done">✓</div>':''}
+    </div>`;
+  }).join('');
+
+  const cHtml=lib.filter(e=>e.type==='cardio').map(e=>{
+    const done=session.exercises.find(s=>s.id===e.id);
+    return `<div class="ex-item" onclick="openCardio('${e.id}')">
+      <div class="ex-icon cardio">🏃</div>
+      <div class="ex-info">
+        <div class="ex-name">${e.name}</div>
+        <div class="ex-target">${e.target.join(', ')}</div>
+        ${done?`<div class="ex-prev" style="color:var(--green)">✓ ${done.duration_min}분 완료</div>`:''}
+      </div>
+      ${done?'<div class="ex-done">✓</div>':''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('strengthList').innerHTML=sHtml;
+  document.getElementById('cardioList').innerHTML=cHtml;
+}
+
+// 근력 운동 열기
+function openStrength(exId){
+  currentExId=exId;
+  const ex=DATA.exercise_library.find(e=>e.id===exId);
+  document.getElementById('strengthName').textContent=ex.name;
+  document.getElementById('strengthTarget').textContent=ex.target.join(', ');
+
+  // 이전 기록
+  const prev=getLastRecord(exId);
+  const prevEl=document.getElementById('strengthPrev');
+  if(prev&&prev.sets){
+    const s=prev.sets[prev.sets.length-1];
+    prevEl.textContent=`지난번: ${s.kg}kg × ${s.reps}회 × ${prev.sets.length}세트`;
+    prevEl.style.display='inline-block';
+  } else {
+    prevEl.style.display='none';
+  }
+
+  // 세트 렌더
+  const existing=session.exercises.find(s=>s.id===exId);
+  const container=document.getElementById('setsContainer');
+
+  if(existing){
+    renderSets(existing.sets);
+  } else if(prev&&prev.sets){
+    const sets=prev.sets.map(s=>({kg:s.kg,reps:s.reps,completed:false}));
+    renderSets(sets);
+  } else {
+    renderSets([{kg:'',reps:'',completed:false},{kg:'',reps:'',completed:false},{kg:'',reps:'',completed:false}]);
+  }
+
+  showView('strength');
+}
+
+function renderSets(sets){
+  const container=document.getElementById('setsContainer');
+  container.innerHTML=sets.map((s,i)=>`
+    <div class="set-row" id="setRow${i}">
+      <div class="set-num">${i+1}</div>
+      <input class="set-input" type="number" inputmode="numeric" value="${s.kg||''}" placeholder="kg" onchange="updateSet(${i},'kg',this.value)">
+      <input class="set-input" type="number" inputmode="numeric" value="${s.reps||''}" placeholder="회" onchange="updateSet(${i},'reps',this.value)">
+      <div class="set-check ${s.completed?'done':''}" onclick="toggleSet(${i})">${s.completed?'✓':''}</div>
+    </div>
+  `).join('');
+}
+
+function getCurrentSets(){
+  const container=document.getElementById('setsContainer');
+  const rows=container.querySelectorAll('.set-row');
+  return Array.from(rows).map((row,i)=>{
+    const inputs=row.querySelectorAll('.set-input');
+    const check=row.querySelector('.set-check');
+    return {
+      kg:parseFloat(inputs[0].value)||0,
+      reps:parseInt(inputs[1].value)||0,
+      completed:check.classList.contains('done')
+    };
+  });
+}
+
+function updateSet(idx,field,val){
+  saveStrengthToSession();
+}
+
+function toggleSet(idx){
+  const check=document.querySelector(`#setRow${idx} .set-check`);
+  check.classList.toggle('done');
+  check.textContent=check.classList.contains('done')?'✓':'';
+  saveStrengthToSession();
+}
+
+function addSet(){
+  const sets=getCurrentSets();
+  const last=sets.length?sets[sets.length-1]:{kg:'',reps:'',completed:false};
+  sets.push({kg:last.kg,reps:last.reps,completed:false});
+  renderSets(sets);
+  saveStrengthToSession();
+}
+
+function saveStrengthToSession(){
+  const sets=getCurrentSets();
+  const ex=DATA.exercise_library.find(e=>e.id===currentExId);
+  const volume=sets.filter(s=>s.completed).reduce((sum,s)=>sum+s.kg*s.reps,0);
+
+  const existing=session.exercises.findIndex(s=>s.id===currentExId);
+  const record={
+    id:currentExId,
+    name:ex.name,
+    type:'strength',
+    target:ex.target,
+    sets:sets,
+    volume_kg:volume
+  };
+
+  if(existing>=0) session.exercises[existing]=record;
+  else session.exercises.push(record);
+  saveSession();
+  renderExList();
+}
+
+// 유산소
+function openCardio(exId){
+  currentExId=exId;
+  const prev=getLastRecord(exId);
+  if(prev){
+    document.getElementById('cardioMin').value=prev.duration_min||'';
+    document.getElementById('cardioIncline').value=prev.incline_pct||'';
+    document.getElementById('cardioSpeed').value=prev.speed_kmh||'';
+  }
+  const existing=session.exercises.find(s=>s.id===exId);
+  if(existing){
+    document.getElementById('cardioMin').value=existing.duration_min||'';
+    document.getElementById('cardioIncline').value=existing.incline_pct||'';
+    document.getElementById('cardioSpeed').value=existing.speed_kmh||'';
+  }
+  showView('cardio');
+}
+
+function saveCardio(){
+  const min=parseInt(document.getElementById('cardioMin').value)||0;
+  const incline=parseFloat(document.getElementById('cardioIncline').value)||0;
+  const speed=parseFloat(document.getElementById('cardioSpeed').value)||0;
+  const cal=Math.round(min*8);
+
+  const existing=session.exercises.findIndex(s=>s.id===currentExId);
+  const record={
+    id:currentExId,
+    name:'경사 트레드밀',
+    type:'cardio',
+    duration_min:min,
+    incline_pct:incline,
+    speed_kmh:speed,
+    calories_burned:cal
+  };
+
+  if(existing>=0) session.exercises[existing]=record;
+  else session.exercises.push(record);
+  saveSession();
+  renderExList();
+  showView('select');
+}
+
+// 운동 완료
+function finishWorkout(){
+  if(session.exercises.length===0){alert('기록된 운동이 없습니다.');return;}
+
+  const elapsed=Math.floor((Date.now()-new Date(session.startTime))/60000);
+  let totalVol=0,totalCal=0;
+  let cardsHtml='';
+
+  session.exercises.forEach(e=>{
+    if(e.type==='strength'){
+      const completed=e.sets.filter(s=>s.completed);
+      const vol=completed.reduce((sum,s)=>sum+s.kg*s.reps,0);
+      totalVol+=vol;
+      totalCal+=Math.round(completed.length*8);
+      const lastSet=completed.length?completed[completed.length-1]:null;
+      cardsHtml+=`<div class="summary-card"><div class="s-name">🏋️ ${e.name}</div><div class="s-detail">${lastSet?lastSet.kg+'kg':'-'} × ${completed.length}세트 · 볼륨 ${vol.toLocaleString()}kg</div></div>`;
+    } else {
+      totalCal+=e.calories_burned||0;
+      cardsHtml+=`<div class="summary-card"><div class="s-name">🏃 ${e.name}</div><div class="s-detail">${e.duration_min}분 · 경사${e.incline_pct}% · ${e.speed_kmh}km/h · ~${e.calories_burned}kcal</div></div>`;
+    }
+  });
+
+  session.end_time=new Date().toTimeString().slice(0,5);
+  session.total_duration_min=elapsed;
+  session.total_volume_kg=totalVol;
+  session.total_calories_burned=totalCal;
+
+  document.getElementById('summaryContent').innerHTML=`
+    <div class="summary-emoji">💪</div>
+    <div class="summary-title">운동 완료!</div>
+    <div class="summary-duration">${elapsed}분 소요 · ${session.exercises.length}종 수행</div>
+    <div class="summary-totals">
+      <div class="t-label">총 볼륨</div>
+      <div class="t-val">${totalVol.toLocaleString()}<span style="font-size:16px;font-family:'Noto Sans KR'">kg</span></div>
+    </div>
+    <div class="summary-totals" style="margin-top:0;">
+      <div class="t-label">추정 칼로리 소모</div>
+      <div class="t-val">~${totalCal}<span style="font-size:16px;font-family:'Noto Sans KR'">kcal</span></div>
+    </div>
+    ${cardsHtml}
+  `;
+
+  showView('done');
+}
+
+async function saveToServer(){
+  const payload={
+    date:session.date,
+    start_time:new Date(session.startTime).toTimeString().slice(0,5),
+    end_time:session.end_time,
+    exercises:session.exercises,
+    total_duration_min:session.total_duration_min,
+    total_volume_kg:session.total_volume_kg,
+    total_calories_burned:session.total_calories_burned,
+    memo:''
+  };
+
+  try{
+    const res=await fetch('/api/exercise',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await res.json();
+    if(d.ok){
+      localStorage.removeItem('workout_session');
+      document.getElementById('saveBtn').textContent='✓ 저장 완료!';
+      document.getElementById('saveBtn').style.background='var(--accent)';
+      document.getElementById('saveBtn').onclick=()=>location.href='/';
+    }
+  }catch(e){
+    alert('저장 실패: '+e.message);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

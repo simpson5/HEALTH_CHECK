@@ -461,15 +461,38 @@ function renderExercise(data){
   const strength=data.profile.exercise.strength||[];
   let guideHtml=strength.map(s=>`<span class="summary-chip">${s}</span>`).join('');
 
+  // 운동 기록 상세 표시 (세트 정보 포함)
+  let exDetailHtml='';
+  if(recs.length===0){
+    exDetailHtml='<div class="empty">이 날 운동 기록 없음</div>';
+  } else {
+    recs.forEach(rec=>{
+      rec.exercises.forEach(e=>{
+        if(e.type==='cardio'){
+          exDetailHtml+=`<div class="card"><div style="font-size:12px;font-weight:700;">🏃 ${e.name}</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">${e.duration_min||'?'}분 · 경사${e.incline_pct||'?'}% · ${e.speed_kmh||'?'}km/h · ~${e.calories_burned||'?'}kcal</div></div>`;
+        } else if(e.sets){
+          const completed=e.sets.filter(s=>s.completed);
+          const vol=completed.reduce((sum,s)=>sum+(s.kg||0)*(s.reps||0),0);
+          const setsText=completed.map(s=>`${s.kg}kg×${s.reps}`).join(' / ');
+          exDetailHtml+=`<div class="card"><div style="font-size:12px;font-weight:700;">🏋️ ${e.name}</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">${setsText}</div><div style="font-size:11px;color:var(--accent);margin-top:2px;">볼륨 ${vol.toLocaleString()}kg</div></div>`;
+        }
+      });
+      if(rec.total_volume_kg||rec.total_calories_burned){
+        exDetailHtml+=`<div style="text-align:center;font-size:12px;margin:8px 0;"><span style="color:var(--accent)">볼륨 ${(rec.total_volume_kg||0).toLocaleString()}kg</span> · <span style="color:var(--orange)">~${rec.total_calories_burned||0}kcal</span> · <span style="color:var(--muted)">${rec.total_duration_min||'?'}분</span></div>`;
+      }
+    });
+  }
+
   document.getElementById('page-exercise').innerHTML=`
     <div class="section">
       <div class="spacer"></div>
+      <a href="/workout-session.html" style="display:block;text-align:center;padding:16px;background:var(--accent);color:#000;font-size:15px;font-weight:900;border-radius:14px;text-decoration:none;margin-bottom:16px;">▶ 운동 시작</a>
       <div class="date-nav">
         <button onclick="moveExDate(-1)">◀</button>
         <div class="date-text">${fmtDateFull(exDate)}</div>
         <button onclick="moveExDate(1)">▶</button>
       </div>
-      ${exHtml}
+      ${exDetailHtml}
       <div class="spacer"></div>
       <div class="section-title">내 운동 루틴</div>
       <div class="card">

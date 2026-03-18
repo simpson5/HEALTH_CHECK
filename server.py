@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 import json
@@ -35,6 +35,16 @@ async def upload_photo(file: UploadFile = File(...)):
         f.write(content)
 
     return JSONResponse({"ok": True, "filename": filename, "path": f"{folder}/{filename}", "type": "image" if is_image else "file"})
+
+@app.post("/api/exercise")
+async def save_exercise(request: Request):
+    request = await request.json()
+    with open(DATA_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    data["exercise_records"].append(request)
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return JSONResponse({"ok": True})
 
 @app.get("/api/photos")
 def list_photos():
