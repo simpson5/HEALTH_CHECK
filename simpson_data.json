@@ -41,6 +41,13 @@
       "change_reason": "투약 시작",
       "side_effects": null,
       "memo": "마운자로 첫 투약"
+    },
+    {
+      "date": "2026-03-18",
+      "dose": "2.5mg",
+      "change_reason": "정기 투약",
+      "side_effects": null,
+      "memo": "2주차 투약 (D+9)"
     }
   ],
 
