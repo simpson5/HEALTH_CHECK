@@ -85,6 +85,42 @@
       ]
     }
   ],
+  "frequent_foods": [
+    {
+      "id": "dryu_shake_choco",
+      "name": "닥터유 프로 단백질 쉐이크 (초코) + 매일두유 고단백",
+      "description": "파우더 1회분(42g) + 매일두유 고단백 190ml에 타먹기",
+      "calories_kcal": 250,
+      "protein_g": 36.0,
+      "carbs_g": 16.5,
+      "fat_g": 6.6,
+      "category": "supplement",
+      "meal_type": "보충제"
+    },
+    {
+      "id": "dryu_powder_only",
+      "name": "닥터유 프로 단백질 파우더 (초코) 1회분",
+      "description": "파우더만 42g",
+      "calories_kcal": 160,
+      "protein_g": 24.0,
+      "carbs_g": 10.0,
+      "fat_g": 2.5,
+      "category": "supplement",
+      "meal_type": "보충제"
+    },
+    {
+      "id": "maeil_highprotein_soymilk",
+      "name": "매일두유 고단백",
+      "description": "190ml 1팩",
+      "calories_kcal": 90,
+      "protein_g": 12.0,
+      "carbs_g": 6.5,
+      "fat_g": 4.1,
+      "category": "drink",
+      "meal_type": "음료"
+    }
+  ],
+
   "food_categories": {
     "meal": [
       "아침",
@@ -232,6 +268,20 @@
       "fat_g": 12.0,
       "photo": "photos/2026-03-18_저녁_설렁탕.jpg",
       "memo": "김치 포함"
+    },
+    {
+      "date": "2026-03-18",
+      "time": "21:00",
+      "category": "supplement",
+      "meal_type": "보충제",
+      "food_name": "닥터유 프로 단백질 쉐이크 (초코) + 매일두유 고단백",
+      "quantity": "파우더1회+두유190ml",
+      "calories_kcal": 250,
+      "protein_g": 36.0,
+      "carbs_g": 16.5,
+      "fat_g": 6.6,
+      "photo": null,
+      "memo": "단백질 보충"
     }
   ],
   "exercise_records": [
