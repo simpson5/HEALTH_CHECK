@@ -96,6 +96,7 @@
   .card:nth-child(3) .num { background: #47c8ff; color: #000; }
   .card:nth-child(4) .num { background: #b47fff; color: #000; }
   .card:nth-child(5) .num { background: #47ffb4; color: #000; }
+  .card:nth-child(6) .num { background: #ff6b9d; color: #000; }
 
   .card-title {
     flex: 1;
@@ -125,6 +126,7 @@
   .card:nth-child(3) .tag { background: rgba(71,200,255,0.12); color: #47c8ff; }
   .card:nth-child(4) .tag { background: rgba(180,127,255,0.12); color: #b47fff; }
   .card:nth-child(5) .tag { background: rgba(71,255,180,0.12); color: #47ffb4; }
+  .card:nth-child(6) .tag { background: rgba(255,107,157,0.12); color: #ff6b9d; }
 
   .card-body {
     padding: 0 18px 18px;
@@ -189,6 +191,7 @@
   .card:nth-child(3) .step-num { color: #47c8ff; }
   .card:nth-child(4) .step-num { color: #b47fff; }
   .card:nth-child(5) .step-num { color: #47ffb4; }
+  .card:nth-child(6) .step-num { color: #ff6b9d; }
 
   .chips {
     display: flex;
@@ -219,6 +222,7 @@
   .card:nth-child(3) .rec-box { background: rgba(71,200,255,0.06); border-color: rgba(71,200,255,0.15); }
   .card:nth-child(4) .rec-box { background: rgba(180,127,255,0.06); border-color: rgba(180,127,255,0.15); }
   .card:nth-child(5) .rec-box { background: rgba(71,255,180,0.06); border-color: rgba(71,255,180,0.15); }
+  .card:nth-child(6) .rec-box { background: rgba(255,107,157,0.06); border-color: rgba(255,107,157,0.15); }
 
   .rec-box strong {
     color: var(--accent);
@@ -229,6 +233,7 @@
   .card:nth-child(3) .rec-box strong { color: #47c8ff; }
   .card:nth-child(4) .rec-box strong { color: #b47fff; }
   .card:nth-child(5) .rec-box strong { color: #47ffb4; }
+  .card:nth-child(6) .rec-box strong { color: #ff6b9d; }
 
   .arrow {
     font-size: 18px;
@@ -253,7 +258,7 @@
 
 <header>
   <div class="label">Simpson · 머신 운동 가이드</div>
-  <h1>기본 5가지<br><span>머신 운동</span></h1>
+  <h1>기본 6가지<br><span>머신 운동</span></h1>
 </header>
 
 <div class="cards">
@@ -354,8 +359,8 @@
     <div class="card-header" onclick="toggle(this)">
       <div class="num">4</div>
       <div class="card-title">
-        <h2>오버헤드 프레스</h2>
-        <div class="sub">Overhead Press Machine · 어깨</div>
+        <h2>머신 숄더 프레스</h2>
+        <div class="sub">Machine Shoulder Press · 어깨</div>
       </div>
       <div class="tag">어깨</div>
       <div class="arrow">▾</div>
@@ -363,7 +368,7 @@
     <div class="card-body">
       <div class="divider"></div>
       <div class="section-label">어떤 운동?</div>
-      <p class="desc">머리 위로 밀어올리는 동작으로 어깨(삼각근) 전체를 자극. 어깨 라인을 만드는 핵심 운동. 머신이라 프리웨이트보다 안전하게 수행 가능.</p>
+      <p class="desc">앉은 자세에서 머리 위로 밀어올리는 동작으로 어깨(삼각근) 전체와 삼두근을 자극. 어깨 라인을 만드는 핵심 운동. 머신이라 안전하게 수행 가능.</p>
       <div class="section-label">자세 포인트</div>
       <ul class="steps">
         <li><div class="step-num">1</div><span>팔꿈치가 어깨 높이와 나란히 오도록 시트 조절</span></li>
@@ -412,9 +417,42 @@
     </div>
   </div>
 
+  <!-- 6. 머신 시티드 로우 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">6</div>
+      <div class="card-title">
+        <h2>머신 시티드 로우</h2>
+        <div class="sub">Seated Row Machine · 등 두께</div>
+      </div>
+      <div class="tag">등</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">앉은 자세에서 앞으로 당기는 동작. 등 중앙부(능형근, 중하부 승모근)와 광배근을 자극. 랫 풀다운이 등 넓이라면 시티드 로우는 등 두께를 만드는 운동.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>가슴 패드에 가슴을 가볍게 밀착</span></li>
+        <li><div class="step-num">2</div><span>손잡이를 잡고 팔꿈치를 몸 옆으로 당기기</span></li>
+        <li><div class="step-num">3</div><span>당길 때 견갑골(날개뼈) 모으는 느낌</span></li>
+        <li><div class="step-num">4</div><span>천천히 돌아올 때 등이 늘어나는 느낌 유지</span></li>
+        <li><div class="step-num">5</div><span>팔이 아닌 등으로 당기는 데 집중</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">광배근</div>
+        <div class="chip">능형근</div>
+        <div class="chip">이두근 보조</div>
+        <div class="chip">후면 삼각근</div>
+      </div>
+      <div class="rec-box"><strong>추천 세트:</strong> 3세트 × 10~12회<br>랫 풀다운과 세트로 수행하면 등 앞뒤 균형 잡힘</div>
+    </div>
+  </div>
+
 </div>
 
-<footer>탭하면 펼쳐집니다 · Simpson 전용 가이드</footer>
+<footer>탭하면 펼쳐집니다 · Simpson 전용 가이드 (6종)</footer>
 
 <script>
   function toggle(header) {

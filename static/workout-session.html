@@ -40,8 +40,10 @@
   .exercise-header .prev-record{font-size:12px;color:var(--accent);margin-top:8px;background:rgba(0,229,255,0.08);display:inline-block;padding:4px 12px;border-radius:20px;}
 
   .sets-table{padding:16px;}
-  .sets-header{display:grid;grid-template-columns:40px 1fr 1fr 50px;gap:8px;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-align:center;}
-  .set-row{display:grid;grid-template-columns:40px 1fr 1fr 50px;gap:8px;margin-bottom:8px;align-items:center;}
+  .sets-header{display:grid;grid-template-columns:40px 1fr 1fr 50px 32px;gap:8px;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-align:center;}
+  .set-row{display:grid;grid-template-columns:40px 1fr 1fr 50px 32px;gap:8px;margin-bottom:8px;align-items:center;}
+  .set-del{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.5;}
+  .set-del:active{opacity:1;}
   .set-num{text-align:center;font-weight:700;font-size:14px;color:var(--muted);}
   .set-input{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;font-size:16px;font-weight:700;color:var(--text);width:100%;font-family:'Noto Sans KR',sans-serif;}
   .set-input:focus{border-color:var(--accent);outline:none;}
@@ -116,12 +118,13 @@
     <div class="prev-record" id="strengthPrev" style="display:none"></div>
   </div>
   <div class="sets-table">
-    <div class="sets-header"><div>세트</div><div>KG</div><div>회</div><div>완료</div></div>
+    <div class="sets-header"><div>세트</div><div>KG</div><div>회</div><div>완료</div><div></div></div>
     <div id="setsContainer"></div>
     <button class="add-set-btn" onclick="addSet()">+ 세트 추가</button>
   </div>
   <div class="bottom-actions">
     <button class="btn btn-secondary" onclick="showView('select')">← 목록</button>
+    <button class="btn btn-danger" style="flex:0.5" onclick="deleteExercise()">삭제</button>
   </div>
 </div>
 
@@ -173,14 +176,34 @@ async function init(){
   const res=await fetch('/api/data');
   DATA=await res.json();
 
-  // 로컬 세션 복구
-  const saved=localStorage.getItem('workout_session');
-  if(saved){
-    const parsed=JSON.parse(saved);
-    if(parsed.date===new Date().toISOString().slice(0,10)){
-      session=parsed;
-    } else {
-      localStorage.removeItem('workout_session');
+  // URL 파라미터로 기존 기록 편집 모드
+  const params=new URLSearchParams(location.search);
+  const editDate=params.get('edit');
+  const editTime=params.get('start');
+
+  if(editDate&&editTime){
+    // 기존 기록 수정 모드
+    const rec=(DATA.exercise_records||[]).find(r=>r.date===editDate&&r.start_time===editTime);
+    if(rec){
+      session={
+        startTime:new Date(editDate+'T'+editTime).toISOString(),
+        date:editDate,
+        exercises:rec.exercises||[],
+        editMode:true,
+        originalStartTime:editTime
+      };
+      document.querySelector('.header-title').textContent='운동 기록 수정';
+    }
+  } else {
+    // 로컬 세션 복구
+    const saved=localStorage.getItem('workout_session');
+    if(saved){
+      const parsed=JSON.parse(saved);
+      if(parsed.date===new Date().toISOString().slice(0,10)){
+        session=parsed;
+      } else {
+        localStorage.removeItem('workout_session');
+      }
     }
   }
 
@@ -303,6 +326,7 @@ function renderSets(sets){
       <input class="set-input" type="number" inputmode="numeric" value="${s.kg||''}" placeholder="kg" onchange="updateSet(${i},'kg',this.value)">
       <input class="set-input" type="number" inputmode="numeric" value="${s.reps||''}" placeholder="회" onchange="updateSet(${i},'reps',this.value)">
       <div class="set-check ${s.completed?'done':''}" onclick="toggleSet(${i})">${s.completed?'✓':''}</div>
+      <button class="set-del" onclick="deleteSet(${i})">×</button>
     </div>
   `).join('');
 }
@@ -329,6 +353,14 @@ function toggleSet(idx){
   const check=document.querySelector(`#setRow${idx} .set-check`);
   check.classList.toggle('done');
   check.textContent=check.classList.contains('done')?'✓':'';
+  saveStrengthToSession();
+}
+
+function deleteSet(idx){
+  const sets=getCurrentSets();
+  if(sets.length<=1) return;
+  sets.splice(idx,1);
+  renderSets(sets);
   saveStrengthToSession();
 }
 
@@ -359,6 +391,16 @@ function saveStrengthToSession(){
   else session.exercises.push(record);
   saveSession();
   renderExList();
+}
+
+function deleteExercise(){
+  const idx=session.exercises.findIndex(s=>s.id===currentExId);
+  if(idx>=0){
+    session.exercises.splice(idx,1);
+    saveSession();
+    renderExList();
+  }
+  showView('select');
 }
 
 // 유산소
@@ -451,7 +493,7 @@ function finishWorkout(){
 async function saveToServer(){
   const payload={
     date:session.date,
-    start_time:new Date(session.startTime).toTimeString().slice(0,5),
+    start_time:session.editMode?session.originalStartTime:new Date(session.startTime).toTimeString().slice(0,5),
     end_time:session.end_time,
     exercises:session.exercises,
     total_duration_min:session.total_duration_min,

@@ -480,6 +480,7 @@ function renderExercise(data){
       if(rec.total_volume_kg||rec.total_calories_burned){
         exDetailHtml+=`<div style="text-align:center;font-size:12px;margin:8px 0;"><span style="color:var(--accent)">볼륨 ${(rec.total_volume_kg||0).toLocaleString()}kg</span> · <span style="color:var(--orange)">~${rec.total_calories_burned||0}kcal</span> · <span style="color:var(--muted)">${rec.total_duration_min||'?'}분</span></div>`;
       }
+      exDetailHtml+=`<a href="/workout-session.html?edit=${rec.date}&start=${rec.start_time}" style="display:block;text-align:center;font-size:12px;color:var(--accent);margin-bottom:10px;">✏️ 수정하기</a>`;
     });
   }
 

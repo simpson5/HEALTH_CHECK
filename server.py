@@ -38,10 +38,16 @@ async def upload_photo(file: UploadFile = File(...)):
 
 @app.post("/api/exercise")
 async def save_exercise(request: Request):
-    request = await request.json()
+    body = await request.json()
     with open(DATA_FILE, encoding="utf-8") as f:
         data = json.load(f)
-    data["exercise_records"].append(request)
+    # 같은 날짜+시작시간 기록 있으면 덮어쓰기 (수정 모드)
+    idx = next((i for i, r in enumerate(data["exercise_records"])
+                if r.get("date") == body.get("date") and r.get("start_time") == body.get("start_time")), -1)
+    if idx >= 0:
+        data["exercise_records"][idx] = body
+    else:
+        data["exercise_records"].append(body)
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return JSONResponse({"ok": True})
