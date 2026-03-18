@@ -17,6 +17,7 @@ description: Simpson 건강관리 통합 스킬. 식단/인바디/운동/투약/
 
 | 키워드/상황 | 유형 |
 |------------|------|
+| 체중계 사진 or "몸무게/체중" | `weight` |
 | 인바디 사진 or "인바디" | `inbody` |
 | 음식 사진 or "먹었어/점심/저녁/아침/간식" | `diet` |
 | "운동/트레드밀/세트/했어" | `exercise` |
@@ -24,11 +25,35 @@ description: Simpson 건강관리 통합 스킬. 식단/인바디/운동/투약/
 | "이번 주/주간/리포트/분석" | `weekly` |
 | "현황/상태/요약" | `status` |
 
+판별 우선순위 (사진):
+```
+체중계 사진 (숫자만 보임)     → weight (매일)
+인바디 결과지 (표/그래프)     → inbody (주간)
+음식 사진                    → diet
+```
+
 사진이 첨부된 경우:
 - `photos/` 폴더에서 최근 업로드된 파일 확인 (`ls -lt photos/ | head -5`)
 - 해당 사진을 Read 도구로 확인하여 내용 파악
 
 ### Step 2: 유형별 처리
+
+---
+
+#### weight (매일 몸무게)
+
+1. **파악**: 체중계 사진이면 숫자 읽기, 텍스트면 파싱
+2. **JSON 추가**: `simpson_data.json` → `weight_records`에 추가
+   ```json
+   {
+     "date": "YYYY-MM-DD",
+     "weight_kg": 0.0,
+     "photo": "photos/YYYY-MM-DD_체중.jpg 또는 null",
+     "memo": ""
+   }
+   ```
+3. **사진**: `photos/YYYY-MM-DD_체중.jpg`
+4. **코멘트**: 전일 대비 변화 + 시작 대비 총 감량
 
 ---
 

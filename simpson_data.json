@@ -30,6 +30,7 @@
     "diet_record": "date, time, category, meal_type, food_name, quantity, calories_kcal, protein_g, carbs_g, fat_g, photo, memo",
     "exercise_record": "date, type(cardio|strength), exercise_name, duration_min|sets, reps, weight_kg, calories_burned, memo",
     "medication_record": "date, dose, change_reason, side_effects, memo",
+    "weight_record": "date, weight_kg, photo, memo",
     "weekly_analysis": "week_start, week_end, weight_change, muscle_change, fat_change, avg_protein, avg_calories, exercise_count, analysis, recommendations"
   },
 
@@ -40,6 +41,21 @@
       "change_reason": "투약 시작",
       "side_effects": null,
       "memo": "마운자로 첫 투약"
+    }
+  ],
+
+  "weight_records": [
+    {
+      "date": "2026-03-11",
+      "weight_kg": 113.1,
+      "photo": null,
+      "memo": "인바디 측정일"
+    },
+    {
+      "date": "2026-03-18",
+      "weight_kg": 108.7,
+      "photo": null,
+      "memo": "인바디 측정일"
     }
   ],
 
