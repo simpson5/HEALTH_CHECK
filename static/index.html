@@ -211,6 +211,12 @@ function renderHome(data){
   const latest=wr.length?wr[wr.length-1]:null;
   const prev=wr.length>1?wr[wr.length-2]:null;
   const wChange=latest&&prev?(latest.weight_kg-prev.weight_kg):null;
+  // 전일 vs 전 측정 판별
+  let wChangeLabel='';
+  if(latest&&prev){
+    const diffDays=Math.floor((new Date(latest.date)-new Date(prev.date))/86400000);
+    wChangeLabel=diffDays===1?'전일 대비':`${diffDays}일 전 대비`;
+  }
   const totalLoss=latest?(p.start_weight_kg-latest.weight_kg):0;
   const totalGoal=p.start_weight_kg-p.goal_weight_kg;
   const pct=totalGoal>0?((totalLoss/totalGoal)*100).toFixed(1):0;
@@ -261,7 +267,7 @@ function renderHome(data){
           <div>
             <div class="card-title">현재 체중</div>
             <div class="big-num">${latest?latest.weight_kg:'--'}<span class="big-unit">kg</span></div>
-            ${wChange!==null?`<div class="change ${wChange<=0?'down-good':'up'}">${wChange<0?'▼':'▲'} ${Math.abs(wChange).toFixed(1)}kg (전일 대비)</div>`:''}
+            ${wChange!==null?`<div class="change ${wChange<=0?'down-good':'up'}">${wChange<0?'▼':'▲'} ${Math.abs(wChange).toFixed(1)}kg (${wChangeLabel})</div>`:''}
           </div>
           <div style="text-align:right;">
             <div style="font-size:11px;color:var(--muted);">💊 마운자로 ${latestInbody?'':''}D+${days}</div>
