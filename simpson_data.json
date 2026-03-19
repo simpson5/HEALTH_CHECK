@@ -195,6 +195,12 @@
       "weight_kg": 108.7,
       "photo": null,
       "memo": "인바디 측정일"
+    },
+    {
+      "date": "2026-03-19",
+      "weight_kg": 109.3,
+      "photo": null,
+      "memo": ""
     }
   ],
   "inbody_records": [
