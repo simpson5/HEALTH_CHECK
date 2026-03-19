@@ -283,12 +283,21 @@ function renderHome(data){
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px;">${remaining}kg 남음</div>
 
       <div class="spacer"></div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div class="card-title" style="margin:0;">오늘 단백질</div>
+          <div style="font-size:13px;font-weight:700;color:${tPro/proTarget<0.3?'var(--red)':tPro/proTarget<0.7?'var(--orange)':'var(--green)'};">${tPro}g / ${proTarget}g</div>
+        </div>
+        <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${Math.min(100,tPro/proTarget*100)}%;background:${tPro/proTarget<0.3?'var(--red)':tPro/proTarget<0.7?'linear-gradient(90deg,var(--orange),var(--yellow))':'linear-gradient(90deg,var(--green),var(--accent))'}"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">${tPro>=proTarget?'✅ 목표 달성!':'⚠️ '+(proTarget-tPro).toFixed(0)+'g 부족 — 쉐이크 1잔 = +36g'} · ${tCal}kcal</div>
+      </div>
+
       ${alertHtml}
 
       <div class="card">
         <div class="card-title">오늘 식단</div>
         ${dietSummary}
-        <div style="margin-top:6px;font-size:12px;"><span style="color:var(--accent)">단백질 ${tPro}g</span><span style="color:var(--muted)"> / ${proTarget}g</span> · <span style="color:var(--yellow)">${tCal}kcal</span></div>
       </div>
 
       <div class="card">
@@ -409,7 +418,7 @@ function renderWeight(data){
       </div>
       <div class="chart-card">
         <div class="ch-title">체중 변화</div>
-        <div class="ch-sub">● 매일 체중 · ◆ 인바디 · --- 목표 ${p.goal_weight_kg}kg</div>
+        <div class="ch-sub">● 매일 체중 · ── 7일 평균 · ◆ 인바디 · --- 목표 ${p.goal_weight_kg}kg</div>
         <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
       </div>
       ${inbodyHtml}
@@ -424,10 +433,18 @@ function renderWeight(data){
   const wData=allDates.map(d=>{const r=wr.find(w=>w.date===d);return r?r.weight_kg:null;});
   const iData=allDates.map(d=>{const r=ir.find(w=>w.date===d);return r?r.weight_kg:null;});
 
+  // 7일 이동평균
+  const wFiltered=wData.filter(v=>v!==null);
+  const maData=wData.map((_,i)=>{
+    const vals=wData.slice(Math.max(0,i-6),i+1).filter(v=>v!==null);
+    return vals.length>=2?parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)):null;
+  });
+
   new Chart(document.getElementById('weightChart'),{
     type:'line',
     data:{labels,datasets:[
       {label:'체중',data:wData,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.08)',pointBackgroundColor:'#00e5ff',pointRadius:4,tension:0.3,fill:true,spanGaps:true},
+      {label:'7일 평균',data:maData,borderColor:'#ff8c00',borderWidth:2,borderDash:[4,2],pointRadius:0,tension:0.4,spanGaps:true,fill:false},
       {label:'인바디',data:iData,borderColor:'#00ff88',pointBackgroundColor:'#00ff88',pointRadius:7,pointStyle:'rectRot',showLine:false},
       {label:'목표',data:allDates.map(()=>p.goal_weight_kg),borderColor:'rgba(255,68,102,0.4)',borderDash:[3,3],pointRadius:0,fill:false}
     ]},
@@ -579,14 +596,39 @@ function renderHistory(data){
     </div>`;
   });
 
+  // 일일 리포트
+  let dailyHtml='';
+  const dailyReports=[...(data.daily_reports||[])].reverse();
+  dailyReports.forEach(r=>{
+    const scoreColor=r.score==='A'?'var(--green)':r.score==='B'?'var(--accent)':r.score==='C'?'var(--orange)':'var(--red)';
+    const highlights=(r.highlights||[]).map(h=>'<div style="font-size:11px;padding:2px 0;">'+h+'</div>').join('');
+    dailyHtml+=`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div class="card-title" style="margin:0;">${r.date} (D+${r.day_since_start})</div>
+        <div style="font-size:16px;font-weight:900;color:${scoreColor};">${r.score}</div>
+      </div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:8px;">${r.analysis}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <span class="summary-chip" style="color:var(--yellow)">🔥 ${r.diet_summary.total_calories}kcal</span>
+        <span class="summary-chip" style="color:var(--accent)">P ${r.diet_summary.total_protein}g</span>
+        <span class="summary-chip" style="color:var(--muted)">체중 ${r.weight_kg}kg</span>
+      </div>
+      ${highlights}
+      <div style="font-size:11px;color:var(--accent);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">💡 ${r.tomorrow_advice}</div>
+    </div>`;
+  });
+
   document.getElementById('page-history').innerHTML=`
     <div class="section">
       <div class="spacer"></div>
-      <div class="section-title">투약 이력</div>
-      <div class="tl">${medHtml||'<div class="empty">기록 없음</div>'}</div>
+      <div class="section-title">일일 리포트</div>
+      ${dailyHtml||'<div class="empty">리포트 없음</div>'}
       <div class="spacer"></div>
       <div class="section-title">주간 분석</div>
       ${weekHtml||'<div class="empty">분석 없음</div>'}
+      <div class="spacer"></div>
+      <div class="section-title">투약 이력</div>
+      <div class="tl">${medHtml||'<div class="empty">기록 없음</div>'}</div>
     </div>`;
 }
 

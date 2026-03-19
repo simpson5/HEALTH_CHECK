@@ -361,6 +361,41 @@
       "memo": ""
     }
   ],
+  "daily_reports": [
+    {
+      "date": "2026-03-18",
+      "day_since_start": 9,
+      "weight_kg": 108.7,
+      "weight_change": null,
+      "diet_summary": {
+        "total_calories": 810,
+        "total_protein": 68,
+        "total_carbs": 116,
+        "total_fat": 25.6,
+        "meals": [
+          "아침: 굶음 (마운자로 식욕 억제)",
+          "점심: 김치찌개+공기밥 0.5인분 (325kcal, P10g)",
+          "음료: 아메리카노 (5kcal)",
+          "저녁: 설렁탕+공기밥 1인분 (480kcal, P22g)",
+          "보충제: 단백질 쉐이크+두유 (262kcal, P36g)"
+        ]
+      },
+      "protein_achievement": "68g / 110g (62%) ⚠️ 미달",
+      "exercise_summary": "운동 없음",
+      "medication": "마운자로 2.5mg 정기 투약 (D+9)",
+      "analysis": "마운자로 D+9. 인바디 측정일 — 체중 108.7kg으로 시작 대비 -4.4kg. 그러나 근손실이 심각 (골격근 -2.2kg > 체지방 -0.8kg). 단백질 68g으로 목표 62% 달성. 쉐이크를 뒤늦게 추가한 덕에 32g→68g으로 올렸으나 여전히 부족.",
+      "score": "C",
+      "highlights": [
+        "✅ 쉐이크 추가로 단백질 36g 보충",
+        "✅ 설렁탕 선택 괜찮음 (단백질 22g)",
+        "⚠️ 아침 굶음 — 최소 쉐이크라도",
+        "⚠️ 운동 없음",
+        "⚠️ 단백질 110g 미달 (62%)"
+      ],
+      "tomorrow_advice": "아침에 쉐이크 1잔이라도 마시기. 운동 꼭 하기. 점심에 단백질 반찬 추가."
+    }
+  ],
+
   "weekly_analysis": [
     {
       "week_start": "2026-03-11",
