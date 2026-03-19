@@ -52,6 +52,38 @@ async def save_exercise(request: Request):
         json.dump(data, f, ensure_ascii=False, indent=2)
     return JSONResponse({"ok": True})
 
+@app.get("/api/foods")
+def get_foods():
+    with open(DATA_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("frequent_foods", [])
+
+@app.post("/api/foods")
+async def add_food(request: Request):
+    body = await request.json()
+    with open(DATA_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    # id 중복 체크 → 있으면 덮어쓰기
+    foods = data.get("frequent_foods", [])
+    idx = next((i for i, f in enumerate(foods) if f.get("id") == body.get("id")), -1)
+    if idx >= 0:
+        foods[idx] = body
+    else:
+        foods.append(body)
+    data["frequent_foods"] = foods
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return JSONResponse({"ok": True})
+
+@app.delete("/api/foods/{food_id}")
+async def delete_food(food_id: str):
+    with open(DATA_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    data["frequent_foods"] = [f for f in data.get("frequent_foods", []) if f.get("id") != food_id]
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return JSONResponse({"ok": True})
+
 @app.delete("/api/exercise")
 async def delete_exercise(request: Request):
     body = await request.json()

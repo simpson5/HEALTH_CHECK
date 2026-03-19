@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>음식 데이터 관리</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+  :root{--bg:#0a0a0f;--card:#13131c;--card2:#1a1a26;--accent:#00e5ff;--green:#00ff88;--red:#ff4466;--orange:#ff8c00;--purple:#b47fff;--yellow:#ffcc00;--text:#eeeeff;--muted:#666688;--border:#22223a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:20px;-webkit-tap-highlight-color:transparent;}
+
+  .header{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border);}
+  .back-btn{background:none;border:none;color:var(--accent);font-size:20px;cursor:pointer;padding:4px 8px;}
+  .header-title{font-size:16px;font-weight:700;flex:1;}
+
+  .section{padding:16px;}
+  .section-title{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+
+  .food-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .food-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+  .food-desc{font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .food-nutrients{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .food-chip{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--card2);}
+  .food-chip.cal{color:var(--yellow);}
+  .food-chip.pro{color:var(--accent);}
+  .food-chip.carb{color:var(--orange);}
+  .food-chip.fat{color:var(--purple);}
+  .food-actions{display:flex;gap:12px;justify-content:flex-end;}
+  .food-actions a{font-size:11px;text-decoration:none;cursor:pointer;}
+  .food-actions .edit{color:var(--accent);}
+  .food-actions .del{color:var(--red);}
+
+  /* 폼 */
+  .form-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:200;overflow-y:auto;}
+  .form-overlay.show{display:block;}
+  .form-box{background:var(--card);border-radius:14px;margin:20px 16px;padding:20px;}
+  .form-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+  .form-field{margin-bottom:12px;}
+  .form-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .form-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px;color:var(--text);font-family:'Noto Sans KR',sans-serif;}
+  .form-input:focus{border-color:var(--accent);outline:none;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .form-actions{display:flex;gap:10px;margin-top:16px;}
+  .btn{flex:1;padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;border:none;font-family:'Noto Sans KR',sans-serif;}
+  .btn-primary{background:var(--accent);color:#000;}
+  .btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+
+  .add-btn{display:block;width:100%;padding:14px;background:var(--card2);border:1px dashed var(--border);border-radius:14px;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;text-align:center;font-family:'Noto Sans KR',sans-serif;margin-bottom:10px;}
+
+  /* 사진 업로드 */
+  .photo-upload{margin-bottom:16px;}
+  .photo-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--card2);border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+  .photo-btn:active{background:var(--card);}
+  .photo-preview{width:100%;border-radius:10px;margin-top:10px;display:none;}
+  .photo-status{font-size:12px;color:var(--green);margin-top:6px;display:none;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="location.href='/'">←</button>
+  <div class="header-title">음식 데이터 관리</div>
+</div>
+
+<div class="section">
+  <div class="photo-upload">
+    <div class="section-title">영양정보 사진 업로드</div>
+    <label class="photo-btn" for="nutritionPhoto">
+      📷 영양성분표 사진 올리기
+    </label>
+    <input type="file" id="nutritionPhoto" accept="image/*" style="display:none" onchange="uploadNutritionPhoto(this)">
+    <img class="photo-preview" id="photoPreview">
+    <div class="photo-status" id="photoStatus"></div>
+  </div>
+
+  <div class="section-title">등록된 음식 목록</div>
+  <button class="add-btn" onclick="openForm()">+ 새 음식 등록</button>
+  <div id="foodList"></div>
+</div>
+
+<!-- 등록/수정 폼 -->
+<div class="form-overlay" id="formOverlay">
+  <div class="form-box">
+    <div class="form-title" id="formTitle">음식 등록</div>
+    <div class="form-field">
+      <div class="form-label">ID (영문, 자동생성)</div>
+      <input class="form-input" id="fId" placeholder="dryu_shake_choco">
+    </div>
+    <div class="form-field">
+      <div class="form-label">음식명</div>
+      <input class="form-input" id="fName" placeholder="닥터유 프로 단백질 쉐이크 (초코)">
+    </div>
+    <div class="form-field">
+      <div class="form-label">설명 (분량 등)</div>
+      <input class="form-input" id="fDesc" placeholder="파우더 42g + 두유 190ml">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">칼로리 (kcal)</div>
+        <input class="form-input" id="fCal" type="number" inputmode="numeric" placeholder="262">
+      </div>
+      <div class="form-field">
+        <div class="form-label">단백질 (g)</div>
+        <input class="form-input" id="fPro" type="number" inputmode="decimal" step="0.1" placeholder="36">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">탄수화물 (g)</div>
+        <input class="form-input" id="fCarb" type="number" inputmode="decimal" step="0.1" placeholder="16.5">
+      </div>
+      <div class="form-field">
+        <div class="form-label">지방 (g)</div>
+        <input class="form-input" id="fFat" type="number" inputmode="decimal" step="0.1" placeholder="8.1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">카테고리</div>
+        <select class="form-input" id="fCategory">
+          <option value="meal">식사</option>
+          <option value="snack">간식</option>
+          <option value="drink">음료</option>
+          <option value="supplement">보충제</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <div class="form-label">유형</div>
+        <select class="form-input" id="fMealType">
+          <option value="아침">아침</option>
+          <option value="점심">점심</option>
+          <option value="저녁">저녁</option>
+          <option value="간식">간식</option>
+          <option value="음료">음료</option>
+          <option value="보충제">보충제</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeForm()">취소</button>
+      <button class="btn btn-primary" onclick="saveFood()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let foods=[];
+let editingId=null;
+
+async function init(){
+  const res=await fetch('/api/foods');
+  foods=await res.json();
+  renderList();
+}
+
+function renderList(){
+  const el=document.getElementById('foodList');
+  if(foods.length===0){
+    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;">등록된 음식 없음</div>';
+    return;
+  }
+  el.innerHTML=foods.map(f=>`
+    <div class="food-card">
+      <div class="food-name">${f.name}</div>
+      <div class="food-desc">${f.description||''}</div>
+      <div class="food-nutrients">
+        <span class="food-chip cal">🔥 ${f.calories_kcal}kcal</span>
+        <span class="food-chip pro">P ${f.protein_g}g</span>
+        <span class="food-chip carb">C ${f.carbs_g}g</span>
+        <span class="food-chip fat">F ${f.fat_g}g</span>
+      </div>
+      <div class="food-actions">
+        <a class="edit" onclick="openForm('${f.id}')">✏️ 수정</a>
+        <a class="del" onclick="deleteFood('${f.id}')">🗑️ 삭제</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openForm(id){
+  editingId=id||null;
+  const overlay=document.getElementById('formOverlay');
+  if(id){
+    const f=foods.find(x=>x.id===id);
+    document.getElementById('formTitle').textContent='음식 수정';
+    document.getElementById('fId').value=f.id;
+    document.getElementById('fId').readOnly=true;
+    document.getElementById('fName').value=f.name;
+    document.getElementById('fDesc').value=f.description||'';
+    document.getElementById('fCal').value=f.calories_kcal;
+    document.getElementById('fPro').value=f.protein_g;
+    document.getElementById('fCarb').value=f.carbs_g;
+    document.getElementById('fFat').value=f.fat_g;
+    document.getElementById('fCategory').value=f.category||'meal';
+    document.getElementById('fMealType').value=f.meal_type||'간식';
+  } else {
+    document.getElementById('formTitle').textContent='새 음식 등록';
+    document.getElementById('fId').value='';
+    document.getElementById('fId').readOnly=false;
+    document.getElementById('fName').value='';
+    document.getElementById('fDesc').value='';
+    document.getElementById('fCal').value='';
+    document.getElementById('fPro').value='';
+    document.getElementById('fCarb').value='';
+    document.getElementById('fFat').value='';
+    document.getElementById('fCategory').value='meal';
+    document.getElementById('fMealType').value='간식';
+  }
+  overlay.classList.add('show');
+}
+
+function closeForm(){
+  document.getElementById('formOverlay').classList.remove('show');
+  editingId=null;
+}
+
+async function saveFood(){
+  const id=document.getElementById('fId').value.trim();
+  const name=document.getElementById('fName').value.trim();
+  if(!id||!name){alert('ID와 음식명은 필수입니다.');return;}
+
+  const body={
+    id:id,
+    name:name,
+    description:document.getElementById('fDesc').value.trim(),
+    calories_kcal:parseInt(document.getElementById('fCal').value)||0,
+    protein_g:parseFloat(document.getElementById('fPro').value)||0,
+    carbs_g:parseFloat(document.getElementById('fCarb').value)||0,
+    fat_g:parseFloat(document.getElementById('fFat').value)||0,
+    category:document.getElementById('fCategory').value,
+    meal_type:document.getElementById('fMealType').value
+  };
+
+  await fetch('/api/foods',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  closeForm();
+  const res=await fetch('/api/foods');
+  foods=await res.json();
+  renderList();
+}
+
+async function deleteFood(id){
+  if(!confirm('이 음식을 삭제할까요?')) return;
+  await fetch('/api/foods/'+id,{method:'DELETE'});
+  const res=await fetch('/api/foods');
+  foods=await res.json();
+  renderList();
+}
+
+async function uploadNutritionPhoto(input){
+  if(!input.files[0]) return;
+  const fd=new FormData();
+  fd.append('file',input.files[0]);
+
+  // 프리뷰 표시
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const preview=document.getElementById('photoPreview');
+    preview.src=e.target.result;
+    preview.style.display='block';
+  };
+  reader.readAsDataURL(input.files[0]);
+
+  const res=await fetch('/api/photo',{method:'POST',body:fd});
+  const d=await res.json();
+  if(d.ok){
+    const status=document.getElementById('photoStatus');
+    status.textContent='✅ 업로드 완료! ('+d.filename+') — 클로드에게 "영양정보 분석해줘" 라고 말하면 자동 등록됩니다.';
+    status.style.display='block';
+  }
+  input.value='';
+}
+
+init();
+</script>
+</body>
+</html>
