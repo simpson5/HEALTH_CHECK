@@ -505,11 +505,11 @@ function renderExercise(data){
         let prevText='';
         if(prev&&prev.sets){
           const lastSet=prev.sets[prev.sets.length-1];
-          prevText=`<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: ${lastSet.kg}kg × ${lastSet.reps}회 × ${prev.sets.length}세트</div>`;
+          prevText='<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: '+lastSet.kg+'kg × '+lastSet.reps+'회 × '+prev.sets.length+'세트</div>';
         } else if(prev&&prev.duration_min){
-          prevText=`<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: ${prev.duration_min}분 경사${prev.incline_pct||0}%</div>`;
+          prevText='<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: '+prev.duration_min+'분 경사'+(prev.incline_pct||0)+'%</div>';
         }
-        return '<div class="card" style="cursor:pointer;" onclick="this.querySelector(\\'.ex-guide-body\\').classList.toggle(\\'.show\\')||this.querySelector(\\'.ex-guide-body\\').style.display=this.querySelector(\\'.ex-guide-body\\').style.display===\\'block\\'?\\'none\\':\\'block\\'">'
+        return '<div class="card" style="cursor:pointer;" onclick="toggleExGuide(this)">'
           +'<div style="display:flex;align-items:center;gap:10px;">'
           +'<div style="font-size:18px;">'+icon+'</div>'
           +'<div style="flex:1;">'
@@ -525,6 +525,11 @@ function renderExercise(data){
           +'</div>';
       }).join('')}
     </div>`;
+}
+
+function toggleExGuide(el){
+  const body=el.querySelector('.ex-guide-body');
+  body.style.display=body.style.display==='block'?'none':'block';
 }
 
 function getExLastRecord(data,exId){
