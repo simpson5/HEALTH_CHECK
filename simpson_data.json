@@ -303,6 +303,34 @@
       "fat_g": 8.1,
       "photo": null,
       "memo": "단백질 보충"
+    },
+    {
+      "date": "2026-03-19",
+      "time": "아침",
+      "category": "meal",
+      "meal_type": "아침",
+      "food_name": "굶음",
+      "quantity": null,
+      "calories_kcal": 0,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "photo": null,
+      "memo": "마운자로 식욕 억제"
+    },
+    {
+      "date": "2026-03-19",
+      "time": "12:00",
+      "category": "meal",
+      "meal_type": "점심",
+      "food_name": "칼국수",
+      "quantity": "0.5인분",
+      "calories_kcal": 225,
+      "protein_g": 6.0,
+      "carbs_g": 37.5,
+      "fat_g": 4.0,
+      "photo": null,
+      "memo": "회사 점심"
     }
   ],
   "exercise_records": [
