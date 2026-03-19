@@ -160,7 +160,6 @@
 <div class="bottom-nav">
   <a href="/" class="active"><span class="icon">📊</span>대시보드</a>
   <a href="/foods.html"><span class="icon">🍽️</span>음식관리</a>
-  <a href="/workout.html"><span class="icon">💪</span>운동팁</a>
 </div>
 
 <script>
@@ -499,17 +498,42 @@ function renderExercise(data){
       </div>
       ${exDetailHtml}
       <div class="spacer"></div>
-      <div class="section-title">내 운동 루틴</div>
-      <div class="card">
-        <div class="card-title">유산소</div>
-        <div style="font-size:13px;">${data.profile.exercise.cardio}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">근력 머신 ${strength.length}종</div>
-        <div class="summary-row" style="margin-top:6px;">${guideHtml}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;"><a href="/workout.html" style="color:var(--accent);">자세 가이드 보기 →</a></div>
-      </div>
+      <div class="section-title">운동 가이드</div>
+      ${(data.exercise_library||[]).map(ex=>{
+        const icon=ex.type==='cardio'?'🏃':'🏋️';
+        const prev=getExLastRecord(data,ex.id);
+        let prevText='';
+        if(prev&&prev.sets){
+          const lastSet=prev.sets[prev.sets.length-1];
+          prevText=`<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: ${lastSet.kg}kg × ${lastSet.reps}회 × ${prev.sets.length}세트</div>`;
+        } else if(prev&&prev.duration_min){
+          prevText=`<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: ${prev.duration_min}분 경사${prev.incline_pct||0}%</div>`;
+        }
+        return '<div class="card" style="cursor:pointer;" onclick="this.querySelector(\\'.ex-guide-body\\').classList.toggle(\\'.show\\')||this.querySelector(\\'.ex-guide-body\\').style.display=this.querySelector(\\'.ex-guide-body\\').style.display===\\'block\\'?\\'none\\':\\'block\\'">'
+          +'<div style="display:flex;align-items:center;gap:10px;">'
+          +'<div style="font-size:18px;">'+icon+'</div>'
+          +'<div style="flex:1;">'
+          +'<div style="font-size:13px;font-weight:700;">'+ex.name+'</div>'
+          +'<div style="font-size:11px;color:var(--muted);">'+ex.target.join(', ')+'</div>'
+          +prevText
+          +'</div>'
+          +'<div style="font-size:14px;color:var(--muted);">▾</div>'
+          +'</div>'
+          +'<div class="ex-guide-body" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:#ccc;line-height:1.7;">'
+          +'<a href="/workout.html#'+ex.id+'" style="color:var(--accent);font-size:11px;">자세 가이드 보기 →</a>'
+          +'</div>'
+          +'</div>';
+      }).join('')}
     </div>`;
+}
+
+function getExLastRecord(data,exId){
+  const recs=(data.exercise_records||[]).slice().reverse();
+  for(const r of recs){
+    const ex=(r.exercises||[]).find(e=>e.id===exId);
+    if(ex) return ex;
+  }
+  return null;
 }
 
 async function deleteExRecord(date,startTime){
