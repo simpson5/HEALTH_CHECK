@@ -97,6 +97,9 @@
   .card:nth-child(4) .num { background: #b47fff; color: #000; }
   .card:nth-child(5) .num { background: #47ffb4; color: #000; }
   .card:nth-child(6) .num { background: #ff6b9d; color: #000; }
+  .card:nth-child(7) .num { background: #ff9f43; color: #000; }
+  .card:nth-child(8) .num { background: #54a0ff; color: #000; }
+  .card:nth-child(9) .num { background: #5f27cd; color: #fff; }
 
   .card-title {
     flex: 1;
@@ -127,6 +130,9 @@
   .card:nth-child(4) .tag { background: rgba(180,127,255,0.12); color: #b47fff; }
   .card:nth-child(5) .tag { background: rgba(71,255,180,0.12); color: #47ffb4; }
   .card:nth-child(6) .tag { background: rgba(255,107,157,0.12); color: #ff6b9d; }
+  .card:nth-child(7) .tag { background: rgba(255,159,67,0.12); color: #ff9f43; }
+  .card:nth-child(8) .tag { background: rgba(84,160,255,0.12); color: #54a0ff; }
+  .card:nth-child(9) .tag { background: rgba(95,39,205,0.12); color: #a58aff; }
 
   .card-body {
     padding: 0 18px 18px;
@@ -192,6 +198,9 @@
   .card:nth-child(4) .step-num { color: #b47fff; }
   .card:nth-child(5) .step-num { color: #47ffb4; }
   .card:nth-child(6) .step-num { color: #ff6b9d; }
+  .card:nth-child(7) .step-num { color: #ff9f43; }
+  .card:nth-child(8) .step-num { color: #54a0ff; }
+  .card:nth-child(9) .step-num { color: #a58aff; }
 
   .chips {
     display: flex;
@@ -223,6 +232,9 @@
   .card:nth-child(4) .rec-box { background: rgba(180,127,255,0.06); border-color: rgba(180,127,255,0.15); }
   .card:nth-child(5) .rec-box { background: rgba(71,255,180,0.06); border-color: rgba(71,255,180,0.15); }
   .card:nth-child(6) .rec-box { background: rgba(255,107,157,0.06); border-color: rgba(255,107,157,0.15); }
+  .card:nth-child(7) .rec-box { background: rgba(255,159,67,0.06); border-color: rgba(255,159,67,0.15); }
+  .card:nth-child(8) .rec-box { background: rgba(84,160,255,0.06); border-color: rgba(84,160,255,0.15); }
+  .card:nth-child(9) .rec-box { background: rgba(95,39,205,0.06); border-color: rgba(95,39,205,0.15); }
 
   .rec-box strong {
     color: var(--accent);
@@ -234,6 +246,9 @@
   .card:nth-child(4) .rec-box strong { color: #b47fff; }
   .card:nth-child(5) .rec-box strong { color: #47ffb4; }
   .card:nth-child(6) .rec-box strong { color: #ff6b9d; }
+  .card:nth-child(7) .rec-box strong { color: #ff9f43; }
+  .card:nth-child(8) .rec-box strong { color: #54a0ff; }
+  .card:nth-child(9) .rec-box strong { color: #a58aff; }
 
   .arrow {
     font-size: 18px;
@@ -258,7 +273,7 @@
 
 <header>
   <div class="label">Simpson · 머신 운동 가이드</div>
-  <h1>기본 6가지<br><span>머신 운동</span></h1>
+  <h1>기본 9가지<br><span>운동 가이드</span></h1>
 </header>
 
 <div class="cards">
@@ -450,9 +465,107 @@
     </div>
   </div>
 
+  <!-- 7. 케틀벨 스윙 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">7</div>
+      <div class="card-title">
+        <h2>케틀벨 스윙</h2>
+        <div class="sub">Kettlebell Swing · 후면사슬</div>
+      </div>
+      <div class="tag">전신</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">케틀벨을 두 손으로 잡고 엉덩이 힌지(접기) 동작으로 앞뒤로 스윙하는 운동. 둔근, 햄스트링, 코어, 어깨를 동시에 자극하는 전신 운동. 유산소+근력 효과를 동시에 얻을 수 있음.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>발을 어깨 너비보다 약간 넓게 벌리기</span></li>
+        <li><div class="step-num">2</div><span>엉덩이를 뒤로 빼면서 케틀벨을 다리 사이로 보내기 (스쿼트 아님, 힌지!)</span></li>
+        <li><div class="step-num">3</div><span>엉덩이를 강하게 앞으로 밀면서 케틀벨을 눈높이까지 스윙</span></li>
+        <li><div class="step-num">4</div><span>팔로 들어올리지 않기 — 엉덩이 힘으로 올리는 것</span></li>
+        <li><div class="step-num">5</div><span>코어 꽉 잡고, 등은 항상 일자 유지</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">둔근</div>
+        <div class="chip">햄스트링</div>
+        <div class="chip">코어</div>
+        <div class="chip">어깨</div>
+      </div>
+      <div class="rec-box"><strong>초보 추천:</strong> 8~12kg 케틀벨로 시작<br>3세트 × 15~20회<br>⚠️ 허리가 둥글어지면 즉시 중단. 힌지 동작이 핵심!</div>
+    </div>
+  </div>
+
+  <!-- 8. 벽 푸쉬업 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">8</div>
+      <div class="card-title">
+        <h2>벽 푸쉬업</h2>
+        <div class="sub">Wall Push-up · 가슴+삼두</div>
+      </div>
+      <div class="tag">상체</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">벽에 손을 짚고 하는 푸쉬업. 일반 푸쉬업이 힘든 초보자나 체중이 많이 나가는 사람에게 최적의 시작점. 체중 부하가 적어 관절에 부담이 없으면서 가슴, 삼두, 어깨를 자극.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>벽에서 팔 길이 + 반 보 정도 떨어져 서기</span></li>
+        <li><div class="step-num">2</div><span>어깨 너비보다 약간 넓게 손을 벽에 짚기</span></li>
+        <li><div class="step-num">3</div><span>몸을 일자로 유지하면서 벽 쪽으로 천천히 기울이기</span></li>
+        <li><div class="step-num">4</div><span>코가 벽에 닿을 정도로 내려간 후 밀어서 돌아오기</span></li>
+        <li><div class="step-num">5</div><span>허리 꺾이지 않게 복부 긴장 유지</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">가슴</div>
+        <div class="chip">삼두</div>
+        <div class="chip">전면 삼각근</div>
+      </div>
+      <div class="rec-box"><strong>초보 추천:</strong> 3세트 × 15~20회<br>쉬우면 발을 벽에서 더 멀리 → 더 어려워짐<br>그 다음 단계: 테이블 푸쉬업 → 무릎 푸쉬업 → 일반 푸쉬업</div>
+    </div>
+  </div>
+
+  <!-- 9. 맨몸 스쿼트 -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="num">9</div>
+      <div class="card-title">
+        <h2>맨몸 스쿼트</h2>
+        <div class="sub">Bodyweight Squat · 하체 전체</div>
+      </div>
+      <div class="tag">하체</div>
+      <div class="arrow">▾</div>
+    </div>
+    <div class="card-body">
+      <div class="divider"></div>
+      <div class="section-label">어떤 운동?</div>
+      <p class="desc">하체 운동의 기본 중 기본. 대퇴사두, 둔근, 코어를 동시에 자극. 체중만으로도 110kg이면 충분한 부하가 됨. 일상생활 기능 향상에 가장 직접적인 운동.</p>
+      <div class="section-label">자세 포인트</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><span>발을 어깨 너비로 벌리고 발끝 약간 바깥으로</span></li>
+        <li><div class="step-num">2</div><span>의자에 앉듯이 엉덩이를 뒤로 빼면서 내려가기</span></li>
+        <li><div class="step-num">3</div><span>무릎이 발끝 방향으로 가게 (안쪽으로 모이면 안 됨)</span></li>
+        <li><div class="step-num">4</div><span>허벅지가 바닥과 평행할 때까지 (못 내려가면 할 수 있는 만큼)</span></li>
+        <li><div class="step-num">5</div><span>발뒤꿈치로 밀면서 올라오기</span></li>
+      </ul>
+      <div class="chips">
+        <div class="chip">대퇴사두</div>
+        <div class="chip">둔근</div>
+        <div class="chip">코어</div>
+        <div class="chip">햄스트링</div>
+      </div>
+      <div class="rec-box"><strong>초보 추천:</strong> 3세트 × 10~15회<br>⚠️ 무릎 통증 있으면 가동범위 줄이기 (반 스쿼트)<br>의자 잡고 해도 OK. 체중 자체가 부하이므로 무리하지 말 것</div>
+    </div>
+  </div>
+
 </div>
 
-<footer>탭하면 펼쳐집니다 · Simpson 전용 가이드 (6종)</footer>
+<footer>탭하면 펼쳐집니다 · Simpson 전용 가이드 (9종)</footer>
 
 <script>
   function toggle(header) {
