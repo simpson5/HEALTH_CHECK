@@ -382,29 +382,8 @@ function renderWeight(data){
   const latest=wr.length?wr[wr.length-1]:null;
   const latestInbody=ir.length?ir[ir.length-1]:null;
 
-  // 인바디 전체 기록 (최신→과거 순)
-  let inbodyHtml='';
-  [...ir].reverse().forEach((r,idx)=>{
-    const prev=ir.length>1&&idx<ir.length-1?ir[ir.length-2-idx]:null;
-    const isLatest=idx===0;
-    const items=[
-      {label:'골격근',val:r.muscle_kg,unit:'kg',change:r.muscle_change_kg,good:'up'},
-      {label:'체지방',val:r.fat_kg,unit:'kg',change:r.fat_change_kg,good:'down'},
-      {label:'체지방률',val:r.fat_pct,unit:'%',change:prev?(r.fat_pct-prev.fat_pct):null,good:'down'},
-      {label:'BMI',val:r.bmi,unit:'',change:prev?(r.bmi-prev.bmi):null,good:'down'},
-      {label:'기초대사',val:r.bmr_kcal,unit:'kcal',change:prev?(r.bmr_kcal-prev.bmr_kcal):null,good:'up'},
-      {label:'인바디점수',val:r.inbody_score,unit:'점',change:prev?(r.inbody_score-prev.inbody_score):null,good:'up'},
-    ];
-    inbodyHtml+=`<div id="inbody-${r.date}" class="card" style="border-color:${isLatest?'var(--accent)':'var(--border)'};">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div style="font-size:13px;font-weight:700;">📋 ${r.date} (D+${r.day_since_start})</div>
-        <div style="font-size:16px;font-weight:900;color:${isLatest?'var(--green)':'var(--muted)'};">${r.weight_kg}kg</div>
-      </div>
-      ${r.weight_change_kg!==null?'<div style="font-size:11px;color:var(--green);margin-bottom:8px;">전 측정 대비 '+r.weight_change_kg+'kg</div>':''}
-      <div class="grid2" style="margin-bottom:0;">${items.map(i=>'<div class="mini-card"><div class="mini-label">'+i.label+'</div><div class="mini-val">'+i.val+'<span class="mini-unit">'+i.unit+'</span></div>'+(i.change!==null?changeHtml(i.change,i.unit,i.good):'')+'</div>').join('')}</div>
-      ${r.memo?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+r.memo+'</div>':''}
-    </div>`;
-  });
+  // 인바디 — 차트에서 선택 시 해당 날짜만 표시 (기본: 최신)
+  window._inbodyRecords=ir;
 
   document.getElementById('page-weight').innerHTML=`
     <div class="section">
@@ -420,9 +399,12 @@ function renderWeight(data){
         <div class="chart-wrap" style="height:220px;"><canvas id="weightChart"></canvas></div>
       </div>
       <div class="spacer"></div>
-      <div class="section-title">인바디 기록 (${ir.length}건)</div>
-      ${inbodyHtml||'<div class="empty">인바디 기록 없음</div>'}
+      <div class="section-title">인바디 기록 <span style="font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;">(차트에서 🟡 포인트 탭하면 전환)</span></div>
+      <div id="inbodyContainer"></div>
     </div>`;
+
+  // 기본으로 최신 인바디 표시
+  if(ir.length>0) showInbodyDetail(ir[ir.length-1].date);
 
   // 차트
   const wLabels=wr.map(r=>fmtDate(r.date));
@@ -464,8 +446,7 @@ function renderWeight(data){
           const idx=elements[0].index;
           const date=wr[idx].date;
           if(irDates.has(date)){
-            const el=document.getElementById('inbody-'+date);
-            if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.style.borderColor='var(--accent)';setTimeout(()=>el.style.borderColor='',2000);}
+            showInbodyDetail(date);
           }
         }
       },
@@ -581,6 +562,33 @@ function renderExercise(data){
           +'</div>';
       }).join('')}
     </div>`;
+}
+
+function showInbodyDetail(date){
+  const ir=window._inbodyRecords||[];
+  const r=ir.find(x=>x.date===date);
+  if(!r) return;
+  const idx=ir.indexOf(r);
+  const prev=idx>0?ir[idx-1]:null;
+  const items=[
+    {label:'골격근',val:r.muscle_kg,unit:'kg',change:r.muscle_change_kg,good:'up'},
+    {label:'체지방',val:r.fat_kg,unit:'kg',change:r.fat_change_kg,good:'down'},
+    {label:'체지방률',val:r.fat_pct,unit:'%',change:prev?(r.fat_pct-prev.fat_pct).toFixed(1):null,good:'down'},
+    {label:'BMI',val:r.bmi,unit:'',change:prev?(r.bmi-prev.bmi).toFixed(1):null,good:'down'},
+    {label:'기초대사',val:r.bmr_kcal,unit:'kcal',change:prev?(r.bmr_kcal-prev.bmr_kcal):null,good:'up'},
+    {label:'인바디점수',val:r.inbody_score,unit:'점',change:prev?(r.inbody_score-prev.inbody_score):null,good:'up'},
+  ];
+  const container=document.getElementById('inbodyContainer');
+  container.innerHTML=`<div class="card" style="border-color:var(--accent);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:700;">📋 ${r.date} (D+${r.day_since_start})</div>
+      <div style="font-size:16px;font-weight:900;color:var(--green);">${r.weight_kg}kg</div>
+    </div>
+    ${r.weight_change_kg!==null?'<div style="font-size:11px;color:var(--green);margin-bottom:8px;">전 측정 대비 '+r.weight_change_kg+'kg</div>':'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">첫 측정</div>'}
+    <div class="grid2" style="margin-bottom:0;">${items.map(i=>'<div class="mini-card"><div class="mini-label">'+i.label+'</div><div class="mini-val">'+i.val+'<span class="mini-unit">'+i.unit+'</span></div>'+(i.change!==null?changeHtml(parseFloat(i.change),i.unit,i.good):'')+'</div>').join('')}</div>
+    ${r.memo?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+r.memo+'</div>':''}
+  </div>`;
+  container.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 function toggleExGuide(el){
