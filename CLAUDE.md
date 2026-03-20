@@ -36,10 +36,10 @@
 ```bash
 # 서버 시작
 cd /Users/simpson/Desktop/SIMPSON/health_check
-python3 -m uvicorn server:app --host 0.0.0.0 --port 8000
+python3 -m uvicorn server:app --host 0.0.0.0 --port 18000
 
 # 접속
-# 로컬: http://localhost:8000
+# 로컬: http://localhost:18000
 # 같은 와이파이: http://맥북IP:8000
 ```
 
