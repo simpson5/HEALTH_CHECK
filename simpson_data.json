@@ -371,6 +371,20 @@
       "fat_g": 0,
       "photo": null,
       "memo": "아침 안 먹음"
+    },
+    {
+      "date": "2026-03-20",
+      "time": "12:00",
+      "category": "meal",
+      "meal_type": "점심",
+      "food_name": "김치찌개 + 공기밥 1/3",
+      "quantity": "0.8인분",
+      "calories_kcal": 420,
+      "protein_g": 14.0,
+      "carbs_g": 48.0,
+      "fat_g": 12.0,
+      "photo": null,
+      "memo": "마운자로 식욕 억제 체감 중"
     }
   ],
   "exercise_records": [

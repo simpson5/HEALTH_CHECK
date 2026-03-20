@@ -668,6 +668,13 @@ function renderHistory(data){
   document.getElementById('page-history').innerHTML=`
     <div class="section">
       <div class="spacer"></div>
+      <div class="section-title">체내 약물 농도 (마운자로)</div>
+      <div class="chart-card">
+        <div class="ch-title">💊 티르제파타이드 잔류량 예측</div>
+        <div class="ch-sub">반감기 5일 기준 · 매주 투약 시 누적</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="drugChart"></canvas></div>
+      </div>
+      <div class="spacer"></div>
       <div class="section-title">일일 리포트</div>
       ${dailyHtml||'<div class="empty">리포트 없음</div>'}
       <div class="spacer"></div>
@@ -677,7 +684,108 @@ function renderHistory(data){
       <div class="section-title">투약 이력</div>
       <div class="tl">${medHtml||'<div class="empty">기록 없음</div>'}</div>
     </div>`;
+
+  // 약물 농도 차트 계산
+  renderDrugChart(data);
 }
+
+function renderDrugChart(data){
+  const meds=data.medication_records||[];
+  if(meds.length===0) return;
+
+  const halfLife=5;
+  const decayPerDay=Math.pow(0.5,1/halfLife);
+  const startDate=new Date(data.profile.medication_start);
+  const today=new Date();
+  const totalDays=Math.floor((today-startDate)/86400000)+1;
+
+  // 투약 일정 구성 (날짜→용량 맵)
+  const doseMap={};
+  meds.forEach(m=>{
+    doseMap[m.date]=parseFloat(m.dose);
+  });
+
+  // 일별 체내 농도 계산
+  const labels=[];
+  const concentrations=[];
+  let conc=0;
+
+  for(let d=0;d<totalDays+14;d++){
+    const date=new Date(startDate);
+    date.setDate(date.getDate()+d);
+    const dateStr=date.toISOString().slice(0,10);
+    const label=fmtDate(dateStr);
+
+    // 매일 감쇠
+    conc*=decayPerDay;
+
+    // 투약일이면 용량 추가
+    if(doseMap[dateStr]){
+      conc+=doseMap[dateStr];
+    }
+
+    labels.push(label);
+    concentrations.push(parseFloat(conc.toFixed(2)));
+  }
+
+  // 오늘 위치
+  const todayIdx=totalDays-1;
+  const pointColors=concentrations.map((_,i)=>i===todayIdx?'#ff4466':'transparent');
+  const pointRadii=concentrations.map((_,i)=>i===todayIdx?6:0);
+
+  // 투약일 표시
+  const doseLabels=[];
+  for(let d=0;d<totalDays+14;d++){
+    const date=new Date(startDate);
+    date.setDate(date.getDate()+d);
+    const dateStr=date.toISOString().slice(0,10);
+    if(doseMap[dateStr]) doseLabels.push({idx:d,dose:doseMap[dateStr]});
+  }
+
+  // 5mg 예측선 (4주 후부터)
+  const predict5mg=[];
+  let conc5=concentrations[todayIdx]||0;
+  for(let d=0;d<totalDays+14;d++){
+    if(d<=todayIdx){
+      predict5mg.push(null);
+    } else {
+      conc5*=decayPerDay;
+      const date=new Date(startDate);
+      date.setDate(date.getDate()+d);
+      const dow=date.getDay();
+      // 매주 투약일 (첫 투약 요일 기준)
+      const startDow=startDate.getDay();
+      if(dow===startDow) conc5+=5;
+      predict5mg.push(parseFloat(conc5.toFixed(2)));
+    }
+  }
+
+  const canvas=document.getElementById('drugChart');
+  if(!canvas) return;
+
+  new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'현재 (2.5mg)',data:concentrations.map((v,i)=>i<=todayIdx?v:null),borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.08)',borderWidth:2,pointBackgroundColor:pointColors,pointRadius:pointRadii,tension:0.3,fill:true,spanGaps:false},
+      {label:'예측 (5mg 전환 시)',data:predict5mg,borderColor:'#00ff88',borderDash:[4,3],borderWidth:1.5,pointRadius:0,tension:0.3,fill:false,spanGaps:true},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#888',font:{size:10}}},
+        tooltip:{
+          backgroundColor:'#1a1a26',borderColor:'#22223a',borderWidth:1,titleColor:'#888',bodyColor:'#eee',
+          callbacks:{
+            label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'mg 잔류'
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#555',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.03)'}},
+        y:{min:0,ticks:{color:'#555',font:{size:10},callback:v=>v+'mg'},grid:{color:'rgba(255,255,255,0.05)'}}
+      }
+    }
+  });
 
 // ===== 사진 업로드 =====
 async function uploadPhoto(input){
