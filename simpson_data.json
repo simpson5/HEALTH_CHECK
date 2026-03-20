@@ -167,6 +167,14 @@
     "weight_record": "date, weight_kg, photo, memo",
     "weekly_analysis": "week_start, week_end, weight_change, muscle_change, fat_change, avg_protein, avg_calories, exercise_count, analysis, recommendations"
   },
+  "schedule": [
+    {"date":"2026-03-26","type":"medication","label":"💊 마운자로 2.5mg 3회차"},
+    {"date":"2026-04-03","type":"medication","label":"💊 마운자로 2.5mg 4회차 (마지막)"},
+    {"date":"2026-04-10","type":"medication","label":"💊 마운자로 5mg 시작 (금요일 고정)"},
+    {"date":"2026-03-25","type":"inbody","label":"📋 인바디 측정 (3주차)"},
+    {"date":"2026-04-07","type":"hospital","label":"🏥 병원 예약 (5mg 처방)"}
+  ],
+
   "medication_records": [
     {
       "date": "2026-03-10",
