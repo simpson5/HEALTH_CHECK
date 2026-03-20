@@ -393,7 +393,7 @@ function renderWeight(data){
       {label:'기초대사',val:latestInbody.bmr_kcal,unit:'kcal',change:latestInbody.bmr_kcal-(ir.length>1?ir[ir.length-2].bmr_kcal:0),good:'up'},
       {label:'인바디점수',val:latestInbody.inbody_score,unit:'점',change:latestInbody.inbody_score-(ir.length>1?ir[ir.length-2].inbody_score:0),good:'up'},
     ];
-    inbodyHtml=`<div class="section-title">최신 인바디 (${latestInbody.date})</div><div class="grid2">${items.map(i=>`<div class="mini-card"><div class="mini-label">${i.label}</div><div class="mini-val">${i.val}<span class="mini-unit">${i.unit}</span></div>${i.change?changeHtml(i.change,i.unit,i.good):''}</div>`).join('')}</div>`;
+    inbodyHtml=`<div id="inbody-detail" class="section-title">📋 최신 인바디 (${latestInbody.date})</div><div class="grid2">${items.map(i=>`<div class="mini-card"><div class="mini-label">${i.label}</div><div class="mini-val">${i.val}<span class="mini-unit">${i.unit}</span></div>${i.change?changeHtml(i.change,i.unit,i.good):''}</div>`).join('')}</div>`;
   }
 
   // 인바디 타임라인
@@ -427,11 +427,20 @@ function renderWeight(data){
       <div class="tl">${tlHtml}</div>
     </div>`;
 
-  // 차트 — 체중만 깔끔하게
+  // 차트
   const wLabels=wr.map(r=>fmtDate(r.date));
   const wData=wr.map(r=>r.weight_kg);
+  const irDates=new Set(ir.map(r=>r.date));
 
-  // Y축 범위: 데이터 기반으로 좁게
+  // 인바디 측정일 포인트 (체중 데이터에서 인바디 날짜만)
+  const inbodyPoints=wr.map(r=>irDates.has(r.date)?r.weight_kg:null);
+
+  // 체중 포인트 색상 (인바디일 = 노란색 테두리)
+  const pointBgColors=wr.map(r=>irDates.has(r.date)?'#ffcc00':'#00e5ff');
+  const pointBorderColors=wr.map(r=>irDates.has(r.date)?'#ffcc00':'#00e5ff');
+  const pointRadii=wr.map(r=>irDates.has(r.date)?7:4);
+
+  // Y축 범위
   const wMin=Math.min(...wData);
   const wMax=Math.max(...wData);
   const yMin=Math.floor(wMin-3);
@@ -443,19 +452,39 @@ function renderWeight(data){
     return vals.length>=2?parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)):null;
   });
 
-  new Chart(document.getElementById('weightChart'),{
+  const weightChart=new Chart(document.getElementById('weightChart'),{
     type:'line',
     data:{labels:wLabels,datasets:[
-      {label:'체중',data:wData,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.06)',pointBackgroundColor:'#00e5ff',pointRadius:5,pointHoverRadius:7,borderWidth:2,tension:0.3,fill:true},
+      {label:'체중',data:wData,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.06)',pointBackgroundColor:pointBgColors,pointBorderColor:pointBorderColors,pointRadius:pointRadii,pointHoverRadius:9,borderWidth:2,tension:0.3,fill:true},
       {label:'추세',data:maData,borderColor:'rgba(255,255,255,0.3)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:0.4,fill:false},
-      {label:'목표 '+p.goal_weight_kg+'kg',data:wLabels.map(()=>p.goal_weight_kg),borderColor:'rgba(255,68,102,0.3)',borderWidth:1,borderDash:[2,2],pointRadius:0,fill:false}
+      {label:'목표',data:wLabels.map(()=>p.goal_weight_kg),borderColor:'rgba(255,68,102,0.3)',borderWidth:1,borderDash:[2,2],pointRadius:0,pointHitRadius:0,fill:false}
     ]},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
+      onClick:(evt,elements)=>{
+        if(elements.length>0&&elements[0].datasetIndex===0){
+          const idx=elements[0].index;
+          const date=wr[idx].date;
+          if(irDates.has(date)){
+            const el=document.getElementById('inbody-detail');
+            if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+          }
+        }
+      },
       plugins:{
         legend:{display:false},
-        tooltip:{backgroundColor:'#1a1a26',borderColor:'#22223a',borderWidth:1,titleColor:'#888',bodyColor:'#eee',bodyFont:{size:13,weight:'bold'},callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'kg'}}
+        tooltip:{
+          backgroundColor:'#1a1a26',borderColor:'#22223a',borderWidth:1,titleColor:'#888',bodyColor:'#eee',bodyFont:{size:13,weight:'bold'},
+          filter:item=>item.datasetIndex===0,
+          callbacks:{
+            label:ctx=>{
+              const date=wr[ctx.dataIndex].date;
+              const isInbody=irDates.has(date);
+              return ctx.parsed.y+'kg'+(isInbody?' 📋 인바디 (탭하면 상세보기)':'');
+            }
+          }
+        }
       },
       scales:{
         x:{ticks:{color:'#555',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
