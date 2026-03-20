@@ -343,6 +343,34 @@
       "fat_g": 4.0,
       "photo": null,
       "memo": "회사 점심"
+    },
+    {
+      "date": "2026-03-19",
+      "time": "저녁",
+      "category": "meal",
+      "meal_type": "저녁",
+      "food_name": "굶음",
+      "quantity": null,
+      "calories_kcal": 0,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "photo": null,
+      "memo": "저녁 안 먹음"
+    },
+    {
+      "date": "2026-03-20",
+      "time": "아침",
+      "category": "meal",
+      "meal_type": "아침",
+      "food_name": "굶음",
+      "quantity": null,
+      "calories_kcal": 0,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "photo": null,
+      "memo": "아침 안 먹음"
     }
   ],
   "exercise_records": [
