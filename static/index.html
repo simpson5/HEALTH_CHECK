@@ -382,29 +382,27 @@ function renderWeight(data){
   const latest=wr.length?wr[wr.length-1]:null;
   const latestInbody=ir.length?ir[ir.length-1]:null;
 
-  // 인바디 상세
+  // 인바디 전체 기록 (최신→과거 순)
   let inbodyHtml='';
-  if(latestInbody){
+  [...ir].reverse().forEach((r,idx)=>{
+    const prev=ir.length>1&&idx<ir.length-1?ir[ir.length-2-idx]:null;
+    const isLatest=idx===0;
     const items=[
-      {label:'골격근',val:latestInbody.muscle_kg,unit:'kg',change:latestInbody.muscle_change_kg,good:'up'},
-      {label:'체지방',val:latestInbody.fat_kg,unit:'kg',change:latestInbody.fat_change_kg,good:'down'},
-      {label:'체지방률',val:latestInbody.fat_pct,unit:'%',change:latestInbody.fat_pct-(ir.length>1?ir[ir.length-2].fat_pct:latestInbody.fat_pct),good:'down'},
-      {label:'BMI',val:latestInbody.bmi,unit:'',change:latestInbody.bmi-(ir.length>1?ir[ir.length-2].bmi:latestInbody.bmi),good:'down'},
-      {label:'기초대사',val:latestInbody.bmr_kcal,unit:'kcal',change:latestInbody.bmr_kcal-(ir.length>1?ir[ir.length-2].bmr_kcal:0),good:'up'},
-      {label:'인바디점수',val:latestInbody.inbody_score,unit:'점',change:latestInbody.inbody_score-(ir.length>1?ir[ir.length-2].inbody_score:0),good:'up'},
+      {label:'골격근',val:r.muscle_kg,unit:'kg',change:r.muscle_change_kg,good:'up'},
+      {label:'체지방',val:r.fat_kg,unit:'kg',change:r.fat_change_kg,good:'down'},
+      {label:'체지방률',val:r.fat_pct,unit:'%',change:prev?(r.fat_pct-prev.fat_pct):null,good:'down'},
+      {label:'BMI',val:r.bmi,unit:'',change:prev?(r.bmi-prev.bmi):null,good:'down'},
+      {label:'기초대사',val:r.bmr_kcal,unit:'kcal',change:prev?(r.bmr_kcal-prev.bmr_kcal):null,good:'up'},
+      {label:'인바디점수',val:r.inbody_score,unit:'점',change:prev?(r.inbody_score-prev.inbody_score):null,good:'up'},
     ];
-    inbodyHtml=`<div id="inbody-detail" class="section-title">📋 최신 인바디 (${latestInbody.date})</div><div class="grid2">${items.map(i=>`<div class="mini-card"><div class="mini-label">${i.label}</div><div class="mini-val">${i.val}<span class="mini-unit">${i.unit}</span></div>${i.change?changeHtml(i.change,i.unit,i.good):''}</div>`).join('')}</div>`;
-  }
-
-  // 인바디 타임라인
-  let tlHtml='';
-  [...ir].reverse().forEach((r,i)=>{
-    const isLatest=i===0;
-    tlHtml+=`<div class="tl-item ${isLatest?'latest':''}">
-      <div class="tl-date">${r.date} · D+${r.day_since_start}</div>
-      <div class="tl-val" ${isLatest?'style="color:var(--green)"':''}>${r.weight_kg} <span style="font-size:13px;font-family:'Noto Sans KR'">kg</span></div>
-      <div class="tl-detail">근육${r.muscle_kg} · 지방${r.fat_kg} · ${r.fat_pct}% · 점수${r.inbody_score}</div>
-      ${r.weight_change_kg!==null?`<span class="tl-tag" style="background:rgba(0,255,136,0.1);color:var(--green)">${r.weight_change_kg}kg</span>`:`<span class="tl-tag" style="background:rgba(0,229,255,0.1);color:var(--accent)">시작</span>`}
+    inbodyHtml+=`<div id="inbody-${r.date}" class="card" style="border-color:${isLatest?'var(--accent)':'var(--border)'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:700;">📋 ${r.date} (D+${r.day_since_start})</div>
+        <div style="font-size:16px;font-weight:900;color:${isLatest?'var(--green)':'var(--muted)'};">${r.weight_kg}kg</div>
+      </div>
+      ${r.weight_change_kg!==null?'<div style="font-size:11px;color:var(--green);margin-bottom:8px;">전 측정 대비 '+r.weight_change_kg+'kg</div>':''}
+      <div class="grid2" style="margin-bottom:0;">${items.map(i=>'<div class="mini-card"><div class="mini-label">'+i.label+'</div><div class="mini-val">'+i.val+'<span class="mini-unit">'+i.unit+'</span></div>'+(i.change!==null?changeHtml(i.change,i.unit,i.good):'')+'</div>').join('')}</div>
+      ${r.memo?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+r.memo+'</div>':''}
     </div>`;
   });
 
@@ -421,10 +419,9 @@ function renderWeight(data){
         <div class="ch-sub">시작 ${p.start_weight_kg}kg → 현재 ${latest?latest.weight_kg:'?'}kg → 목표 ${p.goal_weight_kg}kg</div>
         <div class="chart-wrap" style="height:220px;"><canvas id="weightChart"></canvas></div>
       </div>
-      ${inbodyHtml}
       <div class="spacer"></div>
-      <div class="section-title">인바디 이력</div>
-      <div class="tl">${tlHtml}</div>
+      <div class="section-title">인바디 기록 (${ir.length}건)</div>
+      ${inbodyHtml||'<div class="empty">인바디 기록 없음</div>'}
     </div>`;
 
   // 차트
@@ -467,8 +464,8 @@ function renderWeight(data){
           const idx=elements[0].index;
           const date=wr[idx].date;
           if(irDates.has(date)){
-            const el=document.getElementById('inbody-detail');
-            if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+            const el=document.getElementById('inbody-'+date);
+            if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.style.borderColor='var(--accent)';setTimeout(()=>el.style.borderColor='',2000);}
           }
         }
       },
