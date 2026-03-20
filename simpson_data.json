@@ -169,10 +169,12 @@
   },
   "schedule": [
     {"date":"2026-03-26","type":"medication","label":"💊 마운자로 2.5mg 3회차"},
+    {"date":"2026-03-28","type":"inbody","label":"📋 인바디 측정 (금요일 투약 전 아침)"},
     {"date":"2026-04-03","type":"medication","label":"💊 마운자로 2.5mg 4회차 (마지막)"},
+    {"date":"2026-04-04","type":"inbody","label":"📋 인바디 측정"},
+    {"date":"2026-04-07","type":"hospital","label":"🏥 병원 예약 (5mg 처방) ⚠️ 미예약"},
     {"date":"2026-04-10","type":"medication","label":"💊 마운자로 5mg 시작 (금요일 고정)"},
-    {"date":"2026-03-25","type":"inbody","label":"📋 인바디 측정 (3주차)"},
-    {"date":"2026-04-07","type":"hospital","label":"🏥 병원 예약 (5mg 처방)"}
+    {"date":"2026-04-11","type":"inbody","label":"📋 인바디 측정"}
   ],
 
   "medication_records": [
