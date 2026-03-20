@@ -418,8 +418,8 @@ function renderWeight(data){
       </div>
       <div class="chart-card">
         <div class="ch-title">체중 변화</div>
-        <div class="ch-sub">● 매일 체중 · ── 7일 평균 · ◆ 인바디 · --- 목표 ${p.goal_weight_kg}kg</div>
-        <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+        <div class="ch-sub">시작 ${p.start_weight_kg}kg → 현재 ${latest?latest.weight_kg:'?'}kg → 목표 ${p.goal_weight_kg}kg</div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="weightChart"></canvas></div>
       </div>
       ${inbodyHtml}
       <div class="spacer"></div>
@@ -427,28 +427,41 @@ function renderWeight(data){
       <div class="tl">${tlHtml}</div>
     </div>`;
 
-  // 차트
-  const allDates=[...new Set([...wr.map(r=>r.date),...ir.map(r=>r.date)])].sort();
-  const labels=allDates.map(d=>fmtDate(d));
-  const wData=allDates.map(d=>{const r=wr.find(w=>w.date===d);return r?r.weight_kg:null;});
-  const iData=allDates.map(d=>{const r=ir.find(w=>w.date===d);return r?r.weight_kg:null;});
+  // 차트 — 체중만 깔끔하게
+  const wLabels=wr.map(r=>fmtDate(r.date));
+  const wData=wr.map(r=>r.weight_kg);
+
+  // Y축 범위: 데이터 기반으로 좁게
+  const wMin=Math.min(...wData);
+  const wMax=Math.max(...wData);
+  const yMin=Math.floor(wMin-3);
+  const yMax=Math.ceil(wMax+2);
 
   // 7일 이동평균
-  const wFiltered=wData.filter(v=>v!==null);
   const maData=wData.map((_,i)=>{
-    const vals=wData.slice(Math.max(0,i-6),i+1).filter(v=>v!==null);
+    const vals=wData.slice(Math.max(0,i-6),i+1);
     return vals.length>=2?parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)):null;
   });
 
   new Chart(document.getElementById('weightChart'),{
     type:'line',
-    data:{labels,datasets:[
-      {label:'체중',data:wData,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.08)',pointBackgroundColor:'#00e5ff',pointRadius:4,tension:0.3,fill:true,spanGaps:true},
-      {label:'7일 평균',data:maData,borderColor:'#ff8c00',borderWidth:2,borderDash:[4,2],pointRadius:0,tension:0.4,spanGaps:true,fill:false},
-      {label:'인바디',data:iData,borderColor:'#00ff88',pointBackgroundColor:'#00ff88',pointRadius:7,pointStyle:'rectRot',showLine:false},
-      {label:'목표',data:allDates.map(()=>p.goal_weight_kg),borderColor:'rgba(255,68,102,0.4)',borderDash:[3,3],pointRadius:0,fill:false}
+    data:{labels:wLabels,datasets:[
+      {label:'체중',data:wData,borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.06)',pointBackgroundColor:'#00e5ff',pointRadius:5,pointHoverRadius:7,borderWidth:2,tension:0.3,fill:true},
+      {label:'추세',data:maData,borderColor:'rgba(255,255,255,0.3)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:0.4,fill:false},
+      {label:'목표 '+p.goal_weight_kg+'kg',data:wLabels.map(()=>p.goal_weight_kg),borderColor:'rgba(255,68,102,0.3)',borderWidth:1,borderDash:[2,2],pointRadius:0,fill:false}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#888',font:{size:10}}}},scales:{x:{ticks:{color:tc},grid:{color:gc}},y:{min:p.goal_weight_kg-5,max:Math.max(...wr.map(r=>r.weight_kg),115)+3,ticks:{color:tc,callback:v=>v+'kg'},grid:{color:gc}}}}
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1a1a26',borderColor:'#22223a',borderWidth:1,titleColor:'#888',bodyColor:'#eee',bodyFont:{size:13,weight:'bold'},callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'kg'}}
+      },
+      scales:{
+        x:{ticks:{color:'#555',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
+        y:{min:yMin,max:yMax,ticks:{color:'#555',font:{size:10},callback:v=>v+'kg'},grid:{color:'rgba(255,255,255,0.05)'}}
+      }
+    }
   });
 }
 
