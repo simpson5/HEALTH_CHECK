@@ -280,7 +280,7 @@ function renderHome(data){
 
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
       <div class="goal-sub"><span>${p.start_weight_kg}kg</span><span style="color:var(--accent)">${pct}% 달성</span><span>${p.goal_weight_kg}kg 목표</span></div>
-      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px;">${remaining}kg 남음</div>
+      <div style="display:flex;justify-content:center;gap:16px;font-size:11px;margin-top:4px;"><span style="color:var(--green);">▼${totalLoss.toFixed(1)}kg 감량</span><span style="color:var(--muted);">${remaining}kg 남음</span></div>
 
       <div class="spacer"></div>
 
