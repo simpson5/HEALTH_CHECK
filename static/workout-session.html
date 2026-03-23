@@ -398,7 +398,7 @@ function renderSets(sets){
       <div class="set-check ${s.completed?'done':''}" onclick="toggleSet(${i})">${s.completed?'✓':''}</div>
       <button class="set-del" onclick="deleteSet(${i})">×</button>
     </div>`;
-  `).join('');
+  }).join('');
 }
 
 function getCurrentSets(){
@@ -424,7 +424,7 @@ function updateSet(idx,field,val){
 }
 
 function toggleSet(idx){
-  const check=document.querySelector(`#setRow${idx} .set-check`);
+  const check=document.querySelector('#setRow'+idx+' .set-check');
   check.classList.toggle('done');
   check.textContent=check.classList.contains('done')?'✓':'';
   saveStrengthToSession();
