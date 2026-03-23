@@ -147,25 +147,9 @@
 <div class="view" id="view-cardio">
   <div class="header">
     <button class="back-btn" onclick="showView('select')">←</button>
-    <div class="header-title">경사 트레드밀</div>
+    <div class="header-title" id="cardioTitle">유산소</div>
   </div>
-  <div class="cardio-form">
-    <div class="cardio-field">
-      <div class="cardio-label">시간</div>
-      <input class="cardio-input" id="cardioMin" type="number" inputmode="numeric" placeholder="30" value="">
-      <div class="cardio-unit">분</div>
-    </div>
-    <div class="cardio-field">
-      <div class="cardio-label">경사</div>
-      <input class="cardio-input" id="cardioIncline" type="number" inputmode="decimal" placeholder="12" value="">
-      <div class="cardio-unit">%</div>
-    </div>
-    <div class="cardio-field">
-      <div class="cardio-label">속도</div>
-      <input class="cardio-input" id="cardioSpeed" type="number" inputmode="decimal" step="0.1" placeholder="5.5" value="">
-      <div class="cardio-unit">km/h</div>
-    </div>
-  </div>
+  <div class="cardio-form" id="cardioForm"></div>
   <div class="bottom-actions">
     <button class="btn btn-secondary" onclick="showView('select')">← 목록</button>
     <button class="btn btn-primary" onclick="saveCardio()">완료</button>
@@ -490,37 +474,59 @@ function deleteExercise(){
 // 유산소
 function openCardio(exId){
   currentExId=exId;
-  const prev=getLastRecord(exId);
-  if(prev){
-    document.getElementById('cardioMin').value=prev.duration_min||'';
-    document.getElementById('cardioIncline').value=prev.incline_pct||'';
-    document.getElementById('cardioSpeed').value=prev.speed_kmh||'';
+  const ex=DATA.exercise_library.find(e=>e.id===exId);
+  const isStairmill=exId==='stairmill';
+
+  document.getElementById('cardioTitle').textContent=ex?ex.name:'유산소';
+
+  // 폼 동적 생성
+  const form=document.getElementById('cardioForm');
+  if(isStairmill){
+    form.innerHTML=`
+      <div class="cardio-field"><div class="cardio-label">시간</div><input class="cardio-input" id="cardioMin" type="number" inputmode="numeric" placeholder="15" value=""><div class="cardio-unit">분</div></div>
+      <div class="cardio-field"><div class="cardio-label">레벨</div><input class="cardio-input" id="cardioLevel" type="number" inputmode="numeric" placeholder="5" value=""><div class="cardio-unit">단계</div></div>`;
+  } else {
+    form.innerHTML=`
+      <div class="cardio-field"><div class="cardio-label">시간</div><input class="cardio-input" id="cardioMin" type="number" inputmode="numeric" placeholder="30" value=""><div class="cardio-unit">분</div></div>
+      <div class="cardio-field"><div class="cardio-label">경사</div><input class="cardio-input" id="cardioIncline" type="number" inputmode="decimal" placeholder="12" value=""><div class="cardio-unit">%</div></div>
+      <div class="cardio-field"><div class="cardio-label">속도</div><input class="cardio-input" id="cardioSpeed" type="number" inputmode="decimal" step="0.1" placeholder="5.5" value=""><div class="cardio-unit">km/h</div></div>`;
   }
-  const existing=session.exercises.find(s=>s.id===exId);
-  if(existing){
-    document.getElementById('cardioMin').value=existing.duration_min||'';
-    document.getElementById('cardioIncline').value=existing.incline_pct||'';
-    document.getElementById('cardioSpeed').value=existing.speed_kmh||'';
+
+  // 이전 기록 / 기존 세션 데이터 채우기
+  const src=session.exercises.find(s=>s.id===exId)||getLastRecord(exId);
+  if(src){
+    const minEl=document.getElementById('cardioMin');
+    if(minEl) minEl.value=src.duration_min||'';
+    if(isStairmill){
+      const lvl=document.getElementById('cardioLevel');
+      if(lvl) lvl.value=src.level||'';
+    } else {
+      const inc=document.getElementById('cardioIncline');
+      const spd=document.getElementById('cardioSpeed');
+      if(inc) inc.value=src.incline_pct||'';
+      if(spd) spd.value=src.speed_kmh||'';
+    }
   }
   showView('cardio');
 }
 
 function saveCardio(){
+  const ex=DATA.exercise_library.find(e=>e.id===currentExId);
+  const isStairmill=currentExId==='stairmill';
   const min=parseInt(document.getElementById('cardioMin').value)||0;
-  const incline=parseFloat(document.getElementById('cardioIncline').value)||0;
-  const speed=parseFloat(document.getElementById('cardioSpeed').value)||0;
-  const cal=Math.round(min*8);
+  const cal=Math.round(min*(isStairmill?12:8));
+
+  let record;
+  if(isStairmill){
+    const level=parseInt(document.getElementById('cardioLevel').value)||0;
+    record={id:currentExId,name:ex.name,type:'cardio',duration_min:min,level:level,calories_burned:cal};
+  } else {
+    const incline=parseFloat(document.getElementById('cardioIncline').value)||0;
+    const speed=parseFloat(document.getElementById('cardioSpeed').value)||0;
+    record={id:currentExId,name:ex.name,type:'cardio',duration_min:min,incline_pct:incline,speed_kmh:speed,calories_burned:cal};
+  }
 
   const existing=session.exercises.findIndex(s=>s.id===currentExId);
-  const record={
-    id:currentExId,
-    name:'경사 트레드밀',
-    type:'cardio',
-    duration_min:min,
-    incline_pct:incline,
-    speed_kmh:speed,
-    calories_burned:cal
-  };
 
   if(existing>=0) session.exercises[existing]=record;
   else session.exercises.push(record);
