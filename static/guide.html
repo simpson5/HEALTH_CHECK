@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Simpson 가이드</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Bebas+Neue&display=swap');
+  :root{--bg:#0a0a0f;--card:#13131c;--card2:#1a1a26;--accent:#00e5ff;--green:#00ff88;--red:#ff4466;--orange:#ff8c00;--purple:#b47fff;--yellow:#ffcc00;--text:#eeeeff;--muted:#666688;--border:#22223a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;padding:0 0 80px;-webkit-tap-highlight-color:transparent;}
+
+  .header{background:linear-gradient(160deg,#0d0d20,#0a0a0f);padding:24px 20px 20px;border-bottom:1px solid var(--border);}
+  .header-label{font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:4px;}
+  .header-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;line-height:1;}
+  .header-sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .header-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--accent);margin-top:8px;}
+
+  .nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 8px;}
+  .nav::-webkit-scrollbar{display:none;}
+  .nav-btn{flex-shrink:0;padding:12px 14px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;}
+  .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  .page{display:none;padding:16px;}
+  .page.active{display:block;}
+
+  .section-title{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 10px;}
+  .section-title:first-child{margin-top:0;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+  .card-title{font-size:13px;font-weight:700;margin-bottom:8px;}
+  .card-sub{font-size:11px;color:var(--muted);margin-bottom:8px;}
+
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;}
+  th{text-align:left;color:var(--muted);font-size:10px;letter-spacing:1px;padding:6px 4px;border-bottom:1px solid var(--border);}
+  td{padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.03);}
+  td:first-child{font-weight:700;}
+
+  .highlight{color:var(--accent);}
+  .warn{color:var(--orange);}
+  .good{color:var(--green);}
+  .bad{color:var(--red);}
+
+  .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-right:4px;margin-bottom:4px;}
+  .tag-blue{background:rgba(0,229,255,0.1);color:var(--accent);}
+  .tag-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .tag-orange{background:rgba(255,140,0,0.1);color:var(--orange);}
+  .tag-red{background:rgba(255,68,102,0.1);color:var(--red);}
+  .tag-purple{background:rgba(180,127,255,0.1);color:var(--purple);}
+
+  .tip{background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.15);border-radius:10px;padding:10px 12px;font-size:12px;color:#ccc;line-height:1.7;margin-bottom:10px;}
+  .tip strong{color:var(--accent);}
+
+  .warn-box{background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.15);border-radius:10px;padding:10px 12px;font-size:12px;color:#ccc;line-height:1.7;margin-bottom:10px;}
+  .warn-box strong{color:var(--orange);}
+
+  .star{color:var(--yellow);}
+
+  .schedule-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+  .schedule-time{font-size:11px;color:var(--muted);min-width:40px;}
+  .schedule-icon{font-size:18px;}
+  .schedule-info{flex:1;}
+  .schedule-name{font-size:13px;font-weight:700;}
+  .schedule-detail{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  .roadmap-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+  .roadmap-period{min-width:70px;font-size:12px;font-weight:700;color:var(--accent);}
+  .roadmap-content{flex:1;}
+  .roadmap-goal{font-size:13px;font-weight:700;}
+  .roadmap-action{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  .back-link{display:block;text-align:center;padding:12px;color:var(--accent);font-size:13px;text-decoration:none;margin-top:20px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Simpson Health Guide</div>
+  <div class="header-title">운동 & 식단 가이드</div>
+  <div class="header-sub">108.7kg · 근손실 방지 최우선 · 마운자로 복용 중</div>
+  <div class="header-badge">목표 80kg · 단백질 110g/일</div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showGuidePage('schedule',this)">하루일과</button>
+  <button class="nav-btn" onclick="showGuidePage('diet',this)">식단</button>
+  <button class="nav-btn" onclick="showGuidePage('workout',this)">운동</button>
+  <button class="nav-btn" onclick="showGuidePage('food',this)">식품도감</button>
+  <button class="nav-btn" onclick="showGuidePage('roadmap',this)">로드맵</button>
+</nav>
+
+<!-- ===== 하루일과 ===== -->
+<div class="page active" id="page-schedule">
+  <div class="section-title">하루 스케줄</div>
+  <div class="card">
+    <div class="schedule-row">
+      <div class="schedule-time">오전</div>
+      <div class="schedule-icon">🏋️</div>
+      <div class="schedule-info">
+        <div class="schedule-name">머신 6종</div>
+        <div class="schedule-detail">2세트 × 12~15회 · 30분</div>
+      </div>
+    </div>
+    <div class="schedule-row">
+      <div class="schedule-time">오전</div>
+      <div class="schedule-icon">🏃</div>
+      <div class="schedule-info">
+        <div class="schedule-name">경사 트레드밀</div>
+        <div class="schedule-detail">경사 12% · 속도 5.5km/h · 30분+</div>
+      </div>
+    </div>
+    <div class="schedule-row">
+      <div class="schedule-time">저녁</div>
+      <div class="schedule-icon">🔔</div>
+      <div class="schedule-info">
+        <div class="schedule-name">케틀벨 스윙 인터벌</div>
+        <div class="schedule-detail">16kg · 30초 스윙 / 30초 휴식 × 10라운드 · 15~20분</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">하루 식단</div>
+  <div class="card">
+    <table>
+      <tr><th>식사</th><th>메뉴</th><th>단백질</th></tr>
+      <tr><td>아침</td><td>닥터유PRO 드링크 40g + 고구마 100g</td><td class="highlight">41g</td></tr>
+      <tr><td>점심</td><td>일반식 (고기 위주)</td><td class="highlight">20~30g</td></tr>
+      <tr><td>저녁</td><td>훈제닭가슴살 2개 + 야채</td><td class="highlight">44~54g</td></tr>
+      <tr><td class="good"><strong>합계</strong></td><td></td><td class="good"><strong>105~125g</strong></td></tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <strong>핵심 원칙:</strong> 밥은 최소한으로, 고기+야채 위주. 단백질 110g 사수. 마운자로가 식욕 줄여주니까 먹을 수 있을 때 단백질 위주로 최대한 먹기.
+  </div>
+</div>
+
+<!-- ===== 식단 ===== -->
+<div class="page" id="page-diet">
+  <div class="section-title">식단 원칙</div>
+  <div class="card">
+    <div class="card-title">단백질 110g을 어떻게 채우나</div>
+    <table>
+      <tr><th>방법</th><th>단백질</th><th>실행</th></tr>
+      <tr><td>아침 쉐이크</td><td class="highlight">36~41g</td><td>출근 전 1잔</td></tr>
+      <tr><td>점심 고기 반찬</td><td class="highlight">20~30g</td><td>회사 식당에서</td></tr>
+      <tr><td>편의점 보충</td><td class="highlight">12~20g</td><td>두유 or 계란 or 닭가슴살볼</td></tr>
+      <tr><td>저녁 닭가슴살</td><td class="highlight">44~54g</td><td>훈제닭가슴살 2개</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">채소 가이드</div>
+  <div class="card">
+    <div class="card-title">간편한 채소 3종</div>
+    <table>
+      <tr><th>채소</th><th>보관</th><th>준비</th></tr>
+      <tr><td>상추</td><td>키친타월 감싸서 밀폐용기 → 냉장 7~10일</td><td>씻기만</td></tr>
+      <tr><td>냉동 브로콜리</td><td>냉동 장기보관</td><td>전자레인지 3분</td></tr>
+      <tr><td>방울토마토</td><td>냉장 1~2주</td><td>씻기만</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">쌈장</div>
+    <div style="font-size:12px;color:#ccc;">75kcal/100g → 1큰술 약 15kcal. 양념으로 써도 칼로리 부담 없음.</div>
+  </div>
+
+  <div class="warn-box">
+    <strong>마운자로 복용 중 주의:</strong> 식욕 억제로 못 먹더라도 쉐이크라도 마시기. 하루 6g 같은 날이 있으면 안 됨.
+  </div>
+</div>
+
+<!-- ===== 운동 ===== -->
+<div class="page" id="page-workout">
+  <div class="section-title">머신 6종 (매일 전신)</div>
+  <div class="card">
+    <table>
+      <tr><th>운동</th><th>무게</th><th>세트×회</th><th>부위</th></tr>
+      <tr><td>체스트 프레스</td><td>20~25kg</td><td>2 × 12~15</td><td><span class="tag tag-blue">가슴</span></td></tr>
+      <tr><td>숄더 프레스</td><td>15~20kg</td><td>2 × 12~15</td><td><span class="tag tag-purple">어깨</span></td></tr>
+      <tr><td>랫 풀다운</td><td>25~30kg</td><td>2 × 12~15</td><td><span class="tag tag-green">등</span></td></tr>
+      <tr><td>시티드 로우</td><td>25~30kg</td><td>2 × 12~15</td><td><span class="tag tag-green">등</span></td></tr>
+      <tr><td>레그 컬</td><td>20~25kg</td><td>2 × 12~15</td><td><span class="tag tag-orange">하체</span></td></tr>
+      <tr><td>레그 익스텐션</td><td>25~30kg</td><td>2 × 12~15</td><td><span class="tag tag-orange">하체</span></td></tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <strong>무게 기준:</strong> 마지막 2~3개가 힘들어야 적절한 무게. 12회가 너무 쉬우면 5kg 올리기. 7회도 못 채우면 5kg 내리기.
+  </div>
+
+  <div class="warn-box">
+    <strong>첫 2주:</strong> 위 무게보다 5kg씩 낮게 시작. 자세 익히기가 목표.
+  </div>
+
+  <div class="section-title">세트 수 가이드</div>
+  <div class="card">
+    <table>
+      <tr><th>기간</th><th>세트</th><th>비고</th></tr>
+      <tr><td>1~2주</td><td class="highlight">2세트</td><td>자세 익히기</td></tr>
+      <tr><td>3~4주</td><td class="highlight">2~3세트</td><td>무게 정상화</td></tr>
+      <tr><td>2개월+</td><td class="highlight">3세트</td><td>점진적 과부하</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">케틀벨 스윙 인터벌</div>
+  <div class="card">
+    <div class="card-title">심폐 지구력 목적</div>
+    <table>
+      <tr><th>항목</th><th>설정</th></tr>
+      <tr><td>무게</td><td class="highlight">16kg</td></tr>
+      <tr><td>방식</td><td>30초 스윙 → 30초 휴식</td></tr>
+      <tr><td>라운드</td><td>10라운드</td></tr>
+      <tr><td>소요</td><td>~15분</td></tr>
+    </table>
+    <div class="warn-box" style="margin-top:8px;margin-bottom:0;">
+      <strong>힙힌지 자세 필수.</strong> 허리로 들면 부상. 엉덩이를 뒤로 빼면서 스윙.
+    </div>
+  </div>
+
+  <div class="section-title">경사 트레드밀</div>
+  <div class="card">
+    <table>
+      <tr><th>항목</th><th>설정</th></tr>
+      <tr><td>경사</td><td class="highlight">10~12%</td></tr>
+      <tr><td>속도</td><td class="highlight">4.5~5.5 km/h</td></tr>
+      <tr><td>시간</td><td class="highlight">30분 이상</td></tr>
+    </table>
+    <div class="tip" style="margin-top:8px;margin-bottom:0;">
+      <strong>뛰지 않음.</strong> 빠른 걸음만. 경사가 칼로리 소모 핵심 (평지 대비 2배).
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <strong>조깅은 아직 금지.</strong> 현재 체중에서 무릎 부담 큼. 85~90kg대 이후 시작.
+  </div>
+</div>
+
+<!-- ===== 식품도감 ===== -->
+<div class="page" id="page-food">
+  <div class="section-title">단백질 보충제</div>
+  <div class="card">
+    <div class="card-title">닥터유PRO 드링크 40g 초코 (350ml)</div>
+    <table>
+      <tr><th>칼로리</th><th>단백질</th><th>탄수</th><th>지방</th></tr>
+      <tr><td>258kcal</td><td class="highlight">40g</td><td>9.8g</td><td>6.5g</td></tr>
+    </table>
+    <div style="font-size:11px;color:var(--muted);">BCAA 7,500mg · 아르기닌 1,400mg · L-카르니틴 300mg</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">닥터유 프로 파우더 맥스 초코 (42g)</div>
+    <table>
+      <tr><th>칼로리</th><th>단백질</th><th>탄수</th><th>지방</th></tr>
+      <tr><td>172kcal</td><td class="highlight">24g</td><td>10g</td><td>4g</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">오트몬드 프로틴 초코 ZERO SUGAR (250ml)</div>
+    <table>
+      <tr><th>칼로리</th><th>단백질</th><th>탄수</th><th>지방</th></tr>
+      <tr><td>107kcal</td><td class="highlight">21g</td><td>0g</td><td>0g</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">보충제 종류</div>
+  <div class="card">
+    <table>
+      <tr><th>종류</th><th>특징</th></tr>
+      <tr><td>WPC</td><td>기본형, 70~80%, 유당 포함, 저렴</td></tr>
+      <tr><td class="good"><strong>WPI</strong></td><td class="good"><strong>정제형, 90%+, 유당 없음 — 추천</strong></td></tr>
+      <tr><td>WPH</td><td>가장 빠른 흡수, 비쌈</td></tr>
+      <tr><td>카제인</td><td>소화 느림, 취침 전</td></tr>
+      <tr><td>식물성</td><td>대두·완두, 흡수율 낮음</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">돼지고기 부위별</div>
+  <div class="card">
+    <div class="card-sub">100g 기준 · 쌈 먹을 때 참고</div>
+    <table>
+      <tr><th>부위</th><th>kcal</th><th>단백질</th><th>지방</th><th>추천</th></tr>
+      <tr><td>안심</td><td>115</td><td>22g</td><td>2g</td><td><span class="star">⭐⭐⭐</span></td></tr>
+      <tr><td>뒷다리살</td><td>130</td><td>21g</td><td>5g</td><td><span class="star">⭐⭐⭐</span></td></tr>
+      <tr><td>앞다리살</td><td>145</td><td>19g</td><td>7g</td><td><span class="star">⭐⭐</span></td></tr>
+      <tr><td>등심</td><td>160</td><td>20g</td><td>9g</td><td><span class="star">⭐⭐</span></td></tr>
+      <tr><td>목살</td><td>200</td><td>17g</td><td>14g</td><td><span class="star">⭐</span></td></tr>
+      <tr><td class="bad">갈비</td><td>260</td><td>14g</td><td>22g</td><td class="bad">비추</td></tr>
+      <tr><td class="bad">삼겹살</td><td>330</td><td>13g</td><td>28g</td><td class="bad">비추</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">소고기 (육회용)</div>
+  <div class="card">
+    <div class="card-sub">우둔살/홍두깨살 100g 기준</div>
+    <table>
+      <tr><th>칼로리</th><th>단백질</th><th>지방</th></tr>
+      <tr><td>130~150kcal</td><td class="highlight">21~23g</td><td>4~6g</td></tr>
+    </table>
+    <div style="font-size:11px;color:var(--muted);">양념 최소화 시 훌륭한 고단백 식품</div>
+  </div>
+</div>
+
+<!-- ===== 로드맵 ===== -->
+<div class="page" id="page-roadmap">
+  <div class="section-title">운동 로드맵</div>
+  <div class="card">
+    <div class="roadmap-item">
+      <div class="roadmap-period">1~2주</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">자세 익히기</div>
+        <div class="roadmap-action">추천 무게 -5kg · 2세트 · 자세 집중</div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-period">3~4주</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">무게 정상화</div>
+        <div class="roadmap-action">추천 무게로 2~3세트</div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-period">2~3개월</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">무게 증가</div>
+        <div class="roadmap-action">마지막 2개 힘들면 5kg 증량</div>
+      </div>
+    </div>
+    <div class="roadmap-item" style="border:none;">
+      <div class="roadmap-period">3~6개월</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">루틴 다양화</div>
+        <div class="roadmap-action">대체 머신 활용 · 상하체 분리 고려</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">체지방 감량 로드맵</div>
+  <div class="card">
+    <div class="roadmap-item">
+      <div class="roadmap-period">1~3개월</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">109 → 100kg (월 3~4kg)</div>
+        <div class="roadmap-action">체지방 많아서 공격적 감량 가능</div>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-period">3~6개월</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">100 → 90kg (월 2~3kg)</div>
+        <div class="roadmap-action">속도 낮추기, 근손실 주의</div>
+      </div>
+    </div>
+    <div class="roadmap-item" style="border:none;">
+      <div class="roadmap-period">6~12개월</div>
+      <div class="roadmap-content">
+        <div class="roadmap-goal">90 → 80kg (월 1~2kg)</div>
+        <div class="roadmap-action">보수적 감량, 체지방률 25% 목표</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">마운자로 증량 스케줄</div>
+  <div class="card">
+    <table>
+      <tr><th>기간</th><th>용량</th><th>비고</th></tr>
+      <tr><td>3/10~4/3</td><td>2.5mg</td><td>적응 단계</td></tr>
+      <tr><td class="highlight"><strong>4/10~</strong></td><td class="highlight"><strong>5mg</strong></td><td class="highlight"><strong>본격 감량</strong></td></tr>
+      <tr><td>추후</td><td>7.5~15mg</td><td>담당의 상담 후 증량</td></tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <strong>5mg 임상 결과:</strong> 72주 평균 -15% 체중 감량 (식단+운동 병행 기준). Simpson 기준 약 -16kg → 93kg대 가능.
+  </div>
+</div>
+
+<a href="/" class="back-link">← 대시보드로 돌아가기</a>
+
+<script>
+function showGuidePage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+</script>
+</body>
+</html>
