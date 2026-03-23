@@ -422,6 +422,36 @@ function renderWeight(data){
         <div class="ch-sub">시작 ${p.start_weight_kg}kg → 현재 ${latest?latest.weight_kg:'?'}kg → 목표 ${p.goal_weight_kg}kg</div>
         <div class="chart-wrap" style="height:220px;"><canvas id="weightChart"></canvas></div>
       </div>
+      ${ir.length>=2?`
+      <div class="spacer"></div>
+      <div class="section-title">체성분 변화</div>
+      <div class="tab-bar" style="margin-bottom:10px;">
+        <button class="tab-btn active" onclick="showBodyChart('fatpct',this)">체지방률</button>
+        <button class="tab-btn" onclick="showBodyChart('composition',this)">근육vs지방</button>
+        <button class="tab-btn" onclick="showBodyChart('bmi',this)">BMI</button>
+        <button class="tab-btn" onclick="showBodyChart('bmr',this)">기초대사</button>
+      </div>
+      <div class="chart-card" id="bodyChart-fatpct">
+        <div class="ch-title">체지방률 변화</div>
+        <div class="ch-sub">${ir[0].fat_pct}% → ${ir[ir.length-1].fat_pct}% · 목표 25%</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="fatpctChart"></canvas></div>
+      </div>
+      <div class="chart-card" id="bodyChart-composition" style="display:none">
+        <div class="ch-title">골격근 vs 체지방</div>
+        <div class="ch-sub">근육 유지 + 지방 감소가 핵심</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="compositionChart"></canvas></div>
+      </div>
+      <div class="chart-card" id="bodyChart-bmi" style="display:none">
+        <div class="ch-title">BMI 변화</div>
+        <div class="ch-sub">정상: 18.5~24.9 · 비만: 30+</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="bmiChart"></canvas></div>
+      </div>
+      <div class="chart-card" id="bodyChart-bmr" style="display:none">
+        <div class="ch-title">기초대사량 변화</div>
+        <div class="ch-sub">근육 유지하면 기초대사량도 유지</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="bmrChart"></canvas></div>
+      </div>
+      `:''}
       <div class="spacer"></div>
       <div class="section-title">인바디 기록 <span style="font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;">(차트에서 🟡 포인트 탭하면 전환)</span></div>
       <div id="inbodyContainer"></div>
@@ -429,6 +459,9 @@ function renderWeight(data){
 
   // 기본으로 최신 인바디 표시
   if(ir.length>0) showInbodyDetail(ir[ir.length-1].date);
+
+  // 체성분 차트 렌더
+  if(ir.length>=2) renderBodyCharts(ir);
 
   // 차트
   const wLabels=wr.map(r=>fmtDate(r.date));
@@ -627,6 +660,61 @@ function renderExercise(data){
       </div>
       <div id="exGuideContent">${renderGuideGroup(groups[exGuideTab]||[])}</div>
     </div>`;
+}
+
+function showBodyChart(name,btn){
+  ['fatpct','composition','bmi','bmr'].forEach(n=>{
+    const el=document.getElementById('bodyChart-'+n);
+    if(el) el.style.display=(n===name)?'block':'none';
+  });
+  if(btn){
+    btn.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+function renderBodyCharts(ir){
+  const labels=ir.map(r=>fmtDate(r.date));
+  const chartOpts=(min,max,unit)=>({
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a26',borderColor:'#22223a',borderWidth:1,bodyColor:'#eee',callbacks:{label:ctx=>ctx.parsed.y+unit}}},
+    scales:{x:{ticks:{color:'#555',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},y:{min,max,ticks:{color:'#555',font:{size:10},callback:v=>v+unit},grid:{color:'rgba(255,255,255,0.05)'}}}
+  });
+
+  // 체지방률
+  const fpCanvas=document.getElementById('fatpctChart');
+  if(fpCanvas){
+    new Chart(fpCanvas,{type:'line',data:{labels,datasets:[
+      {label:'체지방률',data:ir.map(r=>r.fat_pct),borderColor:'#ff8c00',backgroundColor:'rgba(255,140,0,0.08)',pointBackgroundColor:'#ff8c00',pointRadius:5,borderWidth:2,tension:0.3,fill:true},
+      {label:'목표',data:ir.map(()=>25),borderColor:'rgba(0,255,136,0.3)',borderDash:[3,3],borderWidth:1,pointRadius:0,fill:false}
+    ]},options:chartOpts(20,Math.max(...ir.map(r=>r.fat_pct))+3,'%')});
+  }
+
+  // 근육 vs 지방
+  const compCanvas=document.getElementById('compositionChart');
+  if(compCanvas){
+    new Chart(compCanvas,{type:'bar',data:{labels,datasets:[
+      {label:'골격근',data:ir.map(r=>r.muscle_kg),backgroundColor:'rgba(0,229,255,0.7)',borderRadius:6},
+      {label:'체지방',data:ir.map(r=>r.fat_kg),backgroundColor:'rgba(255,68,102,0.7)',borderRadius:6}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#888',font:{size:10}}}},scales:{x:{ticks:{color:'#555'},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#555',callback:v=>v+'kg'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  }
+
+  // BMI
+  const bmiCanvas=document.getElementById('bmiChart');
+  if(bmiCanvas){
+    new Chart(bmiCanvas,{type:'line',data:{labels,datasets:[
+      {label:'BMI',data:ir.map(r=>r.bmi),borderColor:'#b47fff',backgroundColor:'rgba(180,127,255,0.08)',pointBackgroundColor:'#b47fff',pointRadius:5,borderWidth:2,tension:0.3,fill:true},
+      {label:'비만기준',data:ir.map(()=>25),borderColor:'rgba(255,68,102,0.3)',borderDash:[3,3],borderWidth:1,pointRadius:0,fill:false}
+    ]},options:chartOpts(20,Math.max(...ir.map(r=>r.bmi))+3,'')});
+  }
+
+  // 기초대사량
+  const bmrCanvas=document.getElementById('bmrChart');
+  if(bmrCanvas){
+    new Chart(bmrCanvas,{type:'line',data:{labels,datasets:[
+      {label:'기초대사량',data:ir.map(r=>r.bmr_kcal),borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,0.08)',pointBackgroundColor:'#00e5ff',pointRadius:5,borderWidth:2,tension:0.3,fill:true}
+    ]},options:chartOpts(Math.min(...ir.map(r=>r.bmr_kcal))-100,Math.max(...ir.map(r=>r.bmr_kcal))+100,'kcal')});
+  }
 }
 
 function showInbodyDetail(date){
