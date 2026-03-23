@@ -513,13 +513,13 @@
       "category": "meal",
       "meal_type": "점심",
       "food_name": "불백 + 김치찌개 + 계란후라이 + 밥 소량",
-      "quantity": "불백 1인분, 김치찌개 0.5인분, 밥 100g 미만",
-      "calories_kcal": 550,
-      "protein_g": 32.0,
-      "carbs_g": 35.0,
-      "fat_g": 18.0,
+      "quantity": "불백 1인분+, 김치찌개 0.5인분, 밥 100g 미만",
+      "calories_kcal": 600,
+      "protein_g": 38.0,
+      "carbs_g": 30.0,
+      "fat_g": 20.0,
       "photo": "photos/2026-03-23_점심_불백김치찌개.jpg",
-      "memo": "밥 거의 안 먹음. 불고기 위주 섭취"
+      "memo": "밥 거의 안 먹음. 고기+쌈야채 위주. 고기 많이 먹음"
     }
   ],
   "exercise_records": [
