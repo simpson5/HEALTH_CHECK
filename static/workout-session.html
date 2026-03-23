@@ -275,9 +275,8 @@ function renderExList(){
   // 카테고리 분류
   const groups={machine:[],bodyweight:[],cardio:[]};
   lib.forEach(ex=>{
-    if(ex.type==='cardio') groups.cardio.push(ex);
-    else if(['wall_pushup','bodyweight_squat','kettlebell_swing'].includes(ex.id)) groups.bodyweight.push(ex);
-    else groups.machine.push(ex);
+    const g=ex.group||(ex.type==='cardio'?'cardio':'machine');
+    if(groups[g]) groups[g].push(ex);
   });
 
   const current=groups[sessionTab]||[];
@@ -335,12 +334,30 @@ function openStrength(exId){
   document.getElementById('strengthName').textContent=ex.name;
   document.getElementById('strengthTarget').textContent=ex.target.join(', ');
 
+  // input_type 확인
+  const inputType=ex.input_type||'weight_reps';
+  window._currentInputType=inputType;
+
+  // 헤더 업데이트
+  const headerEl=document.querySelector('.sets-header');
+  if(inputType==='reps_only'){
+    headerEl.innerHTML='<div>세트</div><div style="grid-column:span 2">회</div><div>완료</div><div></div>';
+    headerEl.style.gridTemplateColumns='40px 1fr 50px 32px';
+  } else {
+    headerEl.innerHTML='<div>세트</div><div>KG</div><div>회</div><div>완료</div><div></div>';
+    headerEl.style.gridTemplateColumns='40px 1fr 1fr 50px 32px';
+  }
+
   // 이전 기록
   const prev=getLastRecord(exId);
   const prevEl=document.getElementById('strengthPrev');
   if(prev&&prev.sets){
     const s=prev.sets[prev.sets.length-1];
-    prevEl.textContent=`지난번: ${s.kg}kg × ${s.reps}회 × ${prev.sets.length}세트`;
+    if(inputType==='reps_only'){
+      prevEl.textContent='지난번: '+s.reps+'회 × '+prev.sets.length+'세트';
+    } else {
+      prevEl.textContent='지난번: '+s.kg+'kg × '+s.reps+'회 × '+prev.sets.length+'세트';
+    }
     prevEl.style.display='inline-block';
   } else {
     prevEl.style.display='none';
@@ -364,23 +381,36 @@ function openStrength(exId){
 
 function renderSets(sets){
   const container=document.getElementById('setsContainer');
-  container.innerHTML=sets.map((s,i)=>`
-    <div class="set-row" id="setRow${i}">
+  const isRepsOnly=window._currentInputType==='reps_only';
+  container.innerHTML=sets.map((s,i)=>{
+    if(isRepsOnly){
+      return `<div class="set-row" id="setRow${i}" style="grid-template-columns:40px 1fr 50px 32px;">
+        <div class="set-num">${i+1}</div>
+        <input class="set-input" type="number" inputmode="numeric" value="${s.reps||''}" placeholder="회" onchange="updateSet(${i},'reps',this.value)">
+        <div class="set-check ${s.completed?'done':''}" onclick="toggleSet(${i})">${s.completed?'✓':''}</div>
+        <button class="set-del" onclick="deleteSet(${i})">×</button>
+      </div>`;
+    }
+    return `<div class="set-row" id="setRow${i}">
       <div class="set-num">${i+1}</div>
       <input class="set-input" type="number" inputmode="numeric" value="${s.kg||''}" placeholder="kg" onchange="updateSet(${i},'kg',this.value)">
       <input class="set-input" type="number" inputmode="numeric" value="${s.reps||''}" placeholder="회" onchange="updateSet(${i},'reps',this.value)">
       <div class="set-check ${s.completed?'done':''}" onclick="toggleSet(${i})">${s.completed?'✓':''}</div>
       <button class="set-del" onclick="deleteSet(${i})">×</button>
-    </div>
+    </div>`;
   `).join('');
 }
 
 function getCurrentSets(){
   const container=document.getElementById('setsContainer');
   const rows=container.querySelectorAll('.set-row');
+  const isRepsOnly=window._currentInputType==='reps_only';
   return Array.from(rows).map((row,i)=>{
     const inputs=row.querySelectorAll('.set-input');
     const check=row.querySelector('.set-check');
+    if(isRepsOnly){
+      return {kg:0,reps:parseInt(inputs[0].value)||0,completed:check.classList.contains('done')};
+    }
     return {
       kg:parseFloat(inputs[0].value)||0,
       reps:parseInt(inputs[1].value)||0,

@@ -36,7 +36,9 @@
       "target": [
         "가슴",
         "어깨"
-      ]
+      ],
+      "input_type": "weight_reps",
+      "group": "machine"
     },
     {
       "id": "lat_pulldown",
@@ -45,7 +47,9 @@
       "target": [
         "등",
         "이두"
-      ]
+      ],
+      "input_type": "weight_reps",
+      "group": "machine"
     },
     {
       "id": "shoulder_press",
@@ -54,7 +58,9 @@
       "target": [
         "어깨",
         "삼두"
-      ]
+      ],
+      "input_type": "weight_reps",
+      "group": "machine"
     },
     {
       "id": "leg_extension",
@@ -62,7 +68,9 @@
       "type": "strength",
       "target": [
         "대퇴사두"
-      ]
+      ],
+      "input_type": "weight_reps",
+      "group": "machine"
     },
     {
       "id": "leg_curl",
@@ -71,7 +79,9 @@
       "target": [
         "햄스트링",
         "종아리"
-      ]
+      ],
+      "input_type": "weight_reps",
+      "group": "machine"
     },
     {
       "id": "seated_row",
@@ -80,25 +90,46 @@
       "target": [
         "등",
         "이두"
-      ]
+      ],
+      "input_type": "weight_reps",
+      "group": "machine"
     },
     {
       "id": "kettlebell_swing",
       "name": "케틀벨 스윙",
       "type": "strength",
-      "target": ["후면사슬", "둔근", "코어", "어깨"]
+      "target": [
+        "후면사슬",
+        "둔근",
+        "코어",
+        "어깨"
+      ],
+      "input_type": "weight_reps",
+      "group": "bodyweight"
     },
     {
       "id": "wall_pushup",
       "name": "벽 푸쉬업",
       "type": "strength",
-      "target": ["가슴", "삼두", "어깨"]
+      "target": [
+        "가슴",
+        "삼두",
+        "어깨"
+      ],
+      "input_type": "reps_only",
+      "group": "bodyweight"
     },
     {
       "id": "bodyweight_squat",
       "name": "맨몸 스쿼트",
       "type": "strength",
-      "target": ["대퇴사두", "둔근", "코어"]
+      "target": [
+        "대퇴사두",
+        "둔근",
+        "코어"
+      ],
+      "input_type": "reps_only",
+      "group": "bodyweight"
     },
     {
       "id": "treadmill",
@@ -106,7 +137,9 @@
       "type": "cardio",
       "target": [
         "전신"
-      ]
+      ],
+      "input_type": "cardio",
+      "group": "cardio"
     }
   ],
   "frequent_foods": [
@@ -155,7 +188,6 @@
       "meal_type": "음료"
     }
   ],
-
   "food_categories": {
     "meal": [
       "아침",
@@ -182,15 +214,42 @@
     "weekly_analysis": "week_start, week_end, weight_change, muscle_change, fat_change, avg_protein, avg_calories, exercise_count, analysis, recommendations"
   },
   "schedule": [
-    {"date":"2026-03-26","type":"medication","label":"💊 마운자로 2.5mg 3회차"},
-    {"date":"2026-03-28","type":"inbody","label":"📋 인바디 측정 (금요일 투약 전 아침)"},
-    {"date":"2026-04-03","type":"medication","label":"💊 마운자로 2.5mg 4회차 (마지막)"},
-    {"date":"2026-04-04","type":"inbody","label":"📋 인바디 측정"},
-    {"date":"2026-04-07","type":"hospital","label":"🏥 병원 예약 (5mg 처방) ⚠️ 미예약"},
-    {"date":"2026-04-10","type":"medication","label":"💊 마운자로 5mg 시작 (금요일 고정)"},
-    {"date":"2026-04-11","type":"inbody","label":"📋 인바디 측정"}
+    {
+      "date": "2026-03-26",
+      "type": "medication",
+      "label": "💊 마운자로 2.5mg 3회차"
+    },
+    {
+      "date": "2026-03-28",
+      "type": "inbody",
+      "label": "📋 인바디 측정 (금요일 투약 전 아침)"
+    },
+    {
+      "date": "2026-04-03",
+      "type": "medication",
+      "label": "💊 마운자로 2.5mg 4회차 (마지막)"
+    },
+    {
+      "date": "2026-04-04",
+      "type": "inbody",
+      "label": "📋 인바디 측정"
+    },
+    {
+      "date": "2026-04-07",
+      "type": "hospital",
+      "label": "🏥 병원 예약 (5mg 처방) ⚠️ 미예약"
+    },
+    {
+      "date": "2026-04-10",
+      "type": "medication",
+      "label": "💊 마운자로 5mg 시작 (금요일 고정)"
+    },
+    {
+      "date": "2026-04-11",
+      "type": "inbody",
+      "label": "📋 인바디 측정"
+    }
   ],
-
   "medication_records": [
     {
       "date": "2026-03-10",
@@ -569,7 +628,6 @@
       "tomorrow_advice": "오늘 점심+저녁 단백질 챙기기. 쉐이크 추가 1잔."
     }
   ],
-
   "weekly_analysis": [
     {
       "week_start": "2026-03-11",
