@@ -482,6 +482,88 @@
         "⚠️ 단백질 110g 미달 (62%)"
       ],
       "tomorrow_advice": "아침에 쉐이크 1잔이라도 마시기. 운동 꼭 하기. 점심에 단백질 반찬 추가."
+    },
+    {
+      "date": "2026-03-19",
+      "day_since_start": 10,
+      "weight_kg": 109.3,
+      "weight_change": "+0.6kg (전일 대비)",
+      "diet_summary": {
+        "total_calories": 225,
+        "total_protein": 6,
+        "total_carbs": 37.5,
+        "total_fat": 4,
+        "meals": [
+          "아침: 굶음",
+          "점심: 칼국수 0.5인분 (225kcal, P6g)",
+          "저녁: 굶음"
+        ]
+      },
+      "protein_achievement": "6g / 110g (5%) ⚠️ 심각",
+      "exercise_summary": "운동 없음",
+      "medication": null,
+      "analysis": "하루 총 칼로리 225kcal, 단백질 6g. 마운자로 식욕 억제가 강하게 작용 중이나, 단백질 5%는 사실상 단식 수준. 칼국수는 탄수화물 위주라 단백질 거의 없음. 저녁도 굶어서 하루 종일 영양 공급 부족.",
+      "score": "D",
+      "highlights": [
+        "⚠️ 단백질 6g — 목표의 5%, 사실상 단식",
+        "⚠️ 아침+저녁 굶음",
+        "⚠️ 운동 없음",
+        "⚠️ 칼로리 225kcal — 기초대사량의 14%"
+      ],
+      "tomorrow_advice": "아침에 쉐이크 필수. 점심 단백질 보충 (두유, 계란). 저녁 닭가슴살."
+    },
+    {
+      "date": "2026-03-20",
+      "day_since_start": 11,
+      "weight_kg": 108.8,
+      "weight_change": "-0.5kg (전일 대비)",
+      "diet_summary": {
+        "total_calories": 420,
+        "total_protein": 14,
+        "total_carbs": 48,
+        "total_fat": 12,
+        "meals": [
+          "아침: 굶음",
+          "점심: 김치찌개 0.8인분 + 공기밥 1/3 (420kcal, P14g)"
+        ]
+      },
+      "protein_achievement": "14g / 110g (13%) ⚠️ 심각",
+      "exercise_summary": "운동 없음",
+      "medication": null,
+      "analysis": "점심 기록만 있음. 저녁 데이터 없어 실제 섭취량 불명. 기록된 것만으로는 단백질 14g, 목표의 13%. 이틀 연속 단백질 심각 부족.",
+      "score": "D",
+      "highlights": [
+        "⚠️ 단백질 14g — 목표의 13%",
+        "⚠️ 아침 굶음",
+        "⚠️ 저녁 데이터 없음",
+        "✅ 체중 108.8kg (-0.5kg 회복)"
+      ],
+      "tomorrow_advice": "주말에도 쉐이크는 챙기기. 단백질 하루 최소 60g 이상."
+    },
+    {
+      "date": "2026-03-23",
+      "day_since_start": 14,
+      "weight_kg": 109.5,
+      "weight_change": "+0.7kg (3/20 대비)",
+      "diet_summary": {
+        "total_calories": 107,
+        "total_protein": 21,
+        "total_carbs": 0,
+        "total_fat": 0,
+        "meals": [
+          "아침: 오트몬드 프로틴 초코 250ml (107kcal, P21g)"
+        ]
+      },
+      "protein_achievement": "21g / 110g (19%) — 아침 기준, 추가 섭취 필요",
+      "exercise_summary": "운동 기록 없음",
+      "medication": null,
+      "analysis": "아침에 프로틴 드링크로 시작. 단백질 21g 확보는 이전보다 나은 출발. 주말 결혼식+술 약속 이후 체중 109.5kg으로 소폭 증가. 수분/나트륨 영향 추정.",
+      "score": "진행 중",
+      "highlights": [
+        "✅ 아침에 프로틴 드링크 (21g)",
+        "⚠️ 주말 체중 +0.7kg (수분 변동 추정)"
+      ],
+      "tomorrow_advice": "오늘 점심+저녁 단백질 챙기기. 쉐이크 추가 1잔."
     }
   ],
 
@@ -501,6 +583,24 @@
         "근력운동 빠짐없이 수행",
         "마운자로 식욕 억제로 못 먹더라도 단백질 쉐이크라도 섭취",
         "다음 주 인바디에서 골격근량 유지 여부 확인"
+      ]
+    },
+    {
+      "week_start": "2026-03-18",
+      "week_end": "2026-03-23",
+      "weight_change_kg": 0.8,
+      "muscle_change_kg": null,
+      "fat_change_kg": null,
+      "avg_protein_g": 27,
+      "avg_calories_kcal": 441,
+      "exercise_count": 0,
+      "analysis": "2주차 (D+9~D+14). 체중 108.7→109.5kg (+0.8kg)으로 소폭 증가. 일일 변동 범위(108.7~109.5) 내 등락. 가장 심각한 문제는 단백질 섭취량 — 기록된 날 평균 27g으로 목표 110g의 25%에 불과. 운동 기록 0회. 마운자로 식욕 억제 효과로 식사량이 극도로 적으나 단백질 보충이 전혀 안 되고 있음. 주말 결혼식+술 약속 있었음.",
+      "recommendations": [
+        "아침 프로틴 드링크/쉐이크 매일 필수 (최소 21~36g 확보)",
+        "점심에 두유 1팩이라도 추가 (편의점에서 구매 가능)",
+        "저녁 닭가슴살 또는 설렁탕 등 단백질 위주 선택",
+        "운동 최소 주 3회 시작 — 머신이든 맨몸이든",
+        "3/25 또는 3/28 인바디 측정으로 근손실 추적"
       ]
     }
   ]
