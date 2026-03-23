@@ -373,7 +373,17 @@ function openStrength(exId){
     const sets=prev.sets.map(s=>({kg:s.kg,reps:s.reps,completed:false}));
     renderSets(sets);
   } else {
-    renderSets([{kg:'',reps:'',completed:false},{kg:'',reps:'',completed:false},{kg:'',reps:'',completed:false}]);
+    // 기본 루틴에서 추천값 불러오기
+    const defaults=(DATA.profile.exercise.daily_routine||{}).morning||{};
+    const machineDefaults=defaults.machine_defaults||{};
+    const def=machineDefaults[exId];
+    if(def){
+      const sets=[];
+      for(let i=0;i<(def.sets||3);i++) sets.push({kg:def.kg||'',reps:def.reps||'',completed:false});
+      renderSets(sets);
+    } else {
+      renderSets([{kg:'',reps:'',completed:false},{kg:'',reps:'',completed:false},{kg:'',reps:'',completed:false}]);
+    }
   }
 
   showView('strength');

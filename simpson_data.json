@@ -7,7 +7,7 @@
     "medication": "마운자로 (티르제파타이드)",
     "medication_start": "2026-03-10",
     "exercise": {
-      "cardio": "경사 트레드밀 아침 30분 + 저녁 20~30분",
+      "cardio": "경사 트레드밀 오전 30분 이상",
       "strength": [
         "머신 체스트 프레스",
         "랫 풀다운",
@@ -18,7 +18,25 @@
         "케틀벨 스윙",
         "벽 푸쉬업",
         "맨몸 스쿼트"
-      ]
+      ],
+      "daily_routine": {
+        "morning": {
+          "description": "머신 6종 (30분) + 경사 트레드밀 (30분)",
+          "machine_defaults": {
+            "chest_press": {"kg": 30, "sets": 3, "reps": 12},
+            "lat_pulldown": {"kg": 35, "sets": 3, "reps": 12},
+            "shoulder_press": {"kg": 20, "sets": 3, "reps": 12},
+            "seated_row": {"kg": 30, "sets": 3, "reps": 12},
+            "leg_extension": {"kg": 35, "sets": 3, "reps": 12},
+            "leg_curl": {"kg": 25, "sets": 3, "reps": 12}
+          },
+          "treadmill": {"duration_min": 30, "incline_pct": 12, "speed_kmh": 5.5}
+        },
+        "evening": {
+          "description": "케틀벨 스윙 (10분)",
+          "kettlebell_swing": {"kg": 16, "sets": 5, "reps": 12}
+        }
+      }
     },
     "daily_targets": {
       "protein_g": 110,
