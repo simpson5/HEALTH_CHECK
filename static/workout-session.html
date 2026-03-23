@@ -20,18 +20,26 @@
   .view.active{display:block;}
 
   .ex-list{padding:16px;}
-  .ex-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.1s;}
-  .ex-item:active{transform:scale(0.98);}
-  .ex-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-  .ex-icon.strength{background:rgba(0,229,255,0.1);}
-  .ex-icon.cardio{background:rgba(255,140,0,0.1);}
-  .ex-info{flex:1;}
-  .ex-name{font-size:14px;font-weight:700;}
-  .ex-target{font-size:11px;color:var(--muted);margin-top:2px;}
-  .ex-done{color:var(--green);font-size:14px;}
-  .ex-prev{font-size:11px;color:var(--muted);margin-top:2px;}
+  .ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .ex-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:transform 0.1s,border-color 0.2s;position:relative;overflow:hidden;}
+  .ex-card:active{transform:scale(0.97);}
+  .ex-card.done{border-color:var(--green);}
+  .ex-card.done::after{content:'✓';position:absolute;top:8px;right:10px;color:var(--green);font-size:16px;font-weight:900;}
+  .ex-card .ec-icon{font-size:24px;margin-bottom:6px;}
+  .ex-card .ec-name{font-size:12px;font-weight:700;line-height:1.3;}
+  .ex-card .ec-target{font-size:10px;color:var(--muted);margin-top:3px;}
+  .ex-card .ec-prev{font-size:10px;color:var(--accent);margin-top:4px;}
+  .ex-card .ec-done-info{font-size:10px;color:var(--green);margin-top:4px;font-weight:700;}
 
-  .section-label{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding:0 16px;}
+  .section-label{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding:0;}
+
+  .session-tab-bar{display:flex;gap:6px;margin-bottom:12px;}
+  .session-tab{flex:1;padding:8px;border-radius:10px;font-size:11px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--muted);text-align:center;transition:all 0.2s;}
+  .session-tab.active{background:rgba(0,229,255,0.12);border-color:rgba(0,229,255,0.3);color:var(--accent);}
+
+  .session-status{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-around;text-align:center;}
+  .ss-item .ss-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);}
+  .ss-item .ss-label{font-size:10px;color:var(--muted);}
 
   /* 세트 기록 */
   .exercise-header{padding:16px;text-align:center;border-bottom:1px solid var(--border);}
@@ -96,10 +104,17 @@
     <div class="header-time" id="timerDisplay">00:00</div>
   </div>
   <div class="ex-list">
-    <div class="section-label" style="padding:0;margin-top:8px;">근력</div>
-    <div id="strengthList"></div>
-    <div class="section-label" style="padding:0;margin-top:16px;">유산소</div>
-    <div id="cardioList"></div>
+    <div class="session-status">
+      <div class="ss-item"><div class="ss-val" id="ssDone">0</div><div class="ss-label">완료</div></div>
+      <div class="ss-item"><div class="ss-val" id="ssVolume">0</div><div class="ss-label">볼륨(kg)</div></div>
+      <div class="ss-item"><div class="ss-val" id="ssCal">0</div><div class="ss-label">kcal</div></div>
+    </div>
+    <div class="session-tab-bar">
+      <button class="session-tab active" onclick="setSessionTab('machine',this)">머신</button>
+      <button class="session-tab" onclick="setSessionTab('bodyweight',this)">맨몸</button>
+      <button class="session-tab" onclick="setSessionTab('cardio',this)">유산소</button>
+    </div>
+    <div id="exerciseGrid"></div>
   </div>
   <div class="bottom-actions">
     <button class="btn btn-finish" onclick="finishWorkout()">운동 완료</button>
@@ -245,43 +260,72 @@ function getLastRecord(exId){
 }
 
 // 운동 목록 렌더
+let sessionTab='machine';
+
+function setSessionTab(tab,btn){
+  sessionTab=tab;
+  document.querySelectorAll('.session-tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderExList();
+}
+
 function renderExList(){
   const lib=DATA.exercise_library||[];
-  const sHtml=lib.filter(e=>e.type==='strength').map(e=>{
+
+  // 카테고리 분류
+  const groups={machine:[],bodyweight:[],cardio:[]};
+  lib.forEach(ex=>{
+    if(ex.type==='cardio') groups.cardio.push(ex);
+    else if(['wall_pushup','bodyweight_squat','kettlebell_swing'].includes(ex.id)) groups.bodyweight.push(ex);
+    else groups.machine.push(ex);
+  });
+
+  const current=groups[sessionTab]||[];
+
+  const gridHtml=current.map(e=>{
     const done=session.exercises.find(s=>s.id===e.id);
     const prev=getLastRecord(e.id);
+    const icon=e.type==='cardio'?'🏃':'🏋️';
     let prevText='';
-    if(prev&&prev.sets){
-      const lastSet=prev.sets[prev.sets.length-1];
-      prevText=`지난번: ${lastSet.kg}kg × ${lastSet.reps}회 × ${prev.sets.length}세트`;
+    let doneText='';
+
+    if(done){
+      if(done.sets){
+        const c=done.sets.filter(s=>s.completed).length;
+        doneText=c+'세트 완료';
+      } else if(done.duration_min){
+        doneText=done.duration_min+'분 완료';
+      }
+    } else if(prev&&prev.sets){
+      const ls=prev.sets[prev.sets.length-1];
+      prevText=ls.kg+'kg × '+ls.reps+'회';
+    } else if(prev&&prev.duration_min){
+      prevText=prev.duration_min+'분';
     }
-    return `<div class="ex-item" onclick="openStrength('${e.id}')">
-      <div class="ex-icon strength">🏋️</div>
-      <div class="ex-info">
-        <div class="ex-name">${e.name}</div>
-        <div class="ex-target">${e.target.join(', ')}</div>
-        ${done?`<div class="ex-prev" style="color:var(--green)">✓ ${done.sets.filter(s=>s.completed).length}세트 완료</div>`
-              :prevText?`<div class="ex-prev">${prevText}</div>`:''}
-      </div>
-      ${done?'<div class="ex-done">✓</div>':''}
-    </div>`;
+
+    const onclick=e.type==='cardio'?`openCardio('${e.id}')`:`openStrength('${e.id}')`;
+
+    return '<div class="ex-card '+(done?'done':'')+'" onclick="'+onclick+'">'
+      +'<div class="ec-icon">'+icon+'</div>'
+      +'<div class="ec-name">'+e.name+'</div>'
+      +'<div class="ec-target">'+e.target.join(', ')+'</div>'
+      +(doneText?'<div class="ec-done-info">'+doneText+'</div>'
+        :prevText?'<div class="ec-prev">'+prevText+'</div>':'')
+      +'</div>';
   }).join('');
 
-  const cHtml=lib.filter(e=>e.type==='cardio').map(e=>{
-    const done=session.exercises.find(s=>s.id===e.id);
-    return `<div class="ex-item" onclick="openCardio('${e.id}')">
-      <div class="ex-icon cardio">🏃</div>
-      <div class="ex-info">
-        <div class="ex-name">${e.name}</div>
-        <div class="ex-target">${e.target.join(', ')}</div>
-        ${done?`<div class="ex-prev" style="color:var(--green)">✓ ${done.duration_min}분 완료</div>`:''}
-      </div>
-      ${done?'<div class="ex-done">✓</div>':''}
-    </div>`;
-  }).join('');
+  document.getElementById('exerciseGrid').innerHTML='<div class="ex-grid">'+gridHtml+'</div>';
 
-  document.getElementById('strengthList').innerHTML=sHtml;
-  document.getElementById('cardioList').innerHTML=cHtml;
+  // 상단 현황 업데이트
+  const doneCount=session.exercises.length;
+  let totalVol=0,totalCal=0;
+  session.exercises.forEach(e=>{
+    if(e.sets) totalVol+=e.sets.filter(s=>s.completed).reduce((sum,s)=>sum+(s.kg||0)*(s.reps||0),0);
+    totalCal+=(e.calories_burned||0);
+  });
+  document.getElementById('ssDone').textContent=doneCount;
+  document.getElementById('ssVolume').textContent=totalVol.toLocaleString();
+  document.getElementById('ssCal').textContent=totalCal;
 }
 
 // 근력 운동 열기
