@@ -497,32 +497,40 @@ function renderWeight(data){
 }
 
 // ===== 운동 =====
-function renderExercise(data){
-  const recs=(data.exercise_records||[]).filter(r=>r.date===exDate);
+let exGuideTab='machine';
 
-  let exHtml='';
-  if(recs.length===0){
-    exHtml='<div class="empty">이 날 운동 기록 없음</div>';
-  } else {
-    recs.forEach(rec=>{
-      rec.exercises.forEach(e=>{
-        const icon=e.type==='cardio'?'🏃':'🏋️';
-        let detail='';
-        if(e.type==='cardio') detail=`${e.duration_min||'?'}분 · ~${e.calories_burned||'?'}kcal`;
-        else detail=`${e.sets||'?'}세트 × ${e.reps||'?'}회${e.weight_kg?' · '+e.weight_kg+'kg':''}`;
-        exHtml+=`<div class="ex-item"><div class="ex-type">${icon} ${e.type==='cardio'?'유산소':'근력'}</div><div class="ex-name">${e.name}</div><div class="ex-detail">${detail}</div></div>`;
-      });
-      if(rec.total_calories_burned){
-        exHtml+=`<div style="text-align:center;font-size:12px;color:var(--accent);margin:8px 0;">총 소모: ~${rec.total_calories_burned}kcal</div>`;
-      }
-    });
+function renderExercise(data){
+  const allEx=data.exercise_records||[];
+  const recs=allEx.filter(r=>r.date===exDate);
+
+  // 주간 운동 현황
+  const weekTarget=4;
+  const now=new Date();
+  const monday=new Date(now);monday.setDate(now.getDate()-((now.getDay()+6)%7));
+  const mondayStr=monday.toISOString().slice(0,10);
+  const weekExDates=new Set(allEx.filter(r=>r.date>=mondayStr).map(r=>r.date));
+  const weekCount=weekExDates.size;
+  const weekPct=Math.min(100,Math.round(weekCount/weekTarget*100));
+
+  // 연속 쉰 일수
+  let restDays=0;
+  const todayStr=new Date().toISOString().slice(0,10);
+  for(let i=0;i<30;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    if(allEx.find(r=>r.date===ds)) break;
+    restDays++;
   }
 
-  // 루틴 가이드
-  const strength=data.profile.exercise.strength||[];
-  let guideHtml=strength.map(s=>`<span class="summary-chip">${s}</span>`).join('');
+  // 최근 운동
+  const lastEx=allEx.length?allEx[allEx.length-1]:null;
+  let lastExHtml='';
+  if(lastEx&&lastEx.date!==exDate){
+    const exNames=lastEx.exercises.map(e=>e.name).join(', ');
+    lastExHtml='<div class="card"><div class="card-title">최근 운동 ('+lastEx.date+')</div><div style="font-size:12px;color:#ccc;">'+exNames+'</div>'+(lastEx.total_volume_kg?'<div style="font-size:11px;color:var(--accent);margin-top:4px;">볼륨 '+lastEx.total_volume_kg.toLocaleString()+'kg · ~'+lastEx.total_calories_burned+'kcal</div>':'')+'</div>';
+  }
 
-  // 운동 기록 상세 표시 (세트 정보 포함)
+  // 오늘 기록 상세
   let exDetailHtml='';
   if(recs.length===0){
     exDetailHtml='<div class="empty">이 날 운동 기록 없음</div>';
@@ -530,61 +538,94 @@ function renderExercise(data){
     recs.forEach(rec=>{
       rec.exercises.forEach(e=>{
         if(e.type==='cardio'){
-          exDetailHtml+=`<div class="card"><div style="font-size:12px;font-weight:700;">🏃 ${e.name}</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">${e.duration_min||'?'}분 · 경사${e.incline_pct||'?'}% · ${e.speed_kmh||'?'}km/h · ~${e.calories_burned||'?'}kcal</div></div>`;
+          exDetailHtml+='<div class="card"><div style="font-size:12px;font-weight:700;">🏃 '+e.name+'</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(e.duration_min||'?')+'분 · 경사'+(e.incline_pct||'?')+'% · '+(e.speed_kmh||'?')+'km/h · ~'+(e.calories_burned||'?')+'kcal</div></div>';
         } else if(e.sets){
           const completed=e.sets.filter(s=>s.completed);
           const vol=completed.reduce((sum,s)=>sum+(s.kg||0)*(s.reps||0),0);
-          const setsText=completed.map(s=>`${s.kg}kg×${s.reps}`).join(' / ');
-          exDetailHtml+=`<div class="card"><div style="font-size:12px;font-weight:700;">🏋️ ${e.name}</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">${setsText}</div><div style="font-size:11px;color:var(--accent);margin-top:2px;">볼륨 ${vol.toLocaleString()}kg</div></div>`;
+          const setsText=completed.map(s=>s.kg+'kg×'+s.reps).join(' / ');
+          exDetailHtml+='<div class="card"><div style="font-size:12px;font-weight:700;">🏋️ '+e.name+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">'+setsText+'</div><div style="font-size:11px;color:var(--accent);margin-top:2px;">볼륨 '+vol.toLocaleString()+'kg</div></div>';
         }
       });
       if(rec.total_volume_kg||rec.total_calories_burned){
-        exDetailHtml+=`<div style="text-align:center;font-size:12px;margin:8px 0;"><span style="color:var(--accent)">볼륨 ${(rec.total_volume_kg||0).toLocaleString()}kg</span> · <span style="color:var(--orange)">~${rec.total_calories_burned||0}kcal</span> · <span style="color:var(--muted)">${rec.total_duration_min||'?'}분</span></div>`;
+        exDetailHtml+='<div style="text-align:center;font-size:12px;margin:8px 0;"><span style="color:var(--accent)">볼륨 '+(rec.total_volume_kg||0).toLocaleString()+'kg</span> · <span style="color:var(--orange)">~'+(rec.total_calories_burned||0)+'kcal</span> · <span style="color:var(--muted)">'+(rec.total_duration_min||'?')+'분</span></div>';
       }
-      exDetailHtml+=`<div style="display:flex;justify-content:center;gap:16px;margin-bottom:10px;">
-        <a href="/workout-session.html?edit=${rec.date}&start=${rec.start_time}" style="font-size:12px;color:var(--accent);text-decoration:none;">✏️ 수정</a>
-        <a href="#" onclick="deleteExRecord('${rec.date}','${rec.start_time}');return false;" style="font-size:12px;color:var(--red);text-decoration:none;">🗑️ 삭제</a>
-      </div>`;
+      exDetailHtml+='<div style="display:flex;justify-content:center;gap:16px;margin-bottom:10px;"><a href="/workout-session.html?edit='+rec.date+'&start='+rec.start_time+'" style="font-size:12px;color:var(--accent);text-decoration:none;">✏️ 수정</a><a href="#" onclick="deleteExRecord(\''+rec.date+'\',\''+rec.start_time+'\');return false;" style="font-size:12px;color:var(--red);text-decoration:none;">🗑️ 삭제</a></div>';
     });
   }
+
+  // 운동 가이드 카테고리별
+  const lib=data.exercise_library||[];
+  const groups={machine:[], bodyweight:[], cardio:[]};
+  lib.forEach(ex=>{
+    if(ex.type==='cardio') groups.cardio.push(ex);
+    else if(['wall_pushup','bodyweight_squat','kettlebell_swing'].includes(ex.id)) groups.bodyweight.push(ex);
+    else groups.machine.push(ex);
+  });
+
+  function renderGuideGroup(exercises){
+    return exercises.map(ex=>{
+      const icon=ex.type==='cardio'?'🏃':'🏋️';
+      const prev=getExLastRecord(data,ex.id);
+      let prevText='';
+      if(prev&&prev.sets){
+        const lastSet=prev.sets[prev.sets.length-1];
+        prevText='<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: '+lastSet.kg+'kg × '+lastSet.reps+'회 × '+prev.sets.length+'세트</div>';
+      } else if(prev&&prev.duration_min){
+        prevText='<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: '+prev.duration_min+'분 경사'+(prev.incline_pct||0)+'%</div>';
+      }
+      return '<div class="card" style="cursor:pointer;" onclick="toggleExGuide(this)">'
+        +'<div style="display:flex;align-items:center;gap:10px;">'
+        +'<div style="font-size:18px;">'+icon+'</div>'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:13px;font-weight:700;">'+ex.name+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);">'+ex.target.join(', ')+'</div>'
+        +prevText
+        +'</div>'
+        +'<div style="font-size:14px;color:var(--muted);">▾</div>'
+        +'</div>'
+        +'<div class="ex-guide-body" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:#ccc;line-height:1.7;">'
+        +'<a href="/workout.html#'+ex.id+'" style="color:var(--accent);font-size:11px;">자세 가이드 보기 →</a>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  const restColor=restDays>=3?'var(--red)':restDays>=1?'var(--orange)':'var(--green)';
+  const restMsg=restDays===0?'오늘 운동함':restDays+'일째 쉬는 중';
 
   document.getElementById('page-exercise').innerHTML=`
     <div class="section">
       <div class="spacer"></div>
-      <a href="/workout-session.html" style="display:block;text-align:center;padding:16px;background:var(--accent);color:#000;font-size:15px;font-weight:900;border-radius:14px;text-decoration:none;margin-bottom:16px;">▶ 운동 시작</a>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div class="card-title" style="margin:0;">이번 주 운동</div>
+          <div style="font-size:12px;font-weight:700;color:${restColor};">${restMsg}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-size:13px;font-weight:700;color:${weekCount>=weekTarget?'var(--green)':'var(--text)'};">${weekCount} / ${weekTarget}회</div>
+          <div style="font-size:11px;color:var(--muted);">${weekPct}%</div>
+        </div>
+        <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${weekPct}%;background:${weekCount>=weekTarget?'linear-gradient(90deg,var(--green),var(--accent))':weekCount>0?'linear-gradient(90deg,var(--orange),var(--yellow))':'var(--red)'}"></div></div>
+      </div>
+
+      <a href="/workout-session.html" style="display:block;text-align:center;padding:18px;background:var(--accent);color:#000;font-size:16px;font-weight:900;border-radius:14px;text-decoration:none;margin-bottom:16px;letter-spacing:1px;">▶ 운동 시작</a>
+
       <div class="date-nav">
         <button onclick="moveExDate(-1)">◀</button>
         <div class="date-text">${fmtDateFull(exDate)}</div>
         <button onclick="moveExDate(1)">▶</button>
       </div>
       ${exDetailHtml}
+      ${recs.length===0?lastExHtml:''}
+
       <div class="spacer"></div>
       <div class="section-title">운동 가이드</div>
-      ${(data.exercise_library||[]).map(ex=>{
-        const icon=ex.type==='cardio'?'🏃':'🏋️';
-        const prev=getExLastRecord(data,ex.id);
-        let prevText='';
-        if(prev&&prev.sets){
-          const lastSet=prev.sets[prev.sets.length-1];
-          prevText='<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: '+lastSet.kg+'kg × '+lastSet.reps+'회 × '+prev.sets.length+'세트</div>';
-        } else if(prev&&prev.duration_min){
-          prevText='<div style="font-size:11px;color:var(--accent);margin-top:4px;">최근: '+prev.duration_min+'분 경사'+(prev.incline_pct||0)+'%</div>';
-        }
-        return '<div class="card" style="cursor:pointer;" onclick="toggleExGuide(this)">'
-          +'<div style="display:flex;align-items:center;gap:10px;">'
-          +'<div style="font-size:18px;">'+icon+'</div>'
-          +'<div style="flex:1;">'
-          +'<div style="font-size:13px;font-weight:700;">'+ex.name+'</div>'
-          +'<div style="font-size:11px;color:var(--muted);">'+ex.target.join(', ')+'</div>'
-          +prevText
-          +'</div>'
-          +'<div style="font-size:14px;color:var(--muted);">▾</div>'
-          +'</div>'
-          +'<div class="ex-guide-body" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:#ccc;line-height:1.7;">'
-          +'<a href="/workout.html#'+ex.id+'" style="color:var(--accent);font-size:11px;">자세 가이드 보기 →</a>'
-          +'</div>'
-          +'</div>';
-      }).join('')}
+      <div class="tab-bar" style="margin-bottom:10px;">
+        <button class="tab-btn ${exGuideTab==='machine'?'active':''}" onclick="exGuideTab='machine';renderExercise(DATA)">머신 ${groups.machine.length}종</button>
+        <button class="tab-btn ${exGuideTab==='bodyweight'?'active':''}" onclick="exGuideTab='bodyweight';renderExercise(DATA)">맨몸 ${groups.bodyweight.length}종</button>
+        <button class="tab-btn ${exGuideTab==='cardio'?'active':''}" onclick="exGuideTab='cardio';renderExercise(DATA)">유산소 ${groups.cardio.length}종</button>
+      </div>
+      <div id="exGuideContent">${renderGuideGroup(groups[exGuideTab]||[])}</div>
     </div>`;
 }
 

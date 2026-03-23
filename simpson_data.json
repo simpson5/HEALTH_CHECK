@@ -23,6 +23,9 @@
     "daily_targets": {
       "protein_g": 110,
       "calories_kcal": 1800
+    },
+    "weekly_targets": {
+      "exercise_count": 4
     }
   },
   "exercise_library": [
