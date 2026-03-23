@@ -139,6 +139,17 @@
       "fat_g": 4.1,
       "category": "drink",
       "meal_type": "음료"
+    },
+    {
+      "id": "otmond_protein_choco",
+      "name": "오트몬드 프로틴 초코 (ZERO SUGAR)",
+      "description": "250ml 1팩",
+      "calories_kcal": 107,
+      "protein_g": 21.0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "category": "drink",
+      "meal_type": "음료"
     }
   ],
 
@@ -395,6 +406,20 @@
       "fat_g": 12.0,
       "photo": null,
       "memo": "마운자로 식욕 억제 체감 중"
+    },
+    {
+      "date": "2026-03-23",
+      "time": "09:07",
+      "category": "drink",
+      "meal_type": "음료",
+      "food_name": "오트몬드 프로틴 초코 (ZERO SUGAR)",
+      "quantity": "250ml",
+      "calories_kcal": 107,
+      "protein_g": 21.0,
+      "carbs_g": 0,
+      "fat_g": 0,
+      "photo": "photos/2026-03-23_아침_오트몬드프로틴.jpg",
+      "memo": "아침 대용"
     }
   ],
   "exercise_records": [
