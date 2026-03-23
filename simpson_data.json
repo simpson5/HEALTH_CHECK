@@ -23,18 +23,50 @@
         "morning": {
           "description": "머신 6종 (30분) + 경사 트레드밀 (30분)",
           "machine_defaults": {
-            "chest_press": {"kg": 30, "sets": 3, "reps": 12},
-            "lat_pulldown": {"kg": 35, "sets": 3, "reps": 12},
-            "shoulder_press": {"kg": 20, "sets": 3, "reps": 12},
-            "seated_row": {"kg": 30, "sets": 3, "reps": 12},
-            "leg_extension": {"kg": 35, "sets": 3, "reps": 12},
-            "leg_curl": {"kg": 25, "sets": 3, "reps": 12}
+            "chest_press": {
+              "kg": 30,
+              "sets": 3,
+              "reps": 12
+            },
+            "lat_pulldown": {
+              "kg": 35,
+              "sets": 3,
+              "reps": 12
+            },
+            "shoulder_press": {
+              "kg": 20,
+              "sets": 3,
+              "reps": 12
+            },
+            "seated_row": {
+              "kg": 30,
+              "sets": 3,
+              "reps": 12
+            },
+            "leg_extension": {
+              "kg": 35,
+              "sets": 3,
+              "reps": 12
+            },
+            "leg_curl": {
+              "kg": 25,
+              "sets": 3,
+              "reps": 12
+            }
           },
-          "treadmill": {"duration_min": 30, "incline_pct": 12, "speed_kmh": 5.5}
+          "treadmill": {
+            "duration_min": 30,
+            "incline_pct": 12,
+            "speed_kmh": 5.5
+          }
         },
         "evening": {
           "description": "케틀벨 스윙 (10분)",
-          "kettlebell_swing": {"kg": 16, "sets": 5, "reps": 12}
+          "kettlebell_swing": {
+            "kg": 16,
+            "sets": 5,
+            "reps": 12
+          }
         }
       }
     },
@@ -206,6 +238,39 @@
       "meal_type": "음료"
     },
     {
+      "id": "dryu_pro_drink_40",
+      "name": "닥터유 PRO 드링크 단백질 40g 초코",
+      "description": "350ml 1병",
+      "calories_kcal": 258,
+      "protein_g": 40.0,
+      "carbs_g": 9.8,
+      "fat_g": 6.5,
+      "category": "drink",
+      "meal_type": "음료"
+    },
+    {
+      "id": "smoked_egg",
+      "name": "훈제란",
+      "description": "1개 (약 50g)",
+      "calories_kcal": 70,
+      "protein_g": 6.0,
+      "carbs_g": 1.0,
+      "fat_g": 5.0,
+      "category": "snack",
+      "meal_type": "간식"
+    },
+    {
+      "id": "smoked_chicken_breast",
+      "name": "훈제닭가슴살",
+      "description": "1개 (약 100g)",
+      "calories_kcal": 110,
+      "protein_g": 22.0,
+      "carbs_g": 2.0,
+      "fat_g": 1.5,
+      "category": "meal",
+      "meal_type": "저녁"
+    },
+    {
       "id": "otmond_protein_choco",
       "name": "오트몬드 프로틴 초코 (ZERO SUGAR)",
       "description": "250ml 1팩",
@@ -325,6 +390,12 @@
       "weight_kg": 109.5,
       "photo": null,
       "memo": "주말 후 소폭 증가"
+    },
+    {
+      "date": "2026-03-24",
+      "weight_kg": 109.0,
+      "photo": null,
+      "memo": ""
     }
   ],
   "inbody_records": [
@@ -531,6 +602,34 @@
       "fat_g": 20.0,
       "photo": "photos/2026-03-23_점심_불백김치찌개.jpg",
       "memo": "밥 거의 안 먹음. 고기+쌈야채 위주. 고기 많이 먹음"
+    },
+    {
+      "date": "2026-03-23",
+      "time": "19:30",
+      "category": "meal",
+      "meal_type": "저녁",
+      "food_name": "훈제닭가슴살 2개 + 훈제란 4개",
+      "quantity": "닭가슴살 2개, 훈제란 4개",
+      "calories_kcal": 460,
+      "protein_g": 62.0,
+      "carbs_g": 4.0,
+      "fat_g": 18.0,
+      "photo": null,
+      "memo": "고단백 저녁"
+    },
+    {
+      "date": "2026-03-24",
+      "time": "08:47",
+      "category": "drink",
+      "meal_type": "음료",
+      "food_name": "닥터유 PRO 드링크 단백질 40g 초코",
+      "quantity": "350ml",
+      "calories_kcal": 258,
+      "protein_g": 40.0,
+      "carbs_g": 9.8,
+      "fat_g": 6.5,
+      "photo": "photos/2026-03-24_아침_닥터유PRO.jpg",
+      "memo": "아침 대용"
     }
   ],
   "exercise_records": [
@@ -552,6 +651,176 @@
       "total_duration_min": 0,
       "total_volume_kg": 0,
       "total_calories_burned": 0,
+      "memo": ""
+    },
+    {
+      "date": "2026-03-23",
+      "start_time": "19:00",
+      "end_time": "19:08",
+      "exercises": [
+        {
+          "id": "kettlebell_swing",
+          "name": "케틀벨 스윙",
+          "type": "strength",
+          "target": [
+            "후면사슬",
+            "둔근",
+            "코어",
+            "어깨"
+          ],
+          "sets": [
+            {
+              "kg": 16,
+              "reps": 25,
+              "completed": true
+            },
+            {
+              "kg": 16,
+              "reps": 20,
+              "completed": true
+            },
+            {
+              "kg": 0,
+              "reps": 0,
+              "completed": false
+            }
+          ],
+          "volume_kg": 720
+        },
+        {
+          "id": "wall_pushup",
+          "name": "벽 푸쉬업",
+          "type": "strength",
+          "target": [
+            "가슴",
+            "삼두",
+            "어깨"
+          ],
+          "sets": [
+            {
+              "kg": 0,
+              "reps": 10,
+              "completed": true
+            },
+            {
+              "kg": 0,
+              "reps": 10,
+              "completed": true
+            },
+            {
+              "kg": 0,
+              "reps": 0,
+              "completed": false
+            }
+          ],
+          "volume_kg": 0
+        },
+        {
+          "id": "bodyweight_squat",
+          "name": "맨몸 스쿼트",
+          "type": "strength",
+          "target": [
+            "대퇴사두",
+            "둔근",
+            "코어"
+          ],
+          "sets": [
+            {
+              "kg": 0,
+              "reps": 20,
+              "completed": true
+            },
+            {
+              "kg": 0,
+              "reps": 20,
+              "completed": true
+            },
+            {
+              "kg": 0,
+              "reps": 0,
+              "completed": false
+            }
+          ],
+          "volume_kg": 0
+        }
+      ],
+      "total_duration_min": 8,
+      "total_volume_kg": 720,
+      "total_calories_burned": 48,
+      "memo": ""
+    },
+    {
+      "date": "2026-03-23",
+      "start_time": "07:45",
+      "end_time": "08:19",
+      "exercises": [
+        {
+          "id": "lat_pulldown",
+          "name": "랫 풀다운",
+          "type": "strength",
+          "target": [
+            "등",
+            "이두"
+          ],
+          "sets": [
+            {
+              "kg": 35,
+              "reps": 12,
+              "completed": true
+            },
+            {
+              "kg": 35,
+              "reps": 12,
+              "completed": true
+            },
+            {
+              "kg": 35,
+              "reps": 12,
+              "completed": true
+            }
+          ],
+          "volume_kg": 1260
+        },
+        {
+          "id": "chest_press",
+          "name": "머신 체스트 프레스",
+          "type": "strength",
+          "target": [
+            "가슴",
+            "어깨"
+          ],
+          "sets": [
+            {
+              "kg": 30,
+              "reps": 12,
+              "completed": true
+            },
+            {
+              "kg": 30,
+              "reps": 11,
+              "completed": true
+            },
+            {
+              "kg": 30,
+              "reps": 12,
+              "completed": false
+            }
+          ],
+          "volume_kg": 690
+        },
+        {
+          "id": "treadmill",
+          "name": "경사 트레드밀",
+          "type": "cardio",
+          "duration_min": 20,
+          "incline_pct": 6,
+          "speed_kmh": 4.5,
+          "calories_burned": 160
+        }
+      ],
+      "total_duration_min": 33,
+      "total_volume_kg": 1950,
+      "total_calories_burned": 200,
       "memo": ""
     }
   ],
@@ -669,6 +938,37 @@
         "⚠️ 주말 체중 +0.7kg (수분 변동 추정)"
       ],
       "tomorrow_advice": "오늘 점심+저녁 단백질 챙기기. 쉐이크 추가 1잔."
+    },
+    {
+      "date": "2026-03-23",
+      "day_since_start": 14,
+      "weight_kg": 109.5,
+      "weight_change": "+0.7kg (3/20 대비)",
+      "diet_summary": {
+        "total_calories": 1167,
+        "total_protein": 121,
+        "total_carbs": 34,
+        "total_fat": 38,
+        "meals": [
+          "아침: 오트몬드 프로틴 초코 250ml (107kcal, P21g)",
+          "점심: 불백+김치찌개+계란후라이 (600kcal, P38g)",
+          "저녁: 훈제닭가슴살 2개+훈제란 4개 (460kcal, P62g)"
+        ]
+      },
+      "protein_achievement": "121g / 110g (110%) ✅ 달성!",
+      "exercise_summary": "오전: 랫풀다운 35kg×3세트 + 체스트프레스 30kg×2세트 + 트레드밀 20분 / 저녁: 케틀벨 16kg (25+20회) + 벽푸쉬업 2×10 + 맨몸스쿼트 2×20",
+      "medication": null,
+      "analysis": "첫 본격 운동일. 오전 헬스장(머신2종+트레드밀) + 저녁 홈트(케틀벨+맨몸). 단백질 121g으로 프로젝트 시작 이후 최초로 110g 목표 달성. 불백에서 고기 위주로 먹고, 저녁 닭가슴살+훈제란 조합이 단백질 62g 확보. 식단+운동 모두 실행한 첫 날.",
+      "score": "A",
+      "highlights": [
+        "✅ 단백질 121g — 목표 110% 달성 (최초!)",
+        "✅ 오전 헬스장 운동 (머신 2종 + 트레드밀 20분)",
+        "✅ 저녁 홈트 (케틀벨 + 벽푸쉬업 + 맨몸스쿼트)",
+        "✅ 저녁 고단백 (닭가슴살 + 훈제란 = 62g)",
+        "✅ 점심 고기 위주 섭취 (밥 최소화)",
+        "⚠️ 트레드밀 20분/경사6% — 30분/경사10%+ 목표"
+      ],
+      "tomorrow_advice": "오늘도 같은 패턴 유지. 트레드밀 시간+경사 올리기. 닥터유PRO 드링크로 아침 40g 확보."
     }
   ],
   "weekly_analysis": [
