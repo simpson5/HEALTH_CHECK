@@ -26,13 +26,18 @@ export function Weight() {
   const latest = wr.length ? wr[wr.length - 1] : null;
   const irDates = new Set(ir.map(r => r.date));
 
-  // 체중 차트 데이터
-  const weightData = wr.map(r => ({
-    date: fmtDate(r.date),
-    fullDate: r.date,
-    weight: r.weight_kg,
-    isInbody: irDates.has(r.date),
-  }));
+  // 체중 차트 데이터 + 7일 이동평균
+  const weightData = wr.map((r, i) => {
+    const slice = wr.slice(Math.max(0, i - 6), i + 1);
+    const avg = slice.length >= 2 ? parseFloat((slice.reduce((s, x) => s + x.weight_kg, 0) / slice.length).toFixed(1)) : null;
+    return {
+      date: fmtDate(r.date),
+      fullDate: r.date,
+      weight: r.weight_kg,
+      trend: avg,
+      isInbody: irDates.has(r.date),
+    };
+  });
 
   // 선택된 인바디
   const showInbody = selectedInbody || (ir.length ? ir[ir.length - 1] : null);
@@ -115,6 +120,16 @@ export function Weight() {
                     />
                   );
                 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="trend"
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth={1.5}
+                strokeDasharray="4 3"
+                dot={false}
+                connectNulls
+                name="추세"
               />
             </LineChart>
           </ResponsiveContainer>

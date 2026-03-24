@@ -98,6 +98,75 @@ async def delete_food(food_id: str):
     conn.close()
     return JSONResponse({"ok": True})
 
+# === 식단 API ===
+@app.post("/api/diet")
+async def add_diet(request: Request):
+    body = await request.json()
+    conn = get_db()
+    conn.execute("""INSERT INTO diet_records (date, time, category, meal_type, food_name, quantity,
+        calories_kcal, protein_g, carbs_g, fat_g, photo, memo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (body.get("date"), body.get("time"), body.get("category"), body.get("meal_type"),
+         body.get("food_name"), body.get("quantity"), body.get("calories_kcal", 0),
+         body.get("protein_g", 0), body.get("carbs_g", 0), body.get("fat_g", 0),
+         body.get("photo"), body.get("memo", "")))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+# === 체중 API ===
+@app.post("/api/weight")
+async def add_weight(request: Request):
+    body = await request.json()
+    conn = get_db()
+    conn.execute("INSERT OR REPLACE INTO weight_records (date, weight_kg, photo, memo) VALUES (?,?,?,?)",
+        (body.get("date"), body.get("weight_kg"), body.get("photo"), body.get("memo", "")))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+# === 투약 API ===
+@app.post("/api/medication")
+async def add_medication(request: Request):
+    body = await request.json()
+    conn = get_db()
+    conn.execute("INSERT INTO medication_records (date, dose, change_reason, side_effects, memo) VALUES (?,?,?,?,?)",
+        (body.get("date"), body.get("dose"), body.get("change_reason"), body.get("side_effects"), body.get("memo", "")))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+# === 인바디 API ===
+@app.post("/api/inbody")
+async def add_inbody(request: Request):
+    body = await request.json()
+    conn = get_db()
+    conn.execute("""INSERT OR REPLACE INTO inbody_records (date, day_since_start, weight_kg, muscle_kg, fat_kg, fat_pct,
+        bmi, bmr_kcal, visceral_fat_level, inbody_score, weight_change_kg, muscle_change_kg, fat_change_kg, photo, memo)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (body.get("date"), body.get("day_since_start"), body.get("weight_kg"), body.get("muscle_kg"),
+         body.get("fat_kg"), body.get("fat_pct"), body.get("bmi"), body.get("bmr_kcal"),
+         body.get("visceral_fat_level"), body.get("inbody_score"), body.get("weight_change_kg"),
+         body.get("muscle_change_kg"), body.get("fat_change_kg"), body.get("photo"), body.get("memo", "")))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+# === 리포트 API ===
+@app.post("/api/report/daily")
+async def add_daily_report(request: Request):
+    body = await request.json()
+    conn = get_db()
+    conn.execute("""INSERT OR REPLACE INTO daily_reports (date, day_since_start, weight_kg, weight_change,
+        diet_summary_json, protein_achievement, exercise_summary, medication, analysis, score, highlights_json, tomorrow_advice)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (body.get("date"), body.get("day_since_start"), body.get("weight_kg"), body.get("weight_change"),
+         json.dumps(body.get("diet_summary", {}), ensure_ascii=False), body.get("protein_achievement"),
+         body.get("exercise_summary"), body.get("medication"), body.get("analysis"), body.get("score"),
+         json.dumps(body.get("highlights", []), ensure_ascii=False), body.get("tomorrow_advice")))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
 @app.get("/api/photos")
 def list_photos():
     files = sorted(os.listdir(PHOTOS_DIR), reverse=True)

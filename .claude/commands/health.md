@@ -172,18 +172,42 @@ description: Simpson 건강관리 통합 스킬. 식단/인바디/운동/투약/
 
 ---
 
-### Step 3: JSON 저장
+### Step 3: DB 저장 (API 호출)
 
-`simpson_data.json` 파일을 Edit 도구로 업데이트. 기존 데이터 절대 손상하지 않는다.
+**simpson_data.json을 직접 편집하지 않는다. 반드시 API를 통해 DB에 저장한다.**
+
+```bash
+# 식단 추가
+curl -X POST http://localhost:18000/api/diet -H "Content-Type: application/json" -d '{"date":"...","time":"...","category":"...","meal_type":"...","food_name":"...","quantity":"...","calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0,"photo":null,"memo":""}'
+
+# 체중 추가
+curl -X POST http://localhost:18000/api/weight -H "Content-Type: application/json" -d '{"date":"...","weight_kg":0,"photo":null,"memo":""}'
+
+# 투약 추가
+curl -X POST http://localhost:18000/api/medication -H "Content-Type: application/json" -d '{"date":"...","dose":"...","change_reason":"...","side_effects":null,"memo":""}'
+
+# 인바디 추가
+curl -X POST http://localhost:18000/api/inbody -H "Content-Type: application/json" -d '{...}'
+
+# 운동 추가
+curl -X POST http://localhost:18000/api/exercise -H "Content-Type: application/json" -d '{...}'
+
+# 일일 리포트 추가
+curl -X POST http://localhost:18000/api/report/daily -H "Content-Type: application/json" -d '{...}'
+```
+
+Bash 도구로 curl 명령어를 실행하여 API를 호출한다.
 
 ### Step 4: Git Commit
 
 `status` 유형을 제외한 모든 유형에서 실행:
 
 ```bash
-git add simpson_data.json photos/
+git add photos/
 git commit -m "health: {유형} - {날짜} {요약}"
 ```
+
+**주의: simpson_data.json은 더 이상 git에 추가하지 않는다. DB가 원본이다.**
 
 커밋 메시지 예시:
 - `health: diet - 0318 점심 김치찌개 0.5인분`
