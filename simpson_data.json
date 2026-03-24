@@ -630,6 +630,20 @@
       "fat_g": 6.5,
       "photo": "photos/2026-03-24_아침_닥터유PRO.jpg",
       "memo": "아침 대용"
+    },
+    {
+      "date": "2026-03-24",
+      "time": "12:30",
+      "category": "meal",
+      "meal_type": "점심",
+      "food_name": "차돌순두부 + 짬뽕밥",
+      "quantity": "1인분, 밥 1/3공기",
+      "calories_kcal": 450,
+      "protein_g": 25.0,
+      "carbs_g": 35.0,
+      "fat_g": 18.0,
+      "photo": null,
+      "memo": "밥 1/3만 섭취"
     }
   ],
   "exercise_records": [
