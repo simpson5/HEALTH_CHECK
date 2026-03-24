@@ -149,7 +149,7 @@ export function Weight() {
                   <LineChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
                     <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
-                    <YAxis tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + '%'} />
+                    <YAxis domain={[20, Math.ceil(Math.max(...ir.map(r=>r.fat_pct))+3)]} tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + '%'} />
                     <Tooltip contentStyle={{ background: '#1a1a26', border: '1px solid #22223a', borderRadius: 8 }} />
                     <ReferenceLine y={25} stroke="rgba(0,255,136,0.3)" strokeDasharray="3 3" label={{ value: '목표 25%', fill: '#555', fontSize: 10 }} />
                     <Line type="monotone" dataKey="fat_pct" stroke="#ff8c00" strokeWidth={2} dot={{ r: 5, fill: '#ff8c00' }} name="체지방률(%)" />
@@ -158,7 +158,7 @@ export function Weight() {
                   <BarChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
                     <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
-                    <YAxis tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kg'} />
+                    <YAxis domain={[0, 'auto']} tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kg'} />
                     <Tooltip contentStyle={{ background: '#1a1a26', border: '1px solid #22223a', borderRadius: 8 }} />
                     <Bar dataKey="muscle_kg" fill="rgba(0,229,255,0.7)" radius={6} name="골격근(kg)" />
                     <Bar dataKey="fat_kg" fill="rgba(255,68,102,0.7)" radius={6} name="체지방(kg)" />
@@ -167,16 +167,16 @@ export function Weight() {
                   <LineChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
                     <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
-                    <YAxis tick={{ fill: '#555', fontSize: 10 }} />
+                    <YAxis domain={[20, Math.ceil(Math.max(...ir.map(r=>r.bmi))+2)]} tick={{ fill: '#555', fontSize: 10 }} />
                     <Tooltip contentStyle={{ background: '#1a1a26', border: '1px solid #22223a', borderRadius: 8 }} />
-                    <ReferenceLine y={25} stroke="rgba(255,68,102,0.3)" strokeDasharray="3 3" />
+                    <ReferenceLine y={25} stroke="rgba(255,68,102,0.3)" strokeDasharray="3 3" label={{ value: '정상', fill: '#555', fontSize: 10 }} />
                     <Line type="monotone" dataKey="bmi" stroke="#b47fff" strokeWidth={2} dot={{ r: 5, fill: '#b47fff' }} name="BMI" />
                   </LineChart>
                 ) : (
                   <LineChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
                     <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
-                    <YAxis tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kcal'} />
+                    <YAxis domain={[Math.floor(Math.min(...ir.map(r=>r.bmr_kcal))-50), Math.ceil(Math.max(...ir.map(r=>r.bmr_kcal))+50)]} tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kcal'} />
                     <Tooltip contentStyle={{ background: '#1a1a26', border: '1px solid #22223a', borderRadius: 8 }} />
                     <Line type="monotone" dataKey="bmr_kcal" stroke="#00e5ff" strokeWidth={2} dot={{ r: 5, fill: '#00e5ff' }} name="기초대사량(kcal)" />
                   </LineChart>
