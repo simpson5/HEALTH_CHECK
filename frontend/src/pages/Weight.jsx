@@ -26,6 +26,18 @@ export function Weight() {
   const latest = wr.length ? wr[wr.length - 1] : null;
   const irDates = new Set(ir.map(r => r.date));
 
+  // 월별 목표 찾기
+  const monthlyGoals = (data.schedule || []).filter(s => s.type === 'goal').map(s => {
+    const match = s.label.match(/(\d+\.?\d*)kg/);
+    return match ? { date: s.date, kg: parseFloat(match[1]) } : null;
+  }).filter(Boolean);
+
+  const getCurrentMonthGoal = (dateStr) => {
+    const ym = dateStr.slice(0, 7);
+    const goal = monthlyGoals.find(g => g.date.slice(0, 7) === ym);
+    return goal ? goal.kg : null;
+  };
+
   // 체중 차트 데이터 + 7일 이동평균
   const weightData = wr.map((r, i) => {
     const slice = wr.slice(Math.max(0, i - 6), i + 1);
@@ -35,6 +47,7 @@ export function Weight() {
       fullDate: r.date,
       weight: r.weight_kg,
       trend: avg,
+      monthGoal: getCurrentMonthGoal(r.date),
       isInbody: irDates.has(r.date),
     };
   });
@@ -130,6 +143,16 @@ export function Weight() {
                 dot={false}
                 connectNulls
                 name="추세"
+              />
+              <Line
+                type="stepAfter"
+                dataKey="monthGoal"
+                stroke="rgba(255,170,0,0.5)"
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                connectNulls
+                name="월 목표"
               />
             </LineChart>
           </ResponsiveContainer>
