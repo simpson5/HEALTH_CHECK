@@ -903,69 +903,132 @@ function showCalDay(dateStr){
 }
 
 // ===== 기록 =====
+let histWeekOffset=0;
+let histTab='daily';
+
+function getWeekRange(offset){
+  const now=new Date();
+  const mon=new Date(now);
+  mon.setDate(now.getDate()-((now.getDay()+6)%7)+offset*7);
+  const sun=new Date(mon);
+  sun.setDate(mon.getDate()+6);
+  return {start:mon.toISOString().slice(0,10),end:sun.toISOString().slice(0,10),monDate:mon,sunDate:sun};
+}
+
+function fmtWeekRange(w){
+  const s=w.start.slice(5).replace('-','/');
+  const e=w.end.slice(5).replace('-','/');
+  const today=new Date().toISOString().slice(0,10);
+  const isThisWeek=w.start<=today&&today<=w.end;
+  return s+' ~ '+e+(isThisWeek?' (이번 주)':'');
+}
+
+function moveHistWeek(dir){
+  histWeekOffset+=dir;
+  if(histWeekOffset>0) histWeekOffset=0;
+  renderHistory(DATA);
+}
+
+function setHistTab(tab){
+  histTab=tab;
+  renderHistory(DATA);
+}
+
+function toggleHistCard(el){
+  const body=el.nextElementSibling;
+  const arrow=el.querySelector('.hist-arrow');
+  body.style.display=body.style.display==='block'?'none':'block';
+  if(arrow) arrow.textContent=body.style.display==='block'?'▴':'▾';
+}
+
 function renderHistory(data){
-  // 투약
-  let medHtml='';
-  (data.medication_records||[]).forEach(r=>{
-    medHtml+=`<div class="tl-item"><div class="tl-date">${r.date}</div><div class="tl-val" style="font-size:18px">${r.dose}</div><div class="tl-detail">${r.change_reason||''} ${r.side_effects?'· 부작용: '+r.side_effects:''}</div></div>`;
-  });
+  const week=getWeekRange(histWeekOffset);
+  const dows=['일','월','화','수','목','금','토'];
 
-  // 주간 분석
-  let weekHtml='';
-  (data.weekly_analysis||[]).forEach(w=>{
-    const recsHtml=(w.recommendations||[]).map(r=>`<div style="font-size:11px;color:#ccc;padding:2px 0;">· ${r}</div>`).join('');
-    weekHtml+=`<div class="card">
-      <div class="card-title">${w.week_start} ~ ${w.week_end}</div>
-      <div style="font-size:12px;margin:6px 0;">체중 ${w.weight_change_kg>0?'+':''}${w.weight_change_kg}kg · 근육 ${w.muscle_change_kg>0?'+':''}${w.muscle_change_kg}kg · 지방 ${w.fat_change_kg>0?'+':''}${w.fat_change_kg}kg</div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">${w.analysis}</div>
-      ${recsHtml}
-    </div>`;
-  });
+  // 일일 리포트 (해당 주만)
+  const weekDailies=(data.daily_reports||[]).filter(r=>r.date>=week.start&&r.date<=week.end).reverse();
 
-  // 일일 리포트
   let dailyHtml='';
-  const dailyReports=[...(data.daily_reports||[])].reverse();
-  dailyReports.forEach(r=>{
-    const scoreColor=r.score==='A'?'var(--green)':r.score==='B'?'var(--accent)':r.score==='C'?'var(--orange)':'var(--red)';
-    const highlights=(r.highlights||[]).map(h=>'<div style="font-size:11px;padding:2px 0;">'+h+'</div>').join('');
-    dailyHtml+=`<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div class="card-title" style="margin:0;">${r.date} (D+${r.day_since_start})</div>
-        <div style="font-size:16px;font-weight:900;color:${scoreColor};">${r.score}</div>
-      </div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:8px;">${r.analysis}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-        <span class="summary-chip" style="color:var(--yellow)">🔥 ${r.diet_summary.total_calories}kcal</span>
-        <span class="summary-chip" style="color:var(--accent)">P ${r.diet_summary.total_protein}g</span>
-        <span class="summary-chip" style="color:var(--muted)">체중 ${r.weight_kg}kg</span>
-      </div>
-      ${highlights}
-      <div style="font-size:11px;color:var(--accent);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">💡 ${r.tomorrow_advice}</div>
-    </div>`;
-  });
+  if(weekDailies.length===0){
+    dailyHtml='<div class="empty">이 주 리포트 없음</div>';
+  } else {
+    weekDailies.forEach(r=>{
+      const scoreColor=r.score==='A'?'var(--green)':r.score==='B'?'var(--accent)':r.score==='C'?'var(--orange)':'var(--red)';
+      const dow=dows[new Date(r.date).getDay()];
+      const highlights=(r.highlights||[]).map(h=>'<div style="font-size:11px;padding:2px 0;">'+h+'</div>').join('');
+      dailyHtml+='<div class="card" style="padding:0;overflow:hidden;">'
+        +'<div style="display:flex;align-items:center;padding:12px 14px;cursor:pointer;gap:8px;" onclick="toggleHistCard(this)">'
+        +'<div style="font-size:12px;font-weight:700;min-width:75px;">'+r.date.slice(5)+' ('+dow+')</div>'
+        +'<div style="display:flex;gap:4px;flex:1;flex-wrap:wrap;">'
+        +'<span class="tag tag-orange" style="font-size:9px;">'+r.diet_summary.total_calories+'kcal</span>'
+        +'<span class="tag tag-blue" style="font-size:9px;">P'+r.diet_summary.total_protein+'g</span>'
+        +'</div>'
+        +'<div style="font-size:14px;font-weight:900;color:'+scoreColor+';min-width:20px;">'+r.score+'</div>'
+        +'<div class="hist-arrow" style="color:var(--muted);font-size:12px;">▾</div>'
+        +'</div>'
+        +'<div style="display:none;padding:0 14px 14px;border-top:1px solid var(--border);">'
+        +'<div style="font-size:12px;color:#aaa;margin:10px 0 8px;">'+r.analysis+'</div>'
+        +highlights
+        +'<div style="font-size:11px;color:var(--accent);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">💡 '+r.tomorrow_advice+'</div>'
+        +'</div>'
+        +'</div>';
+    });
+  }
+
+  // 주간 분석 (해당 주)
+  const weekAnalysis=(data.weekly_analysis||[]).filter(w=>w.week_start>=week.start&&w.week_start<=week.end||w.week_end>=week.start&&w.week_end<=week.end);
+  let weekHtml='';
+  if(weekAnalysis.length===0){
+    weekHtml='<div class="empty">이 주 분석 없음</div>';
+  } else {
+    weekAnalysis.forEach(w=>{
+      const recsHtml=(w.recommendations||[]).map(r=>'<div style="font-size:11px;color:#ccc;padding:2px 0;">· '+r+'</div>').join('');
+      weekHtml+='<div class="card">'
+        +'<div class="card-title">'+w.week_start+' ~ '+w.week_end+'</div>'
+        +'<div style="font-size:12px;margin:6px 0;">체중 '+(w.weight_change_kg>0?'+':'')+w.weight_change_kg+'kg'+(w.muscle_change_kg!==null?' · 근육 '+(w.muscle_change_kg>0?'+':'')+w.muscle_change_kg+'kg':'')+(w.fat_change_kg!==null?' · 지방 '+(w.fat_change_kg>0?'+':'')+w.fat_change_kg+'kg':'')+'</div>'
+        +'<div style="font-size:12px;color:#aaa;margin-bottom:6px;">'+w.analysis+'</div>'
+        +recsHtml
+        +'</div>';
+    });
+  }
+
+  // 투약 (해당 주)
+  const weekMeds=(data.medication_records||[]).filter(r=>r.date>=week.start&&r.date<=week.end);
+  let medHtml='';
+  if(weekMeds.length===0){
+    medHtml='<div class="empty">이 주 투약 기록 없음</div>';
+  } else {
+    weekMeds.forEach(r=>{
+      medHtml+='<div class="card"><div style="font-size:13px;font-weight:700;">💊 '+r.date+' — '+r.dose+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">'+r.change_reason+(r.side_effects?' · 부작용: '+r.side_effects:'')+'</div></div>';
+    });
+  }
+
+  // 서브 탭별 콘텐츠
+  const tabContents={
+    daily:dailyHtml,
+    weekly:weekHtml,
+    medication:medHtml,
+    drug:'<div class="chart-card"><div class="ch-title">💊 티르제파타이드 잔류량 예측</div><div class="ch-sub">반감기 5일 기준 · 매주 투약 시 누적</div><div class="chart-wrap" style="height:200px;"><canvas id="drugChart"></canvas></div></div>'
+  };
 
   document.getElementById('page-history').innerHTML=`
     <div class="section">
       <div class="spacer"></div>
-      <div class="section-title">체내 약물 농도 (마운자로)</div>
-      <div class="chart-card">
-        <div class="ch-title">💊 티르제파타이드 잔류량 예측</div>
-        <div class="ch-sub">반감기 5일 기준 · 매주 투약 시 누적</div>
-        <div class="chart-wrap" style="height:200px;"><canvas id="drugChart"></canvas></div>
+      <div class="date-nav">
+        <button onclick="moveHistWeek(-1)">◀</button>
+        <div class="date-text">${fmtWeekRange(week)}</div>
+        <button onclick="moveHistWeek(1)">▶</button>
       </div>
-      <div class="spacer"></div>
-      <div class="section-title">일일 리포트</div>
-      ${dailyHtml||'<div class="empty">리포트 없음</div>'}
-      <div class="spacer"></div>
-      <div class="section-title">주간 분석</div>
-      ${weekHtml||'<div class="empty">분석 없음</div>'}
-      <div class="spacer"></div>
-      <div class="section-title">투약 이력</div>
-      <div class="tl">${medHtml||'<div class="empty">기록 없음</div>'}</div>
+      <div class="tab-bar" style="margin:12px 0;">
+        <button class="tab-btn ${histTab==='daily'?'active':''}" onclick="setHistTab('daily')">일일</button>
+        <button class="tab-btn ${histTab==='weekly'?'active':''}" onclick="setHistTab('weekly')">주간분석</button>
+        <button class="tab-btn ${histTab==='medication'?'active':''}" onclick="setHistTab('medication')">투약</button>
+        <button class="tab-btn ${histTab==='drug'?'active':''}" onclick="setHistTab('drug')">약물농도</button>
+      </div>
+      ${tabContents[histTab]||''}
     </div>`;
 
-  // 약물 농도 차트 계산
-  renderDrugChart(data);
+  if(histTab==='drug') renderDrugChart(data);
 }
 
 function renderDrugChart(data){
