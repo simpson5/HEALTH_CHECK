@@ -378,7 +378,7 @@ export function Calendar() {
       )}
 
       {/* 날짜 상세 */}
-      {viewMode === 'monthly' && renderDetail()}
+      {renderDetail()}
 
       {/* 다가오는 일정 */}
       <div className="text-[11px] tracking-[2px] text-muted uppercase mt-4 mb-2">다가오는 일정</div>
