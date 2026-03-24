@@ -620,8 +620,8 @@
     {
       "date": "2026-03-24",
       "time": "08:47",
-      "category": "drink",
-      "meal_type": "음료",
+      "category": "meal",
+      "meal_type": "아침",
       "food_name": "닥터유 PRO 드링크 단백질 40g 초코",
       "quantity": "350ml",
       "calories_kcal": 258,
