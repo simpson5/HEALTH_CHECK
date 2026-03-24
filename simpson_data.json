@@ -342,7 +342,16 @@
       "date": "2026-04-11",
       "type": "inbody",
       "label": "📋 인바디 측정"
-    }
+    },
+    {"date":"2026-04-30","type":"goal","label":"🎯 4월 목표: 105kg (-4kg)"},
+    {"date":"2026-05-31","type":"goal","label":"🎯 5월 목표: 101kg (-4kg)"},
+    {"date":"2026-06-30","type":"goal","label":"🎯 6월 목표: 97kg (-4kg)"},
+    {"date":"2026-07-31","type":"goal","label":"🎯 7월 목표: 94kg (-3kg)"},
+    {"date":"2026-08-31","type":"goal","label":"🎯 8월 목표: 91kg (-3kg)"},
+    {"date":"2026-09-30","type":"goal","label":"🎯 9월 목표: 88kg (-3kg)"},
+    {"date":"2026-10-31","type":"goal","label":"🎯 10월 목표: 85.5kg (-2.5kg)"},
+    {"date":"2026-11-30","type":"goal","label":"🎯 11월 목표: 83kg (-2.5kg)"},
+    {"date":"2026-12-31","type":"goal","label":"🎯 12월 목표: 80kg (-3kg) 🏆 최종 목표!"}
   ],
   "medication_records": [
     {
