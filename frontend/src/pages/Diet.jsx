@@ -8,7 +8,7 @@ import { fmtDateFull, getToday } from '../lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const mealIcons = { 아침: '🌅', 점심: '☀️', 저녁: '🌙', 간식: '🍪', 음료: '☕', 보충제: '💊' };
-const mealColors = { 아침: 'border-l-yellow-400', 점심: 'border-l-orange-400', 저녁: 'border-l-purple-400', 간식: 'border-l-pink-400', 음료: 'border-l-cyan-400', 보충제: 'border-l-green-400' };
+const mealColors = { 아침: 'border-l-amber-400', 점심: 'border-l-orange-500', 저녁: 'border-l-violet-500', 간식: 'border-l-pink-500', 음료: 'border-l-cyan-400', 보충제: 'border-l-emerald-400' };
 const mealOrder = ['아침', '점심', '저녁', '간식', '음료', '보충제'];
 
 export function Diet() {

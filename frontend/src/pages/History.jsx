@@ -89,7 +89,7 @@ export function History() {
           weekDailies.map(r => {
             const isOpen = openReport === r.date;
             return (
-              <Card key={r.date} onClick={() => setOpenReport(isOpen ? null : r.date)} className="!p-0 overflow-hidden">
+              <Card key={r.date} onClick={() => setOpenReport(isOpen ? null : r.date)} className={'!p-0 overflow-hidden border-l-4 ' + (r.score==='A'?'border-l-success':r.score==='B'?'border-l-accent':r.score==='C'?'border-l-warning':'border-l-danger')}>
                 <div className="flex items-center px-4 py-3 gap-2">
                   <div className="text-xs font-bold min-w-[75px]">{r.date.slice(5)} ({getDow(r.date)})</div>
                   <div className="flex gap-1 flex-1 flex-wrap">

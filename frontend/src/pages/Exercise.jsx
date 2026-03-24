@@ -90,7 +90,7 @@ export function Exercise() {
       {/* 운동 시작 */}
       <a
         href="/workout-session"
-        className="block text-center py-4 bg-gradient-to-r from-accent to-success text-black text-base font-black rounded-2xl no-underline shadow-lg shadow-accent/20 active:scale-[0.97] transition-transform"
+        className="block text-center py-4 bg-gradient-to-r from-accent to-success text-black text-base font-black rounded-2xl no-underline shadow-[0_0_30px_rgba(0,229,255,0.3)] hover:shadow-[0_0_40px_rgba(0,229,255,0.5)] active:scale-[0.97] transition-all animate-pulse-glow"
       >
         ▶ 운동 시작
       </a>

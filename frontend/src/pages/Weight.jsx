@@ -59,8 +59,9 @@ export function Weight() {
       {/* 현재 체중 */}
       <Card elevated>
         <CardTitle>현재 체중</CardTitle>
-        <div className="font-display text-4xl tracking-wide leading-none">
-          {latest ? latest.weight_kg : '--'}<span className="text-sm font-sans text-muted ml-1">kg</span>
+        <div className="font-display text-5xl tracking-tight leading-none">
+          <span className="gradient-text">{latest ? latest.weight_kg : '--'}</span>
+          <span className="text-base font-sans text-muted ml-1">kg</span>
         </div>
         <div className="text-[11px] text-muted mt-1">
           시작 {p.start_weight_kg}kg 대비 <span className="text-success font-bold">▼{latest ? (p.start_weight_kg - latest.weight_kg).toFixed(1) : '?'}kg</span>
