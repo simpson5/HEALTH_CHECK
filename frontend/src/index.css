@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0a0f;
+  --color-bg-card: #12121a;
+  --color-bg-elevated: #1e1e2a;
+  --color-accent: #00e5ff;
+  --color-success: #00ff88;
+  --color-warning: #ffaa00;
+  --color-danger: #ff4466;
+  --color-info: #b47fff;
+  --color-text: #f0f0ff;
+  --color-muted: #8888aa;
+  --color-dim: #555570;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --font-sans: 'Noto Sans KR', sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+}
+
+@layer base {
+  @font-face {
+    font-family: 'Noto Sans KR';
+    font-display: swap;
+    src: url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+  }
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Noto Sans KR', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

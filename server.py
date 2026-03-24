@@ -107,5 +107,8 @@ def list_photos():
 app.mount("/photos", StaticFiles(directory=PHOTOS_DIR), name="photos")
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
-# 정적 파일 (HTML, CSS, JS)
-app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "static"), html=True), name="static")
+# React 빌드 서빙 (frontend/dist가 있으면 우선, 없으면 기존 static/)
+DIST_DIR = os.path.join(BASE_DIR, "frontend", "dist")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+SERVE_DIR = DIST_DIR if os.path.exists(DIST_DIR) else STATIC_DIR
+app.mount("/", StaticFiles(directory=SERVE_DIR, html=True), name="static")
