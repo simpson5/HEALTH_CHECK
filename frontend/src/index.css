@@ -1,46 +1,91 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0a0f;
-  --color-bg-card: #12121a;
-  --color-bg-elevated: #1e1e2a;
+  --color-bg: #06060b;
+  --color-bg-card: rgba(255, 255, 255, 0.03);
+  --color-bg-elevated: rgba(255, 255, 255, 0.06);
+  --color-bg-input: rgba(255, 255, 255, 0.08);
   --color-accent: #00e5ff;
   --color-success: #00ff88;
   --color-warning: #ffaa00;
   --color-danger: #ff4466;
   --color-info: #b47fff;
   --color-text: #f0f0ff;
-  --color-muted: #8888aa;
-  --color-dim: #555570;
+  --color-muted: #7a7a9e;
+  --color-dim: #4a4a6a;
   --color-border: rgba(255, 255, 255, 0.06);
-  --font-sans: 'Noto Sans KR', sans-serif;
-  --font-display: 'Bebas Neue', sans-serif;
-}
-
-@layer base {
-  @font-face {
-    font-family: 'Noto Sans KR';
-    font-display: swap;
-    src: url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
-  }
+  --font-sans: 'Pretendard', 'Noto Sans KR', sans-serif;
+  --font-display: 'Inter', 'Geist', sans-serif;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh;
   margin: 0;
+  position: relative;
+  overflow-x: hidden;
 }
 
-#root {
-  min-height: 100vh;
+#root { min-height: 100vh; }
+
+/* 디스플레이 폰트 */
+.font-display { font-family: 'Inter', 'Geist', sans-serif; font-weight: 700; }
+
+/* 그라데이션 텍스트 */
+.gradient-text {
+  background: linear-gradient(135deg, #00e5ff, #00ff88);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.font-display {
-  font-family: 'Bebas Neue', sans-serif;
+/* 글래스 카드 */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+}
+.glass-bright {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
 }
 
+/* 글로우 */
+.glow-accent { box-shadow: 0 0 24px rgba(0, 229, 255, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3); }
+.glow-success { box-shadow: 0 0 24px rgba(0, 255, 136, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3); }
+.glow-warning { box-shadow: 0 0 24px rgba(255, 170, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3); }
+
+/* Ambient orbs */
+.ambient-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-cyan { width: 350px; height: 350px; background: #00e5ff; top: -120px; left: -120px; opacity: 0.08; }
+.orb-purple { width: 300px; height: 300px; background: #b47fff; bottom: -100px; right: -100px; opacity: 0.06; }
+.orb-warm { width: 250px; height: 250px; background: #ff8c00; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; }
+
+/* 애니메이션 */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes countUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); } 50% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.4); } }
+.animate-in { animation: fadeInUp 0.4s ease-out both; }
+.animate-in-delay-1 { animation: fadeInUp 0.4s ease-out 0.05s both; }
+.animate-in-delay-2 { animation: fadeInUp 0.4s ease-out 0.1s both; }
+.animate-in-delay-3 { animation: fadeInUp 0.4s ease-out 0.15s both; }
+.animate-in-delay-4 { animation: fadeInUp 0.4s ease-out 0.2s both; }
+.animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+
+/* 스크롤바 숨기기 */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

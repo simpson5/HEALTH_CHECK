@@ -50,7 +50,7 @@ export function BottomNav() {
       <input ref={fileRef} type="file" accept="image/*,.csv,.txt,.xlsx" className="hidden" onChange={handleUpload} />
 
       {/* 하단 네비 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-bg-card/90 backdrop-blur-xl border-t border-white/[0.06] z-[100] pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#06060b]/70 backdrop-blur-2xl border-t border-white/[0.06] z-[100] pb-[env(safe-area-inset-bottom)]">
         <div className="flex">
           {links.map(link => {
             const Icon = link.icon;

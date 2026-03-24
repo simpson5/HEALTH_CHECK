@@ -47,9 +47,9 @@ export function Home() {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle>현재 체중</CardTitle>
-            <div className="font-display text-4xl tracking-wide leading-none">
-              {latest ? latest.weight_kg : '--'}
-              <span className="text-sm font-sans text-muted ml-1">kg</span>
+            <div className="font-display text-5xl tracking-tight leading-none">
+              <span className="gradient-text">{latest ? latest.weight_kg : '--'}</span>
+              <span className="text-base font-sans text-muted ml-1">kg</span>
             </div>
             {wChange !== null && (
               <div className={`text-xs font-bold mt-1.5 ${wChange <= 0 ? 'text-success' : 'text-danger'}`}>
@@ -69,7 +69,7 @@ export function Home() {
 
       {/* 목표 프로그레스 */}
       <div>
-        <ProgressBar value={totalLoss} max={totalGoal} />
+        <ProgressBar value={totalLoss} max={totalGoal} glow />
         <div className="flex justify-between text-[11px] text-muted mt-1.5">
           <span>{p.start_weight_kg}kg</span>
           <span className="text-accent">{pct.toFixed(1)}% 달성</span>
