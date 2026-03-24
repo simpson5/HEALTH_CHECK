@@ -232,6 +232,62 @@ function changeHtml(val,unit,goodDir){
   return `<div class="mini-change ${cls}">${arrow} ${Math.abs(val).toFixed(1)}${unit}</div>`;
 }
 
+// ===== 달성률 계산 =====
+function getDayAchievement(data,dateStr){
+  const dow=new Date(dateStr).getDay();
+  const isWeekend=dow===0||dow===6;
+
+  // 식단
+  const meals=(data.diet_records||[]).filter(r=>r.date===dateStr);
+  let totalPro=0,totalCal=0;
+  meals.forEach(m=>{totalPro+=m.protein_g||0;totalCal+=m.calories_kcal||0;});
+  const proOk=totalPro>=110;
+  const calOk=totalCal>0&&totalCal<=1500;
+
+  // 운동
+  const exRecs=(data.exercise_records||[]).filter(r=>r.date===dateStr);
+  let morningEx=false,eveningEx=false;
+  exRecs.forEach(r=>{
+    const h=parseInt((r.start_time||'12').split(':')[0]);
+    if(h<14) morningEx=true;
+    else eveningEx=true;
+  });
+
+  if(isWeekend){
+    // 주말: 식단만 (단백질 + 칼로리)
+    const total=2;
+    const done=(proOk?1:0)+(calOk?1:0);
+    return {total,done,items:[
+      {name:'단백질 110g',ok:proOk,val:totalPro+'g'},
+      {name:'칼로리 1500이하',ok:calOk,val:totalCal>0?totalCal+'kcal':'미기록'}
+    ]};
+  } else {
+    // 평일: 운동2 + 식단2
+    const total=4;
+    const done=(morningEx?1:0)+(eveningEx?1:0)+(proOk?1:0)+(calOk?1:0);
+    return {total,done,items:[
+      {name:'오전 운동',ok:morningEx},
+      {name:'저녁 운동',ok:eveningEx},
+      {name:'단백질 110g',ok:proOk,val:totalPro+'g'},
+      {name:'칼로리 1500이하',ok:calOk,val:totalCal>0?totalCal+'kcal':'미기록'}
+    ]};
+  }
+}
+
+function getStreak(data){
+  let streak=0;
+  const today=new Date();
+  for(let i=0;i<365;i++){
+    const d=new Date(today);
+    d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const ach=getDayAchievement(data,ds);
+    if(ach.done===ach.total&&ach.total>0) streak++;
+    else break;
+  }
+  return streak;
+}
+
 // ===== 홈 =====
 function renderHome(data){
   const p=data.profile;
@@ -267,7 +323,25 @@ function renderHome(data){
   const latestInbody=inbody[inbody.length-1];
   const mc=latestInbody?latestInbody.muscle_change_kg:null;
 
-  // 경고는 주간 리포트에서 다룸. 홈에는 표시 안 함.
+  // 오늘 미션 체크리스트
+  const todayAch=getDayAchievement(data,today);
+  const streak=getStreak(data);
+  let missionHtml='<div class="card">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+    +'<div class="card-title" style="margin:0;">오늘 미션</div>'
+    +(streak>0?'<div style="font-size:12px;font-weight:700;color:var(--orange);">🔥 '+streak+'일 연속</div>':'')
+    +'</div>';
+  todayAch.items.forEach(item=>{
+    missionHtml+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;">'
+      +'<div style="width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;'
+      +(item.ok?'background:var(--green);color:#000;':'background:var(--card2);border:1px solid var(--border);color:var(--muted);')
+      +'">'+(item.ok?'✓':'')+'</div>'
+      +'<div style="flex:1;'+(item.ok?'color:var(--green);':'color:var(--text);')+'">'+item.name+'</div>'
+      +(item.val?'<div style="font-size:11px;color:var(--muted);">'+item.val+'</div>':'')
+      +'</div>';
+  });
+  missionHtml+='<div style="margin-top:8px;"><div class="goal-bar-bg"><div class="goal-bar-fill" style="width:'+Math.round(todayAch.done/todayAch.total*100)+'%;background:'+(todayAch.done===todayAch.total?'var(--green)':'linear-gradient(90deg,var(--orange),var(--yellow))')+'"></div></div>'
+    +'<div style="text-align:center;font-size:10px;color:var(--muted);margin-top:4px;">'+todayAch.done+'/'+todayAch.total+' 달성</div></div></div>';
   let alertHtml='';
 
   // 식단 요약
@@ -314,7 +388,7 @@ function renderHome(data){
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">${tPro>=proTarget?'✅ 목표 달성!':'⚠️ '+(proTarget-tPro).toFixed(0)+'g 부족 — 쉐이크 1잔 = +36g'} · ${tCal}kcal</div>
       </div>
 
-      ${alertHtml}
+      ${missionHtml}
 
       <div class="card">
         <div class="card-title">오늘 식단</div>
@@ -825,7 +899,17 @@ function renderCalendar(data){
     const dots=dayEvents.length>0?
       '<div class="cal-dots">'+[...new Set(dayEvents.map(e=>e.type))].map(t=>'<div class="cal-dot '+t+'"></div>').join('')+'</div>':'';
 
-    gridHtml+=`<div class="cal-day ${isToday?'today':''} ${isSun?'sun':''}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;
+    // 달성률 배경색 (과거 날짜만)
+    let achStyle='';
+    if(dateStr<new Date().toISOString().slice(0,10)){
+      const ach=getDayAchievement(data,dateStr);
+      if(ach.done>0&&ach.total>0){
+        if(ach.done===ach.total) achStyle='background:rgba(0,255,136,0.15);';
+        else if(ach.done>=ach.total/2) achStyle='background:rgba(255,140,0,0.1);';
+        else achStyle='background:rgba(255,68,102,0.08);';
+      }
+    }
+    gridHtml+=`<div class="cal-day ${isToday?'today':''} ${isSun?'sun':''}" style="${achStyle}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;
   }
 
   // 선택된 날짜 이벤트
