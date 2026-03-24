@@ -89,7 +89,7 @@ export function Exercise() {
 
       {/* 운동 시작 */}
       <a
-        href="/workout-session.html"
+        href="/workout-session"
         className="block text-center py-4 bg-gradient-to-r from-accent to-success text-black text-base font-black rounded-2xl no-underline shadow-lg shadow-accent/20 active:scale-[0.97] transition-transform"
       >
         ▶ 운동 시작

@@ -107,8 +107,20 @@ def list_photos():
 app.mount("/photos", StaticFiles(directory=PHOTOS_DIR), name="photos")
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
-# React 빌드 서빙 (frontend/dist가 있으면 우선, 없으면 기존 static/)
+# React SPA 서빙
+from fastapi.responses import FileResponse
+
 DIST_DIR = os.path.join(BASE_DIR, "frontend", "dist")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 SERVE_DIR = DIST_DIR if os.path.exists(DIST_DIR) else STATIC_DIR
-app.mount("/", StaticFiles(directory=SERVE_DIR, html=True), name="static")
+
+# 정적 파일 (CSS, JS, assets)
+app.mount("/assets", StaticFiles(directory=os.path.join(SERVE_DIR, "assets")), name="assets")
+
+# SPA 폴백: 모든 비-API 경로를 index.html로
+@app.get("/{path:path}")
+async def spa_fallback(path: str):
+    file_path = os.path.join(SERVE_DIR, path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    return FileResponse(os.path.join(SERVE_DIR, "index.html"))
