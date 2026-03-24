@@ -175,28 +175,45 @@ export function Calendar() {
 
     return (
       <div className="space-y-3">
-        {/* 주간 날짜 가로 */}
-        <div className="grid grid-cols-7 gap-1">
+        {/* 주간 날짜 카드 */}
+        <div className="grid grid-cols-7 gap-1.5">
           {weekDates.map((d, i) => {
             const isToday = d === today;
             const isSelected = d === selectedDate;
             const dayNum = new Date(d).getDate();
-            const ach = d <= today ? getDayAchievement(data, d) : null;
+            const isPast = d <= today;
+            const ach = isPast ? getDayAchievement(data, d) : null;
             const missionEmoji = ach ? getMissionEmoji(ach) : '';
             const topEvent = getTopEvent(d);
+
+            // 해당 날짜 데이터
+            const dayMeals = isPast ? (data.diet_records || []).filter(r => r.date === d) : [];
+            let dayPro = 0, dayCal = 0;
+            dayMeals.forEach(m => { dayPro += m.protein_g; dayCal += m.calories_kcal; });
+            const dayEx = (data.exercise_records || []).filter(r => r.date === d);
+            const exCount = dayEx.length > 0 ? dayEx[0].exercises.length : 0;
+            const dayWeight = (data.weight_records || []).find(r => r.date === d);
 
             return (
               <div
                 key={d}
                 onClick={() => setSelectedDate(d)}
-                className={'flex flex-col items-center py-2 rounded-xl cursor-pointer transition-all '
-                  + (isToday ? 'bg-accent/15 ring-1 ring-accent/30 ' : '')
-                  + (isSelected && !isToday ? 'ring-1 ring-white/20 bg-white/[0.03] ' : '')}
+                className={'glass flex flex-col items-center py-2.5 px-1 !rounded-xl cursor-pointer transition-all min-h-[130px] '
+                  + (isToday ? '!border-accent/30 !bg-accent/[0.08] ' : '')
+                  + (isSelected && !isToday ? '!border-white/20 !bg-white/[0.05] ' : '')}
               >
                 <span className="text-[10px] text-dim">{dows[i]}</span>
-                <span className={'text-sm font-bold mt-0.5 ' + (isToday ? 'text-accent' : '')}>{dayNum}</span>
-                {missionEmoji && <span className="text-[13px] mt-0.5">{missionEmoji}</span>}
-                {topEvent && <span className="text-[10px] mt-0.5">{topEvent}</span>}
+                <span className={'text-sm font-bold ' + (isToday ? 'text-accent' : '')}>{dayNum}</span>
+                {missionEmoji && <span className="text-[14px] mt-1">{missionEmoji}</span>}
+                {isPast && dayCal > 0 && (
+                  <>
+                    <span className={'text-[9px] mt-1.5 font-bold ' + (dayPro >= 110 ? 'text-success' : dayPro > 0 ? 'text-muted' : '')}>{dayPro > 0 ? 'P' + dayPro + 'g' : ''}</span>
+                    <span className="text-[9px] text-dim">{dayCal > 0 ? dayCal + 'kcal' : ''}</span>
+                  </>
+                )}
+                {exCount > 0 && <span className="text-[9px] text-accent mt-0.5">💪{exCount}종</span>}
+                {dayWeight && <span className="text-[9px] text-muted mt-0.5">{dayWeight.weight_kg}kg</span>}
+                {topEvent && <span className="text-[9px] mt-0.5">{topEvent}</span>}
               </div>
             );
           })}
