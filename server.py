@@ -98,6 +98,18 @@ async def delete_food(food_id: str):
     conn.close()
     return JSONResponse({"ok": True})
 
+# === 즐겨찾기 토글 ===
+@app.put("/api/exercise-library/{ex_id}/favorite")
+async def toggle_favorite(ex_id: str):
+    conn = get_db()
+    row = conn.execute("SELECT is_favorite FROM exercise_library WHERE id=?", (ex_id,)).fetchone()
+    if row:
+        new_val = 0 if row["is_favorite"] else 1
+        conn.execute("UPDATE exercise_library SET is_favorite=? WHERE id=?", (new_val, ex_id))
+        conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
 # === 식단 API ===
 @app.post("/api/diet")
 async def add_diet(request: Request):

@@ -200,8 +200,18 @@ export function WorkoutSession() {
           tabs={[{ id: 'machine', label: '머신' }, { id: 'bodyweight', label: '맨몸' }, { id: 'cardio', label: '유산소' }]}
           active={sessionTab} onChange={setSessionTab}
         />
-        <div className="grid grid-cols-2 gap-2">
-          {(groups[sessionTab] || []).map(ex => {
+        {(() => {
+          const currentList = groups[sessionTab] || [];
+          const favorites = currentList.filter(ex => ex.is_favorite);
+          const bodypartLabels = { push: '상체 밀기', pull: '상체 당기기', legs: '하체', core: '코어', posterior: '후면사슬', cardio: '유산소' };
+          const bodypartGroups = {};
+          currentList.forEach(ex => {
+            const bp = ex.bodypart || 'etc';
+            if (!bodypartGroups[bp]) bodypartGroups[bp] = [];
+            bodypartGroups[bp].push(ex);
+          });
+
+          const renderCard = (ex) => {
             const done = session.exercises.find(s => s.id === ex.id);
             const prev = getLastRecord(ex.id);
             let hint = '';
@@ -213,18 +223,35 @@ export function WorkoutSession() {
               <div
                 key={ex.id}
                 onClick={() => ex.type === 'cardio' ? openCardio(ex.id) : openStrength(ex.id)}
-                className={`bg-bg-card border rounded-2xl p-3.5 cursor-pointer active:scale-[0.97] transition-transform relative overflow-hidden
-                  ${done ? 'border-success/40' : 'border-white/[0.06]'}`}
+                className={'bg-bg-card border rounded-2xl p-3.5 cursor-pointer active:scale-[0.97] transition-transform relative overflow-hidden '
+                  + (done ? 'border-success/40' : 'border-white/[0.06]')}
               >
                 {done && <div className="absolute top-2 right-2.5 text-success text-sm font-black">✓</div>}
                 <div className="text-xl mb-1.5">{ex.type === 'cardio' ? '🏃' : '🏋️'}</div>
                 <div className="text-xs font-bold leading-tight">{ex.name}</div>
                 <div className="text-[10px] text-muted mt-1">{ex.target.join(', ')}</div>
-                {hint && <div className={`text-[10px] mt-1.5 font-bold ${done ? 'text-success' : 'text-accent'}`}>{hint}</div>}
+                {hint && <div className={'text-[10px] mt-1.5 font-bold ' + (done ? 'text-success' : 'text-accent')}>{hint}</div>}
               </div>
             );
-          })}
-        </div>
+          };
+
+          return (
+            <>
+              {favorites.length > 0 && (
+                <>
+                  <div className="text-[10px] text-warning tracking-[1px] uppercase mb-1">⭐ 즐겨찾기</div>
+                  <div className="grid grid-cols-2 gap-2 mb-2">{favorites.map(renderCard)}</div>
+                </>
+              )}
+              {Object.entries(bodypartGroups).map(([bp, exercises]) => (
+                <div key={bp}>
+                  <div className="text-[10px] text-dim tracking-[1px] uppercase mt-2 mb-1">{bodypartLabels[bp] || bp}</div>
+                  <div className="grid grid-cols-2 gap-2">{exercises.map(renderCard)}</div>
+                </div>
+              ))}
+            </>
+          );
+        })()}
         <button onClick={finishWorkout} className="w-full py-4 bg-success text-black font-black rounded-2xl text-sm active:scale-[0.97] transition-transform">
           운동 완료
         </button>

@@ -314,6 +314,8 @@ def db_to_json():
             "id": r["id"], "name": r["name"], "type": r["type"],
             "target": json.loads(r["target_json"] or "[]"),
             "input_type": r["input_type"], "group": r["exercise_group"],
+            "bodypart": r["bodypart"] if "bodypart" in r.keys() else None,
+            "is_favorite": bool(r["is_favorite"]) if "is_favorite" in r.keys() else False,
         })
 
     # 자주 먹는 음식

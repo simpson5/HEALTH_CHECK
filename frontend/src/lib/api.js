@@ -48,3 +48,8 @@ export async function deleteFood(id) {
   const res = await fetch(`${BASE}/api/foods/${id}`, { method: 'DELETE' });
   return res.json();
 }
+
+export async function toggleFavoriteExercise(id) {
+  const res = await fetch(`${BASE}/api/exercise-library/${id}/favorite`, { method: 'PUT' });
+  return res.json();
+}

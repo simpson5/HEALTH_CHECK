@@ -138,36 +138,65 @@ export function Exercise() {
       <div className="text-[11px] tracking-[2px] text-muted uppercase mt-4 mb-2">운동 가이드</div>
       <TabBar
         tabs={[
-          { id: 'machine', label: `머신 ${groups.machine.length}종` },
-          { id: 'bodyweight', label: `맨몸 ${groups.bodyweight.length}종` },
-          { id: 'cardio', label: `유산소 ${groups.cardio.length}종` },
+          { id: 'machine', label: `머신` },
+          { id: 'bodyweight', label: `맨몸` },
+          { id: 'cardio', label: `유산소` },
         ]}
         active={guideTab}
         onChange={setGuideTab}
       />
       <div className="space-y-2">
-        {(groups[guideTab] || []).map(ex => {
-          const prev = getLastRecord(ex.id);
-          let prevText = '';
-          if (prev && prev.sets) {
-            const ls = prev.sets[prev.sets.length - 1];
-            prevText = `최근: ${ls.kg}kg × ${ls.reps}회 × ${prev.sets.length}세트`;
-          } else if (prev && prev.duration_min) {
-            prevText = `최근: ${prev.duration_min}분`;
-          }
-          return (
-            <Card key={ex.id}>
-              <div className="flex items-center gap-2.5">
-                <span className="text-lg">{ex.type === 'cardio' ? '🏃' : '🏋️'}</span>
-                <div className="flex-1">
-                  <div className="text-sm font-bold">{ex.name}</div>
-                  <div className="text-[11px] text-muted">{ex.target.join(', ')}</div>
-                  {prevText && <div className="text-[11px] text-accent mt-0.5">{prevText}</div>}
+        {(() => {
+          const currentList = groups[guideTab] || [];
+          const favorites = currentList.filter(ex => ex.is_favorite);
+          const bodypartLabels = { push: '상체 밀기 (가슴/어깨/삼두)', pull: '상체 당기기 (등/이두)', legs: '하체', core: '코어', posterior: '후면사슬', cardio: '유산소' };
+          const bodypartGroups = {};
+          currentList.forEach(ex => {
+            const bp = ex.bodypart || 'etc';
+            if (!bodypartGroups[bp]) bodypartGroups[bp] = [];
+            bodypartGroups[bp].push(ex);
+          });
+
+          const renderExCard = (ex) => {
+            const prev = getLastRecord(ex.id);
+            let prevText = '';
+            if (prev && prev.sets) {
+              const ls = prev.sets[prev.sets.length - 1];
+              prevText = ls.kg + 'kg × ' + ls.reps + '회 × ' + prev.sets.length + '세트';
+            } else if (prev && prev.duration_min) {
+              prevText = prev.duration_min + '분';
+            }
+            return (
+              <Card key={ex.id}>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">{ex.type === 'cardio' ? '🏃' : '🏋️'}</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold">{ex.name} {ex.is_favorite ? '⭐' : ''}</div>
+                    <div className="text-[11px] text-muted">{ex.target.join(', ')}</div>
+                    {prevText && <div className="text-[11px] text-accent mt-0.5">최근: {prevText}</div>}
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            );
+          };
+
+          return (
+            <>
+              {favorites.length > 0 && (
+                <>
+                  <div className="text-[10px] text-warning tracking-[1px] uppercase mt-1 mb-1">⭐ 즐겨찾기</div>
+                  {favorites.map(renderExCard)}
+                </>
+              )}
+              {Object.entries(bodypartGroups).map(([bp, exercises]) => (
+                <div key={bp}>
+                  <div className="text-[10px] text-dim tracking-[1px] uppercase mt-3 mb-1">{bodypartLabels[bp] || bp}</div>
+                  {exercises.map(renderExCard)}
+                </div>
+              ))}
+            </>
           );
-        })}
+        })()}
       </div>
     </div>
   );
