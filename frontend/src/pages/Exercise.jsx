@@ -13,6 +13,7 @@ export function Exercise() {
   const { data, loading, refresh } = useData();
   const [exDate, setExDate] = useState(getToday());
   const [guideTab, setGuideTab] = useState('machine');
+  const [bodypartTab, setBodypartTab] = useState('favorite');
 
   if (loading || !data) return <div className="text-center text-muted py-10">로딩 중...</div>;
 
@@ -145,59 +146,59 @@ export function Exercise() {
         active={guideTab}
         onChange={setGuideTab}
       />
-      <div className="space-y-2">
-        {(() => {
-          const currentList = groups[guideTab] || [];
-          const favorites = currentList.filter(ex => ex.is_favorite);
-          const bodypartLabels = { push: '상체 밀기 (가슴/어깨/삼두)', pull: '상체 당기기 (등/이두)', legs: '하체', core: '코어', posterior: '후면사슬', cardio: '유산소' };
-          const bodypartGroups = {};
+      {(() => {
+        const currentList = groups[guideTab] || [];
+        const favorites = currentList.filter(ex => ex.is_favorite);
+        const bodypartLabels = { favorite: '⭐ 즐겨찾기', push: '상체 밀기', pull: '상체 당기기', legs: '하체', core: '코어', posterior: '후면사슬', cardio: '유산소' };
+
+        const renderExCard = (ex) => {
+          const prev = getLastRecord(ex.id);
+          let prevText = '';
+          if (prev && prev.sets) {
+            const ls = prev.sets[prev.sets.length - 1];
+            prevText = ls.kg + 'kg × ' + ls.reps + '회 × ' + prev.sets.length + '세트';
+          } else if (prev && prev.duration_min) {
+            prevText = prev.duration_min + '분';
+          }
+          return (
+            <Card key={ex.id}>
+              <div className="flex items-center gap-2.5">
+                <span className="text-lg">{ex.type === 'cardio' ? '🏃' : '🏋️'}</span>
+                <div className="flex-1">
+                  <div className="text-sm font-bold">{ex.name} {ex.is_favorite ? '⭐' : ''}</div>
+                  <div className="text-[11px] text-muted">{ex.target.join(', ')}</div>
+                  {prevText && <div className="text-[11px] text-accent mt-0.5">최근: {prevText}</div>}
+                </div>
+              </div>
+            </Card>
+          );
+        };
+
+        if (guideTab === 'machine') {
+          // 머신: 부위 서브탭
+          const bodyparts = {};
           currentList.forEach(ex => {
             const bp = ex.bodypart || 'etc';
-            if (!bodypartGroups[bp]) bodypartGroups[bp] = [];
-            bodypartGroups[bp].push(ex);
+            if (!bodyparts[bp]) bodyparts[bp] = [];
+            bodyparts[bp].push(ex);
           });
-
-          const renderExCard = (ex) => {
-            const prev = getLastRecord(ex.id);
-            let prevText = '';
-            if (prev && prev.sets) {
-              const ls = prev.sets[prev.sets.length - 1];
-              prevText = ls.kg + 'kg × ' + ls.reps + '회 × ' + prev.sets.length + '세트';
-            } else if (prev && prev.duration_min) {
-              prevText = prev.duration_min + '분';
-            }
-            return (
-              <Card key={ex.id}>
-                <div className="flex items-center gap-2.5">
-                  <span className="text-lg">{ex.type === 'cardio' ? '🏃' : '🏋️'}</span>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold">{ex.name} {ex.is_favorite ? '⭐' : ''}</div>
-                    <div className="text-[11px] text-muted">{ex.target.join(', ')}</div>
-                    {prevText && <div className="text-[11px] text-accent mt-0.5">최근: {prevText}</div>}
-                  </div>
-                </div>
-              </Card>
-            );
-          };
+          const bpTabs = [
+            ...(favorites.length > 0 ? [{ id: 'favorite', label: '⭐ 즐겨찾기' }] : []),
+            ...Object.keys(bodyparts).map(bp => ({ id: bp, label: bodypartLabels[bp] || bp })),
+          ];
+          const showList = bodypartTab === 'favorite' ? favorites : (bodyparts[bodypartTab] || []);
 
           return (
             <>
-              {favorites.length > 0 && (
-                <>
-                  <div className="text-[10px] text-warning tracking-[1px] uppercase mt-1 mb-1">⭐ 즐겨찾기</div>
-                  {favorites.map(renderExCard)}
-                </>
-              )}
-              {Object.entries(bodypartGroups).map(([bp, exercises]) => (
-                <div key={bp}>
-                  <div className="text-[10px] text-dim tracking-[1px] uppercase mt-3 mb-1">{bodypartLabels[bp] || bp}</div>
-                  {exercises.map(renderExCard)}
-                </div>
-              ))}
+              <TabBar tabs={bpTabs} active={bodypartTab} onChange={setBodypartTab} className="mt-1" />
+              <div className="space-y-2">{showList.map(renderExCard)}</div>
             </>
           );
-        })()}
-      </div>
+        } else {
+          // 맨몸/유산소: 서브탭 없이 전체 표시
+          return <div className="space-y-2">{currentList.map(renderExCard)}</div>;
+        }
+      })()}
     </div>
   );
 }
