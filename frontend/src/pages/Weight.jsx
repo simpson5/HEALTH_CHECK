@@ -55,10 +55,11 @@ export function Weight() {
   };
   const regression = calcLinearRegression();
 
-  // 체중 차트 데이터 + 추세선
+  // 체중 차트 데이터 + 추세선 (첫점/끝점만 → 직선)
   const weightData = wr.map((r, i) => {
+    const isFirstOrLast = (i === 0 || i === wr.length - 1);
     const dayIdx = regression ? (new Date(r.date).getTime() - regression.firstDate) / 86400000 : 0;
-    const trendVal = regression ? parseFloat((regression.intercept + regression.slope * dayIdx).toFixed(1)) : null;
+    const trendVal = (regression && isFirstOrLast) ? parseFloat((regression.intercept + regression.slope * dayIdx).toFixed(1)) : null;
     return {
       date: fmtDate(r.date),
       fullDate: r.date,
