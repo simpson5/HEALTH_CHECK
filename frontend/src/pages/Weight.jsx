@@ -111,15 +111,7 @@ export function Weight() {
         </div>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={weightData} onClick={(e) => {
-              if (e && e.activePayload) {
-                const d = e.activePayload[0]?.payload;
-                if (d?.isInbody) {
-                  const found = ir.find(r => r.date === d.fullDate);
-                  if (found) setSelectedInbody(found);
-                }
-              }
-            }}>
+            <LineChart data={weightData}>
               <CartesianGrid stroke="rgba(255,255,255,0.03)" />
               <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
               <YAxis domain={['dataMin - 2', 'dataMax + 2']} tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kg'} />
@@ -152,11 +144,11 @@ export function Weight() {
                 }}
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="trend"
-                stroke="rgba(255,255,255,0.2)"
+                stroke="rgba(255,255,255,0.25)"
                 strokeWidth={1.5}
-                strokeDasharray="4 3"
+                strokeDasharray="6 4"
                 dot={false}
                 connectNulls
                 name="추세"
@@ -231,7 +223,21 @@ export function Weight() {
       {showInbody && (
         <>
           <div className="text-[11px] tracking-[2px] text-muted uppercase mt-4 mb-2">
-            인바디 기록 <span className="text-accent normal-case tracking-normal">(차트에서 🟡 탭하면 전환)</span>
+            인바디 기록
+          </div>
+          <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar">
+            {ir.map((r, i) => (
+              <button
+                key={r.date}
+                onClick={() => setSelectedInbody(r)}
+                className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all '
+                  + (showInbody && showInbody.date === r.date
+                    ? 'bg-accent/15 border-accent/30 text-accent'
+                    : 'bg-transparent border-white/[0.06] text-muted')}
+              >
+                {fmtDate(r.date)} · {r.weight_kg}kg
+              </button>
+            ))}
           </div>
           <Card elevated>
             <div className="flex justify-between items-center mb-2">
