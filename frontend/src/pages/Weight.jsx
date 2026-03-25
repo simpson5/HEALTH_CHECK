@@ -38,15 +38,32 @@ export function Weight() {
     return goal ? goal.kg : null;
   };
 
-  // 체중 차트 데이터 + 7일 이동평균
+  // 선형 회귀 계산 (전체 데이터)
+  const calcLinearRegression = () => {
+    if (wr.length < 2) return null;
+    const firstDate = new Date(wr[0].date).getTime();
+    const xs = wr.map(r => (new Date(r.date).getTime() - firstDate) / 86400000);
+    const ys = wr.map(r => r.weight_kg);
+    const n = xs.length;
+    const sumX = xs.reduce((a, b) => a + b, 0);
+    const sumY = ys.reduce((a, b) => a + b, 0);
+    const sumXY = xs.reduce((a, x, i) => a + x * ys[i], 0);
+    const sumXX = xs.reduce((a, x) => a + x * x, 0);
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    return { slope, intercept, firstDate };
+  };
+  const regression = calcLinearRegression();
+
+  // 체중 차트 데이터 + 추세선
   const weightData = wr.map((r, i) => {
-    const slice = wr.slice(Math.max(0, i - 6), i + 1);
-    const avg = slice.length >= 2 ? parseFloat((slice.reduce((s, x) => s + x.weight_kg, 0) / slice.length).toFixed(1)) : null;
+    const dayIdx = regression ? (new Date(r.date).getTime() - regression.firstDate) / 86400000 : 0;
+    const trendVal = regression ? parseFloat((regression.intercept + regression.slope * dayIdx).toFixed(1)) : null;
     return {
       date: fmtDate(r.date),
       fullDate: r.date,
       weight: r.weight_kg,
-      trend: avg,
+      trend: trendVal,
       monthGoal: getCurrentMonthGoal(r.date),
       isInbody: irDates.has(r.date),
     };
