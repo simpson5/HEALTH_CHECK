@@ -14,14 +14,16 @@ export function BottomNav() {
   const fileRef = useRef(null);
 
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const res = await uploadPhoto(file);
-    if (res.ok) {
-      const icon = res.type === 'image' ? '📷' : '📄';
-      setToast(`${icon} ${res.filename}`);
-      setTimeout(() => setToast(''), 2500);
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    let count = 0;
+    for (const file of files) {
+      const res = await uploadPhoto(file);
+      if (res.ok) count++;
     }
+    const icon = count > 1 ? '📁' : (files[0].type.startsWith('image') ? '📷' : '📄');
+    setToast(`${icon} ${count}개 업로드 완료`);
+    setTimeout(() => setToast(''), 2500);
     e.target.value = '';
   };
 
@@ -47,7 +49,7 @@ export function BottomNav() {
         <Camera size={20} />
       </button>
       <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleUpload} />
-      <input ref={fileRef} type="file" accept="image/*,.csv,.txt,.xlsx" className="hidden" onChange={handleUpload} />
+      <input ref={fileRef} type="file" accept="image/*,.csv,.txt,.xlsx" multiple className="hidden" onChange={handleUpload} />
 
       {/* 하단 네비 */}
       <nav className="fixed bottom-0 left-0 right-0 bg-[#06060b]/70 backdrop-blur-2xl border-t border-white/[0.06] z-[100] pb-[env(safe-area-inset-bottom)]">
