@@ -4,7 +4,7 @@ import { Card, CardTitle } from '../components/ui/Card';
 import { TabBar } from '../components/ui/Tabs';
 import { Badge } from '../components/ui/Badge';
 import { fmtDate } from '../lib/utils';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 const bodyTabs = [
   { id: 'fatpct', label: '체지방률' },
@@ -188,14 +188,14 @@ export function Weight() {
                     <Line type="monotone" dataKey="fat_pct" stroke="#ff8c00" strokeWidth={2} dot={{ r: 5, fill: '#ff8c00' }} name="체지방률(%)" />
                   </LineChart>
                 ) : bodyTab === 'composition' ? (
-                  <BarChart data={irData}>
+                  <LineChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
                     <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
-                    <YAxis domain={[0, 'auto']} tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kg'} />
+                    <YAxis tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kg'} />
                     <Tooltip contentStyle={{ background: '#1a1a26', border: '1px solid #22223a', borderRadius: 8 }} />
-                    <Bar dataKey="muscle_kg" fill="rgba(0,229,255,0.7)" radius={6} name="골격근(kg)" />
-                    <Bar dataKey="fat_kg" fill="rgba(255,68,102,0.7)" radius={6} name="체지방(kg)" />
-                  </BarChart>
+                    <Line type="monotone" dataKey="muscle_kg" stroke="#00e5ff" strokeWidth={3} dot={{ r: 5, fill: '#00e5ff' }} name="골격근(kg)" />
+                    <Line type="monotone" dataKey="fat_kg" stroke="#ff4466" strokeWidth={3} dot={{ r: 5, fill: '#ff4466' }} name="체지방(kg)" />
+                  </LineChart>
                 ) : bodyTab === 'bmi' ? (
                   <LineChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
