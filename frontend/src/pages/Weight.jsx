@@ -191,10 +191,11 @@ export function Weight() {
                   <LineChart data={irData}>
                     <CartesianGrid stroke="rgba(255,255,255,0.03)" />
                     <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} />
-                    <YAxis tick={{ fill: '#555', fontSize: 10 }} tickFormatter={v => v + 'kg'} />
+                    <YAxis yAxisId="muscle" domain={[Math.floor(Math.min(...ir.map(r=>r.muscle_kg))-2), Math.ceil(Math.max(...ir.map(r=>r.muscle_kg))+2)]} tick={{ fill: '#00e5ff', fontSize: 10 }} tickFormatter={v => v + 'kg'} orientation="left" />
+                    <YAxis yAxisId="fat" domain={[Math.floor(Math.min(...ir.map(r=>r.fat_kg))-2), Math.ceil(Math.max(...ir.map(r=>r.fat_kg))+2)]} tick={{ fill: '#ff4466', fontSize: 10 }} tickFormatter={v => v + 'kg'} orientation="right" />
                     <Tooltip contentStyle={{ background: '#1a1a26', border: '1px solid #22223a', borderRadius: 8 }} />
-                    <Line type="monotone" dataKey="muscle_kg" stroke="#00e5ff" strokeWidth={3} dot={{ r: 5, fill: '#00e5ff' }} name="골격근(kg)" />
-                    <Line type="monotone" dataKey="fat_kg" stroke="#ff4466" strokeWidth={3} dot={{ r: 5, fill: '#ff4466' }} name="체지방(kg)" />
+                    <Line yAxisId="muscle" type="monotone" dataKey="muscle_kg" stroke="#00e5ff" strokeWidth={3} dot={{ r: 5, fill: '#00e5ff' }} name="골격근(kg)" />
+                    <Line yAxisId="fat" type="monotone" dataKey="fat_kg" stroke="#ff4466" strokeWidth={3} dot={{ r: 5, fill: '#ff4466' }} name="체지방(kg)" />
                   </LineChart>
                 ) : bodyTab === 'bmi' ? (
                   <LineChart data={irData}>
