@@ -24,8 +24,12 @@ def get_token():
 
 
 def is_configured():
-    """AI 엔진 사용 가능 여부"""
-    return bool(get_token())
+    """AI 엔진 사용 가능 여부 — 토큰 있거나, 이미 로그인된 상태면 OK"""
+    if get_token():
+        return True
+    # 토큰 없어도 로그인된 상태일 수 있음
+    import shutil
+    return shutil.which("claude") is not None
 
 
 def create_job(job_type, input_data):
@@ -89,12 +93,11 @@ def update_job(job_id, status, output=None, error=None):
 
 async def run_claude(prompt, timeout=120):
     """claude -p 비대화형 실행"""
-    token = get_token()
-    if not token:
-        return {"ok": False, "error": "토큰 미설정"}
-
     env = os.environ.copy()
-    env["CLAUDE_CODE_OAUTH_TOKEN"] = token
+    token = get_token()
+    if token:
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = token
+    # 토큰 없어도 로그인된 상태면 동작함
 
     try:
         proc = await asyncio.create_subprocess_exec(
