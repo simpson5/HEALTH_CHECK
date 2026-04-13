@@ -7,11 +7,13 @@ import { Weight } from './pages/Weight';
 import { Exercise } from './pages/Exercise';
 import { Calendar } from './pages/Calendar';
 import { History } from './pages/History';
+import { AI } from './pages/AI';
 import { WorkoutSession } from './pages/WorkoutSession';
 import { Guide } from './pages/Guide';
 import { Foods } from './pages/Foods';
+import { Settings } from './pages/Settings';
 
-const tabPages = { home: Home, diet: Diet, weight: Weight, exercise: Exercise, calendar: Calendar, history: History };
+const tabPages = { home: Home, diet: Diet, weight: Weight, exercise: Exercise, calendar: Calendar, history: History, ai: AI };
 
 export default function App() {
   const [tab, setTab] = useState('home');
@@ -23,11 +25,6 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
-  const navigate = (path) => {
-    window.history.pushState({}, '', path);
-    setRoute(path);
-  };
-
   // 라우팅
   if (route.startsWith('/workout-session')) {
     return <DataProvider><WorkoutSession /></DataProvider>;
@@ -37,6 +34,9 @@ export default function App() {
   }
   if (route.startsWith('/foods')) {
     return <DataProvider><Foods /></DataProvider>;
+  }
+  if (route.startsWith('/settings')) {
+    return <DataProvider><Settings /></DataProvider>;
   }
 
   const Page = tabPages[tab] || Home;

@@ -5,6 +5,7 @@ const tabs = [
   { id: 'exercise', label: '운동' },
   { id: 'calendar', label: '달력' },
   { id: 'history', label: '기록' },
+  { id: 'ai', label: '🤖 AI' },
 ];
 
 export function TopNav({ active, onChange }) {
