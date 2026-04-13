@@ -28,8 +28,7 @@ def is_configured():
     if get_token():
         return True
     # 토큰 없어도 로그인된 상태일 수 있음
-    import shutil
-    return shutil.which("claude") is not None
+    return os.path.exists("/Users/simpson/.claude/local/claude")
 
 
 def create_job(job_type, input_data):
@@ -101,7 +100,7 @@ async def run_claude(prompt, timeout=120):
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "claude", "-p", prompt,
+            "/Users/simpson/.claude/local/claude", "-p", prompt,
             cwd=str(PROJECT_ROOT),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
