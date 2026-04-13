@@ -27,13 +27,9 @@ export function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-bg pb-10">
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-white/[0.06]">
-        <a href="/" className="text-accent"><ArrowLeft size={20} /></a>
-        <div className="flex-1 text-base font-bold">설정</div>
-      </div>
-
-      <div className="px-4 pt-4 space-y-3">
+    <div className="pb-10 animate-in">
+      <div className="text-base font-bold mb-4">⚙️ 설정</div>
+      <div className="space-y-3">
         {/* Claude 인증 */}
         <Card elevated>
           <CardTitle>Claude AI 인증</CardTitle>
@@ -88,15 +84,21 @@ export function Settings() {
         <Card>
           <CardTitle>최근 AI 작업</CardTitle>
           {settings?.recent_jobs?.length > 0 ? (
-            settings.recent_jobs.map(j => (
-              <div key={j.id} className="flex items-center gap-2 text-xs py-1.5 border-b border-white/[0.03] last:border-0">
-                <span className="text-muted">#{j.id}</span>
-                <span className="flex-1">{j.type}</span>
-                <span className={'font-bold ' + (j.status === 'done' ? 'text-success' : j.status === 'failed' ? 'text-danger' : 'text-muted')}>
-                  {j.status}
-                </span>
-              </div>
-            ))
+            settings.recent_jobs.map(j => {
+              const typeLabels = { diet_draft: '🍽️ 식단 분석', daily_report: '📊 일일 리포트', coach: '💬 건강 상담' };
+              const statusLabels = { done: '✅ 완료', failed: '❌ 실패', running: '🔄 진행 중', queued: '⏳ 대기' };
+              const time = j.finished_at || j.created_at;
+              const timeStr = time ? time.slice(11, 16) : '';
+              return (
+                <div key={j.id} className="flex items-center gap-2 text-xs py-2 border-b border-white/[0.03] last:border-0">
+                  <span className="flex-1">{typeLabels[j.type] || j.type}</span>
+                  <span className="text-[10px] text-dim">{timeStr}</span>
+                  <span className={'text-[11px] font-bold ' + (j.status === 'done' ? 'text-success' : j.status === 'failed' ? 'text-danger' : 'text-muted')}>
+                    {statusLabels[j.status] || j.status}
+                  </span>
+                </div>
+              );
+            })
           ) : (
             <div className="text-xs text-muted text-center py-3">작업 없음</div>
           )}

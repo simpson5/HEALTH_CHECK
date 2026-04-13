@@ -26,9 +26,9 @@ export default function App() {
 
   // 별도 페이지 라우팅
   if (route.startsWith('/workout-session')) return <DataProvider><WorkoutSession /></DataProvider>;
-  if (route.startsWith('/guide')) return <DataProvider><Guide /></DataProvider>;
-  if (route.startsWith('/foods')) return <DataProvider><Foods /></DataProvider>;
-  if (route.startsWith('/settings')) return <DataProvider><Settings /></DataProvider>;
+  if (route.startsWith('/guide')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Guide /></Layout></DataProvider>;
+  if (route.startsWith('/foods')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Foods /></Layout></DataProvider>;
+  if (route.startsWith('/settings')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Settings /></Layout></DataProvider>;
   if (route.startsWith('/calendar')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Calendar /></Layout></DataProvider>;
 
   const Page = tabPages[tab] || Home;

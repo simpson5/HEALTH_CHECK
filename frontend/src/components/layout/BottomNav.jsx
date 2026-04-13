@@ -3,7 +3,7 @@ import { BarChart3, CalendarDays, BookOpen, Settings } from 'lucide-react';
 const links = [
   { href: '/', icon: BarChart3, label: '대시보드' },
   { href: '/calendar', icon: CalendarDays, label: '달력' },
-  { href: '/guide', icon: BookOpen, label: '가이드' },
+  { href: '/guide', icon: BookOpen, label: '건강팁' },
   { href: '/settings', icon: Settings, label: '설정' },
 ];
 

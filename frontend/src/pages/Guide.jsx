@@ -16,20 +16,16 @@ export function Guide() {
   const [tab, setTab] = useState('schedule');
 
   return (
-    <div className="min-h-screen bg-bg pb-10">
-      <div className="bg-gradient-to-br from-[#0d0d20] to-bg px-5 pt-6 pb-5 border-b border-white/[0.06]">
-        <a href="/" className="text-accent text-sm mb-2 inline-block"><ArrowLeft size={16} className="inline mr-1" />대시보드</a>
+    <div className="pb-10 animate-in">
+      <div className="mb-4">
         <div className="text-[11px] tracking-[3px] text-accent uppercase">Simpson Health Guide</div>
-        <div className="font-display text-3xl tracking-wider mt-1">운동 & 식단 가이드</div>
+        <div className="font-display text-2xl tracking-wider mt-1">운동 & 식단 가이드</div>
         <div className="text-xs text-muted mt-1.5">108.7kg · 근손실 방지 최우선 · 마운자로 복용 중</div>
         <Badge color="accent" className="mt-2">목표 80kg · 단백질 110g/일</Badge>
       </div>
 
-      <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-2">
-        <TabBar tabs={guideTabs} active={tab} onChange={setTab} />
-      </div>
-
-      <div className="px-4 pt-4 space-y-3">
+      <TabBar tabs={guideTabs} active={tab} onChange={setTab} />
+      <div className="space-y-3">
         {tab === 'schedule' && <ScheduleTab />}
         {tab === 'diet' && <DietGuideTab />}
         {tab === 'workout' && <WorkoutGuideTab />}
