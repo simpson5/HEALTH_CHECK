@@ -3,9 +3,7 @@ const tabs = [
   { id: 'diet', label: '식단' },
   { id: 'weight', label: '체중' },
   { id: 'exercise', label: '운동' },
-  { id: 'calendar', label: '달력' },
-  { id: 'history', label: '기록' },
-  { id: 'ai', label: '🤖 AI' },
+  { id: 'record', label: '✏️ 기록' },
 ];
 
 export function TopNav({ active, onChange }) {

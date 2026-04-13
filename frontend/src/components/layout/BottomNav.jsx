@@ -1,9 +1,10 @@
-import { BarChart3, BookOpen, Settings, Camera, FolderUp } from 'lucide-react';
+import { BarChart3, CalendarDays, BookOpen, Settings, Camera, FolderUp } from 'lucide-react';
 import { uploadPhoto } from '../../lib/api';
 import { useState, useRef } from 'react';
 
 const links = [
   { href: '/', icon: BarChart3, label: '대시보드' },
+  { href: '/calendar', icon: CalendarDays, label: '달력' },
   { href: '/guide', icon: BookOpen, label: '가이드' },
   { href: '/settings', icon: Settings, label: '설정' },
 ];
