@@ -15,7 +15,10 @@ import { Settings } from './pages/Settings';
 const tabPages = { home: Home, diet: Diet, weight: Weight, exercise: Exercise, record: Record };
 
 export default function App() {
-  const [tab, setTab] = useState('home');
+  const [tab, setTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'home';
+  });
   const [route, setRoute] = useState(window.location.pathname + window.location.search);
 
   useEffect(() => {

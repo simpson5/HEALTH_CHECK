@@ -7,13 +7,22 @@ const tabs = [
 ];
 
 export function TopNav({ active, onChange }) {
+  const handleTab = (tabId) => {
+    // 다른 페이지에 있으면 메인으로 이동
+    if (window.location.pathname !== '/') {
+      window.location.href = '/?tab=' + tabId;
+      return;
+    }
+    onChange(tabId);
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-[#06060b]/70 backdrop-blur-2xl border-b border-white/[0.06]">
       <div className="flex overflow-x-auto no-scrollbar px-2">
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => onChange(tab.id)}
+            onClick={() => handleTab(tab.id)}
             className={`relative flex-shrink-0 px-4 py-3.5 text-[13px] font-medium transition-all duration-200
               ${active === tab.id ? 'text-text' : 'text-dim hover:text-muted'}`}
           >

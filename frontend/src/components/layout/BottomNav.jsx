@@ -13,7 +13,8 @@ export function BottomNav() {
       <div className="flex">
         {links.map(link => {
           const Icon = link.icon;
-          const isActive = window.location.pathname === link.href;
+          const path = window.location.pathname;
+          const isActive = link.href === '/' ? path === '/' : path.startsWith(link.href);
           return (
             <a
               key={link.href}
