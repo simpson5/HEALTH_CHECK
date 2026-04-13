@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardTitle } from '../components/ui/Card';
-import { ArrowLeft, Save, Check, AlertCircle } from 'lucide-react';
+import { Check, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 export function Settings() {
   const [settings, setSettings] = useState(null);
   const [token, setToken] = useState('');
   const [saved, setSaved] = useState(false);
+  const [openJob, setOpenJob] = useState(null);
+  const [jobDetail, setJobDetail] = useState(null);
 
   useEffect(() => {
     fetch('/api/settings').then(r => r.json()).then(s => {
@@ -89,13 +91,38 @@ export function Settings() {
               const statusLabels = { done: '✅ 완료', failed: '❌ 실패', running: '🔄 진행 중', queued: '⏳ 대기' };
               const time = j.finished_at || j.created_at;
               const timeStr = time ? time.slice(11, 16) : '';
+              const isOpen = openJob === j.id;
               return (
-                <div key={j.id} className="flex items-center gap-2 text-xs py-2 border-b border-white/[0.03] last:border-0">
-                  <span className="flex-1">{typeLabels[j.type] || j.type}</span>
-                  <span className="text-[10px] text-dim">{timeStr}</span>
-                  <span className={'text-[11px] font-bold ' + (j.status === 'done' ? 'text-success' : j.status === 'failed' ? 'text-danger' : 'text-muted')}>
-                    {statusLabels[j.status] || j.status}
-                  </span>
+                <div key={j.id} className="border-b border-white/[0.03] last:border-0">
+                  <div className="flex items-center gap-2 text-xs py-2 cursor-pointer" onClick={async () => {
+                    if (isOpen) { setOpenJob(null); setJobDetail(null); return; }
+                    setOpenJob(j.id);
+                    const res = await fetch('/api/ai/jobs/' + j.id);
+                    setJobDetail(await res.json());
+                  }}>
+                    <span className="flex-1">{typeLabels[j.type] || j.type}</span>
+                    <span className="text-[10px] text-dim">{timeStr}</span>
+                    <span className={'text-[11px] font-bold ' + (j.status === 'done' ? 'text-success' : j.status === 'failed' ? 'text-danger' : 'text-muted')}>
+                      {statusLabels[j.status] || j.status}
+                    </span>
+                    {isOpen ? <ChevronUp size={12} className="text-muted" /> : <ChevronDown size={12} className="text-muted" />}
+                  </div>
+                  {isOpen && jobDetail && (
+                    <div className="pb-3 text-[11px] space-y-1.5">
+                      {jobDetail.input && (
+                        <div><span className="text-dim">입력:</span> <span className="text-muted">{JSON.stringify(jobDetail.input).slice(0, 100)}</span></div>
+                      )}
+                      {jobDetail.output && (
+                        <div><span className="text-dim">결과:</span> <span className="text-text">{typeof jobDetail.output === 'object' ? (jobDetail.output.message || JSON.stringify(jobDetail.output).slice(0, 120)) : String(jobDetail.output).slice(0, 120)}</span></div>
+                      )}
+                      {jobDetail.error && (
+                        <div><span className="text-dim">에러:</span> <span className="text-danger">{jobDetail.error.slice(0, 100)}</span></div>
+                      )}
+                      {jobDetail.started_at && (
+                        <div className="text-dim">시작: {jobDetail.started_at.slice(11, 19)} → 완료: {jobDetail.finished_at?.slice(11, 19) || '-'}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })
