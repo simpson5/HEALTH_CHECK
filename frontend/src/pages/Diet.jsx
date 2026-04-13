@@ -37,7 +37,7 @@ export function Diet() {
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 animate-in">
       <DateNav label={fmtDateFull(date)} onPrev={() => moveDate(-1)} onNext={() => moveDate(1)} />
 
       <Card>

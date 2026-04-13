@@ -91,7 +91,7 @@ export function Weight() {
   const irData = ir.map(r => ({ date: fmtDate(r.date), ...r }));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 animate-in">
       {/* 현재 체중 */}
       <Card elevated>
         <CardTitle>현재 체중</CardTitle>

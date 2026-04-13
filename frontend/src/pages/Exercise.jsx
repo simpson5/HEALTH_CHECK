@@ -70,7 +70,7 @@ export function Exercise() {
   const restColor = restDays >= 3 ? 'text-danger' : restDays >= 1 ? 'text-warning' : 'text-success';
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 animate-in">
       {/* 주간 현황 */}
       <Card>
         <div className="flex justify-between items-center mb-2">

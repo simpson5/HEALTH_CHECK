@@ -174,7 +174,7 @@ export function Record() {
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 animate-in">
       {toast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-success text-black px-4 py-2 rounded-lg text-xs font-bold z-[200]">
           {toast}
@@ -190,7 +190,7 @@ export function Record() {
       <TabBar tabs={subTabs} active={subTab} onChange={setSubTab} />
 
       {subTab === 'input' && (
-        <div className="space-y-3">
+        <div className="space-y-3 animate-in">
           {/* 체중 입력 */}
           <Card>
             <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export function Record() {
       )}
 
       {subTab === 'report' && (
-        <div className="space-y-3">
+        <div className="space-y-3 animate-in">
           {/* 주간 네비 */}
           <div className="flex items-center justify-center gap-4 mb-2">
             <button onClick={() => setHistWeek(h => h - 1)} className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-accent text-sm">◀</button>
