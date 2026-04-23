@@ -1,0 +1,92 @@
+/* ============================================================
+ * Simpson Health — Global CSS (v2)
+ * Tailwind 4 @theme 기반 디자인 토큰 + 최소 전역 규칙
+ *
+ * 원본: docs/design_handoff/project/tokens.js
+ * 적용 위치 (실제 구현): frontend/src/index.css 에 통째로 덮어쓰기
+ * ============================================================ */
+
+@import "tailwindcss";
+
+/* ── 디자인 토큰 (tokens.js 1:1 변환) ────────────────────────── */
+@theme {
+  /* Surfaces (warm-cool dark, oklch 기반) */
+  --color-bg:          #0E0F12;
+  --color-bg-elev:     #151619;
+  --color-bg-elev-2:   #1C1D21;
+  --color-bg-elev-3:   #24262B;
+
+  --color-line:        rgba(255,255,255,0.07);
+  --color-line-strong: rgba(255,255,255,0.14);
+
+  /* Text hierarchy (3단계 + faint) */
+  --color-text:        #EDEDEE;
+  --color-text-mid:    rgba(237,237,238,0.68);
+  --color-text-dim:    rgba(237,237,238,0.42);
+  --color-text-faint:  rgba(237,237,238,0.22);
+
+  /* Accent — 단일 앰버 (oklch 0.78 0.14 65 ≈ #F5A524)
+     사용 규칙: CTA / 활성 상태 / 강조 메트릭에만. 카테고리/상태색과 혼동 금지 */
+  --color-accent:      #F5A524;
+  --color-accent-soft: rgba(245,165,36,0.14);
+  --color-accent-line: rgba(245,165,36,0.35);
+  --color-accent-on:   #171309;   /* 앰버 배경 위 텍스트 */
+
+  /* Semantic — 델타/상태 전용 (up/down/info). 엑센트 아님 */
+  --color-up:    #6FCF8E;
+  --color-down:  #E87C5C;
+  --color-info:  #7EA8FF;
+  --color-warn:  #F5A524;   /* warn은 앰버와 동색 (경고=엑센트) */
+
+  /* Macro — 카테고리 구분 전용 (탄단지). 엑센트 아님 */
+  --color-protein: #C9A96E;  /* champagne */
+  --color-carb:    #8FB8E0;  /* dusty blue */
+  --color-fat:     #D68FA5;  /* dusty rose */
+
+  /* Type — Geist(영문) / Pretendard(한글) / Geist Mono(숫자) / Instrument Serif(감성) */
+  --font-sans:  "Geist", "Pretendard", -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono:  "Geist Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --font-serif: "Instrument Serif", "Noto Serif KR", Georgia, serif;
+
+  /* Radius (tokens.js radius 매핑 — rounded-sm=10, md=14, lg=20, xl=28) */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* 모션 */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* ── 전역 리셋 / 기본값 ──────────────────────────────────────── */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+::selection { background: rgba(245, 165, 36, 0.3); }
+
+/* ── 스크롤바 ──────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+.nosb::-webkit-scrollbar { display: none; }
+.nosb { scrollbar-width: none; }
+
+/* ── 유틸 ─────────────────────────────────────────────────── */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ── 애니메이션 ────────────────────────────────────────────── */
+@keyframes fade-up  { from { opacity: 0; transform: translateY(6px); } }
+@keyframes spin     { to   { transform: rotate(360deg); } }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } }
+
+.animate-fade-up { animation: fade-up .28s var(--ease-out); }
+.animate-spin    { animation: spin .8s linear infinite; }
+.animate-toast   { animation: toast-in .24s var(--ease-out); }
+
+#root { min-height: 100vh; }
