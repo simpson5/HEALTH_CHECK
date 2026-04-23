@@ -148,7 +148,7 @@ export function Settings() {
             <div className="px-4 py-6 text-center text-text-dim text-[12px]">최근 AI 작업 없음</div>
           ) : (
             jobs.slice(0, 4).map((j, i, a) => {
-              const time = j.started_at ? j.started_at.slice(11, 16) : '--:--';
+              const time = (j.started_at || j.created_at)?.slice(11, 16) || '--:--';
               const label = JOB_TYPE_LABEL[j.type] || j.type;
               const statusLabel = JOB_STATUS_LABEL[j.status] || j.status;
               const statusClass =
