@@ -1,93 +1,92 @@
+/* ============================================================
+ * Simpson Health — Global CSS (v2)
+ * Tailwind 4 @theme 기반 디자인 토큰 + 최소 전역 규칙
+ *
+ * 원본: docs/design_handoff/project/tokens.js
+ * 적용 위치 (실제 구현): frontend/src/index.css 에 통째로 덮어쓰기
+ * ============================================================ */
+
 @import "tailwindcss";
 
+/* ── 디자인 토큰 (tokens.js 1:1 변환) ────────────────────────── */
 @theme {
-  --color-bg: #08080f;
-  --color-bg-card: rgba(255, 255, 255, 0.04);
-  --color-bg-elevated: rgba(255, 255, 255, 0.08);
-  --color-bg-input: rgba(255, 255, 255, 0.08);
-  --color-accent: #00e5ff;
-  --color-success: #00ff88;
-  --color-warning: #ffaa00;
-  --color-danger: #ff4466;
-  --color-info: #b47fff;
-  --color-text: #f0f0ff;
-  --color-muted: #7a7a9e;
-  --color-dim: #4a4a6a;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --font-sans: 'Pretendard', 'Noto Sans KR', sans-serif;
-  --font-display: 'Inter', 'Geist', sans-serif;
+  /* Surfaces (warm-cool dark, oklch 기반) */
+  --color-bg:          #0E0F12;
+  --color-bg-elev:     #151619;
+  --color-bg-elev-2:   #1C1D21;
+  --color-bg-elev-3:   #24262B;
+
+  --color-line:        rgba(255,255,255,0.07);
+  --color-line-strong: rgba(255,255,255,0.14);
+
+  /* Text hierarchy (3단계 + faint) */
+  --color-text:        #EDEDEE;
+  --color-text-mid:    rgba(237,237,238,0.68);
+  --color-text-dim:    rgba(237,237,238,0.42);
+  --color-text-faint:  rgba(237,237,238,0.22);
+
+  /* Accent — 단일 앰버 (oklch 0.78 0.14 65 ≈ #F5A524)
+     사용 규칙: CTA / 활성 상태 / 강조 메트릭에만. 카테고리/상태색과 혼동 금지 */
+  --color-accent:      #F5A524;
+  --color-accent-soft: rgba(245,165,36,0.14);
+  --color-accent-line: rgba(245,165,36,0.35);
+  --color-accent-on:   #171309;   /* 앰버 배경 위 텍스트 */
+
+  /* Semantic — 델타/상태 전용 (up/down/info). 엑센트 아님 */
+  --color-up:    #6FCF8E;
+  --color-down:  #E87C5C;
+  --color-info:  #7EA8FF;
+  --color-warn:  #F5A524;   /* warn은 앰버와 동색 (경고=엑센트) */
+
+  /* Macro — 카테고리 구분 전용 (탄단지). 엑센트 아님 */
+  --color-protein: #C9A96E;  /* champagne */
+  --color-carb:    #8FB8E0;  /* dusty blue */
+  --color-fat:     #D68FA5;  /* dusty rose */
+
+  /* Type — Geist(영문) / Pretendard(한글) / Geist Mono(숫자) / Instrument Serif(감성) */
+  --font-sans:  "Geist", "Pretendard", -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono:  "Geist Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --font-serif: "Instrument Serif", "Noto Serif KR", Georgia, serif;
+
+  /* Radius (tokens.js radius 매핑 — rounded-sm=10, md=14, lg=20, xl=28) */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* 모션 */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-body {
-  background-color: var(--color-bg);
+/* ── 전역 리셋 / 기본값 ──────────────────────────────────────── */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
-  -webkit-tap-highlight-color: transparent;
-  min-height: 100vh;
-  margin: 0;
-  position: relative;
-  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
+* { box-sizing: border-box; }
+::selection { background: rgba(245, 165, 36, 0.3); }
+
+/* ── 스크롤바 ──────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+.nosb::-webkit-scrollbar { display: none; }
+.nosb { scrollbar-width: none; }
+
+/* ── 유틸 ─────────────────────────────────────────────────── */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ── 애니메이션 ────────────────────────────────────────────── */
+@keyframes fade-up  { from { opacity: 0; transform: translateY(6px); } }
+@keyframes spin     { to   { transform: rotate(360deg); } }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } }
+
+.animate-fade-up { animation: fade-up .28s var(--ease-out); }
+.animate-spin    { animation: spin .8s linear infinite; }
+.animate-toast   { animation: toast-in .24s var(--ease-out); }
 
 #root { min-height: 100vh; }
-
-/* 디스플레이 폰트 */
-.font-display { font-family: 'Inter', 'Geist', sans-serif; font-weight: 700; }
-
-/* 그라데이션 텍스트 */
-.gradient-text {
-  background: linear-gradient(135deg, #00e5ff, #00ff88);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* 글래스 카드 */
-.glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
-.glass-bright {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* 글로우 */
-.glow-accent { box-shadow: 0 0 24px rgba(0, 229, 255, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3); }
-.glow-success { box-shadow: 0 0 24px rgba(0, 255, 136, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3); }
-.glow-warning { box-shadow: 0 0 24px rgba(255, 170, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3); }
-
-/* Ambient orbs */
-.ambient-orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 0;
-}
-.orb-cyan { width: 350px; height: 350px; background: #00e5ff; top: -120px; left: -120px; opacity: 0.08; }
-.orb-purple { width: 300px; height: 300px; background: #b47fff; bottom: -100px; right: -100px; opacity: 0.06; }
-.orb-warm { width: 250px; height: 250px; background: #ff8c00; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; }
-
-/* 애니메이션 */
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes countUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); } 50% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.4); } }
-.animate-in { animation: fadeInUp 0.4s ease-out both; }
-.animate-in-delay-1 { animation: fadeInUp 0.4s ease-out 0.05s both; }
-.animate-in-delay-2 { animation: fadeInUp 0.4s ease-out 0.1s both; }
-.animate-in-delay-3 { animation: fadeInUp 0.4s ease-out 0.15s both; }
-.animate-in-delay-4 { animation: fadeInUp 0.4s ease-out 0.2s both; }
-.animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
-
-/* 스크롤바 숨기기 */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
