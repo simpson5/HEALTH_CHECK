@@ -7,7 +7,7 @@
 // 활성 판정: useLocation().pathname 으로 각 탭 경로 startsWith 매칭.
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Icon from '../Icon';
+import Icon from '../design/Icon';
 
 const TABS = [
   { key: 'home',  label: '대시보드', to: '/',         match: (p) => p === '/',             render: (s) => <Icon.home s={s}/> },

@@ -12,7 +12,7 @@ import React from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import { TopTabs } from './TopTabs';
 import { TabBar } from './TabBar';
-import Icon from '../Icon';
+import Icon from '../design/Icon';
 
 export function MobileShell() {
   const loc = useLocation();
