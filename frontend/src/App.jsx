@@ -1,46 +1,42 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
 import { DataProvider } from './hooks/useData.jsx';
-import { Layout } from './components/layout/Layout';
-import { Home } from './pages/Home';
-import { Diet } from './pages/Diet';
-import { Weight } from './pages/Weight';
-import { Exercise } from './pages/Exercise';
-import { Record } from './pages/Record';
-import { Calendar } from './pages/Calendar';
-import { WorkoutSession } from './pages/WorkoutSession';
-import { Guide } from './pages/Guide';
-import { Foods } from './pages/Foods';
-import { Settings } from './pages/Settings';
+import { MobileShell } from './layout/MobileShell';
+import { Home } from './screens/Home';
+import { Meal } from './screens/Meal';
+import { Weight } from './screens/Weight';
+import { Workout } from './screens/Workout';
+import { Record } from './screens/Record';
+import { Session } from './screens/Session';
+import { Calendar } from './screens/Calendar';
+import { Guide } from './screens/Guide';
+import { Settings } from './screens/Settings';
 
-const tabPages = { home: Home, diet: Diet, weight: Weight, exercise: Exercise, record: Record };
+function HomeRouter() {
+  const [params] = useSearchParams();
+  const tab = params.get('tab') || 'home';
+  switch (tab) {
+    case 'diet':     return <Meal />;
+    case 'weight':   return <Weight />;
+    case 'exercise': return <Workout />;
+    case 'record':   return <Record />;
+    default:         return <Home />;
+  }
+}
 
 export default function App() {
-  const [tab, setTab] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('tab') || 'home';
-  });
-  const [route, setRoute] = useState(window.location.pathname + window.location.search);
-
-  useEffect(() => {
-    const handlePop = () => setRoute(window.location.pathname + window.location.search);
-    window.addEventListener('popstate', handlePop);
-    return () => window.removeEventListener('popstate', handlePop);
-  }, []);
-
-  // 별도 페이지 라우팅
-  if (route.startsWith('/workout-session')) return <DataProvider><WorkoutSession /></DataProvider>;
-  if (route.startsWith('/guide')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Guide /></Layout></DataProvider>;
-  if (route.startsWith('/foods')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Foods /></Layout></DataProvider>;
-  if (route.startsWith('/settings')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Settings /></Layout></DataProvider>;
-  if (route.startsWith('/calendar')) return <DataProvider><Layout activeTab="" onTabChange={setTab}><Calendar /></Layout></DataProvider>;
-
-  const Page = tabPages[tab] || Home;
-
   return (
     <DataProvider>
-      <Layout activeTab={tab} onTabChange={setTab}>
-        <Page />
-      </Layout>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<MobileShell />}>
+            <Route path="/" element={<HomeRouter />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/guide" element={<Guide />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/session" element={<Session />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </DataProvider>
   );
 }

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Simpson Health — 리디자인</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+
+<style>
+  html, body { margin: 0; padding: 0; background: #0a0a0b; font-family: 'Geist', 'Pretendard', -apple-system, sans-serif; color: #EDEDEE; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  ::selection { background: rgba(245,165,36,0.3); }
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+  /* Hide scrollbar on mobile frames */
+  .nosb::-webkit-scrollbar { display: none; }
+  .nosb { scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Tokens (plain JS) -->
+<script src="tokens.js"></script>
+
+<!-- Starter components -->
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+
+<!-- Primitives + screens -->
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="chrome.jsx"></script>
+<script type="text/babel" src="screens/home.jsx"></script>
+<script type="text/babel" src="screens/weight.jsx"></script>
+<script type="text/babel" src="screens/meal.jsx"></script>
+<script type="text/babel" src="screens/workout.jsx"></script>
+<script type="text/babel" src="screens/record.jsx"></script>
+<script type="text/babel" src="screens/calendar-settings.jsx"></script>
+<script type="text/babel" src="mobile-app.jsx"></script>
+<script type="text/babel" src="desktop-app.jsx"></script>
+
+<!-- Tweaks -->
+<script>
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "accentHue": 86,
+    "density": "comfortable",
+    "showGrid": false
+  }/*EDITMODE-END*/;
+</script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const S = window.SH;
+
+function AppShell() {
+  const [tweaksOn, setTweaksOn] = useState(false);
+  const [tweaks, setTweaks] = useState(TWEAKS);
+
+  // Apply accent hue dynamically
+  useEffect(() => {
+    const h = tweaks.accentHue;
+    const accent = `oklch(0.78 0.14 ${h})`;
+    // update the window.SH accent for new renders
+    window.SH.accent = accent;
+  }, [tweaks.accentHue]);
+
+  useEffect(() => {
+    function onMsg(e) {
+      if (e.data?.type === '__activate_edit_mode') setTweaksOn(true);
+      if (e.data?.type === '__deactivate_edit_mode') setTweaksOn(false);
+    }
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const setTweak = (k, v) => {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
+  };
+
+  return (
+    <>
+      <DesignCanvas>
+        {/* ── Mobile screens ── */}
+        <DCSection id="mobile-core" title="Simpson Health — Mobile" subtitle="홈 → 식단 → 체중 → 운동 → 기록 · 오리지널 리디자인">
+
+          <DCArtboard id="home" label="01 · 홈 대시보드" width={390} height={844}>
+            <MobileDevice initialTab="home" initialTop="홈"/>
+          </DCArtboard>
+
+          <DCArtboard id="meal" label="02 · 식단" width={390} height={844}>
+            <MobileDevice initialTab="home" initialTop="식단"/>
+          </DCArtboard>
+
+          <DCArtboard id="weight" label="03 · 체중 & 체성분" width={390} height={844}>
+            <MobileDevice initialTab="home" initialTop="체중"/>
+          </DCArtboard>
+
+          <DCArtboard id="workout" label="04 · 운동" width={390} height={844}>
+            <MobileDevice initialTab="home" initialTop="운동"/>
+          </DCArtboard>
+
+          <DCArtboard id="record" label="05 · 기록 입력" width={390} height={844}>
+            <MobileDevice initialTab="home" initialTop="기록"/>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="mobile-other" title="Secondary screens" subtitle="달력 · 가이드 · 설정 · 운동 세션">
+          <DCArtboard id="cal" label="06 · 달력" width={390} height={844}>
+            <MobileDevice initialTab="cal" initialTop="달력"/>
+          </DCArtboard>
+
+          <DCArtboard id="guide" label="07 · 가이드 & 플랜" width={390} height={844}>
+            <MobileDevice initialTab="guide" initialTop="가이드"/>
+          </DCArtboard>
+
+          <DCArtboard id="set" label="08 · 설정" width={390} height={844}>
+            <MobileDevice initialTab="set" initialTop="설정"/>
+          </DCArtboard>
+
+          <DCArtboard id="session" label="09 · 운동 세션 (진행 중)" width={390} height={844}>
+            <SessionOnlyDevice/>
+          </DCArtboard>
+        </DCSection>
+
+        {/* ── Desktop ── */}
+        <DCSection id="desktop" title="Desktop Dashboard" subtitle="사이드바 + 멀티 위젯 레이아웃">
+          <DCArtboard id="desktop-dash" label="10 · 데스크탑 대시보드" width={1280} height={820}>
+            <div style={{ width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden', border: `1px solid ${S.line}`, background: S.bg }}>
+              <DesktopApp/>
+            </div>
+          </DCArtboard>
+        </DCSection>
+
+        {/* ── Design system callouts ── */}
+        <DCSection id="system" title="Design System" subtitle="컬러 · 타입 · 컴포넌트 근거">
+          <DCArtboard id="tokens" label="11 · 디자인 토큰" width={720} height={520}>
+            <TokensCard/>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      {tweaksOn && <TweaksPanel tweaks={tweaks} setTweak={setTweak}/>}
+    </>
+  );
+}
+
+// Wraps the mobile app in an iPhone-like frame
+function MobileDevice({ initialTab, initialTop }) {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#000', borderRadius: 42,
+      padding: 8, boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.5)',
+      position: 'relative',
+    }}>
+      <div style={{
+        width: '100%', height: '100%', borderRadius: 36, overflow: 'hidden',
+        background: S.bg, position: 'relative',
+      }} className="nosb">
+        {/* iOS status bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 54, zIndex: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '18px 30px 0', pointerEvents: 'none',
+        }}>
+          <span style={{ fontFamily: S.fontSans, fontSize: 15, fontWeight: 600, color: S.text, letterSpacing: -0.3 }}>9:41</span>
+          <span style={{ fontFamily: S.fontMono, fontSize: 11, color: S.textMid, letterSpacing: 0.3 }}>●●● · 5G · 82%</span>
+        </div>
+        {/* Dynamic island */}
+        <div style={{
+          position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+          width: 110, height: 30, borderRadius: 999, background: '#000', zIndex: 21,
+        }}/>
+        <MobileApp initialTab={initialTab} initialTop={initialTop}/>
+      </div>
+    </div>
+  );
+}
+
+function SessionOnlyDevice() {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: '#000', borderRadius: 42,
+      padding: 8, boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.5)',
+      position: 'relative',
+    }}>
+      <div style={{ width: '100%', height: '100%', borderRadius: 36, overflow: 'hidden', background: S.bg, position: 'relative' }} className="nosb">
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 54, zIndex: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '18px 30px 0', pointerEvents: 'none',
+        }}>
+          <span style={{ fontFamily: S.fontSans, fontSize: 15, fontWeight: 600, color: S.text, letterSpacing: -0.3 }}>9:55</span>
+          <span style={{ fontFamily: S.fontMono, fontSize: 11, color: S.textMid, letterSpacing: 0.3 }}>●●● · 5G · 79%</span>
+        </div>
+        <div style={{ position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)', width: 110, height: 30, borderRadius: 999, background: '#000', zIndex: 21 }}/>
+        <div style={{ height: 54 }}/>
+        <SessionScreen onEnd={() => {}}/>
+      </div>
+    </div>
+  );
+}
+
+function TokensCard() {
+  return (
+    <div style={{ width: '100%', height: '100%', background: S.bg, color: S.text, padding: 30, fontFamily: S.fontSans, overflow: 'auto' }}>
+      <div style={{ fontSize: 10, color: S.accent, fontFamily: S.fontMono, letterSpacing: 1.2, textTransform: 'uppercase' }}>Design System</div>
+      <h2 style={{ fontSize: 24, margin: '6px 0 0', fontWeight: 500, letterSpacing: -0.5 }}>Tokens & Rationale</h2>
+      <p style={{ fontSize: 13, color: S.textMid, margin: '10px 0 22px', maxWidth: 560, lineHeight: 1.5, textWrap: 'pretty' }}>
+        형광 민트/시안을 걷어내고 <b style={{ color: S.accent }}>따뜻한 앰버 단일 엑센트</b>로 재구성.
+        배경은 오프-블랙(warm), 텍스트는 3단계 위계. 모든 데이터는 Geist Mono로 정렬,
+        본문은 Pretendard/Geist, 이름 같은 감성 요소만 Instrument Serif.
+      </p>
+
+      {/* Swatches */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 22 }}>
+        {[
+          ['Bg', S.bg], ['Elev', S.bgElev2], ['Accent', S.accent],
+          ['Protein', S.protein], ['Carb', S.carb],
+        ].map(([n, c]) => (
+          <div key={n} style={{ background: c, borderRadius: 10, padding: 12, color: n === 'Accent' ? '#171309' : S.text, aspectRatio: '1.8', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: `1px solid ${S.line}` }}>
+            <span style={{ fontSize: 11, fontFamily: S.fontMono, letterSpacing: 0.4, textTransform: 'uppercase', opacity: .7 }}>{n}</span>
+            <span style={{ fontSize: 10, fontFamily: S.fontMono, opacity: .8 }}>{c}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Type */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ background: S.bgElev2, borderRadius: 12, padding: 16, border: `1px solid ${S.line}` }}>
+          <div style={{ fontSize: 9, color: S.textDim, fontFamily: S.fontMono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Display · Geist 300</div>
+          <div style={{ fontSize: 48, fontWeight: 300, letterSpacing: -1.5, lineHeight: 1, marginTop: 8 }}>105.0<span style={{ fontSize: 16, color: S.textMid }}>kg</span></div>
+        </div>
+        <div style={{ background: S.bgElev2, borderRadius: 12, padding: 16, border: `1px solid ${S.line}` }}>
+          <div style={{ fontSize: 9, color: S.textDim, fontFamily: S.fontMono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Body · Pretendard 500 / Mono</div>
+          <div style={{ fontSize: 14, marginTop: 8, letterSpacing: -0.2 }}>단백질 108g 섭취</div>
+          <div style={{ fontSize: 12, color: S.textDim, fontFamily: S.fontMono, marginTop: 4 }}>P108g / 110g · 98% 달성</div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 22, display: 'flex', gap: 8 }}>
+        <Chip label="P" value="36g" color={S.protein}/>
+        <Chip label="C" value="16g" color={S.carb}/>
+        <Chip label="F" value="8g" color={S.fat}/>
+        <Chip label="" value="262 kcal" color={S.accent}/>
+      </div>
+
+      {/* Principles */}
+      <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+        {[
+          ['위계', '숫자 크게, 라벨 작게, 메타는 모노로'],
+          ['색', '단색 엑센트 · 매크로만 컬러 코드'],
+          ['모션', '6px 아래→투명, 240ms, ease-out'],
+        ].map(([k, v]) => (
+          <div key={k} style={{ padding: 14, borderLeft: `2px solid ${S.accent}`, background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ fontSize: 10, color: S.textDim, fontFamily: S.fontMono, letterSpacing: 0.4, textTransform: 'uppercase' }}>{k}</div>
+            <div style={{ fontSize: 12, color: S.text, marginTop: 5, letterSpacing: -0.2, lineHeight: 1.5 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TweaksPanel({ tweaks, setTweak }) {
+  return (
+    <div style={{
+      position: 'fixed', right: 20, bottom: 20, width: 280,
+      background: '#151619', border: `1px solid rgba(255,255,255,0.1)`, borderRadius: 14,
+      padding: 16, zIndex: 1000,
+      boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+      fontFamily: S.fontSans, color: S.text,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ width: 6, height: 6, borderRadius: 999, background: S.accent }}/>
+        <span style={{ fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', fontFamily: S.fontMono, color: S.textMid }}>Tweaks</span>
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
+          <span>엑센트 Hue</span>
+          <span style={{ color: S.accent, fontFamily: S.fontMono }}>{tweaks.accentHue}°</span>
+        </div>
+        <input type="range" min="0" max="360" value={tweaks.accentHue}
+          onChange={e => setTweak('accentHue', +e.target.value)}
+          style={{ width: '100%', accentColor: S.accent }}/>
+        <div style={{ fontSize: 10, color: S.textDim, fontFamily: S.fontMono, marginTop: 4 }}>
+          ⚠ 프리뷰만 업데이트 · 새로고침 시 재적용
+        </div>
+      </div>
+
+      <div>
+        <div style={{ fontSize: 12, marginBottom: 6 }}>밀도</div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {['compact','comfortable','spacious'].map(d => (
+            <button key={d} onClick={() => setTweak('density', d)} style={{
+              flex: 1, padding: '6px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: tweaks.density === d ? S.accent : 'rgba(255,255,255,0.06)',
+              color: tweaks.density === d ? '#171309' : S.text,
+              fontSize: 10, fontFamily: S.fontSans, fontWeight: 500,
+            }}>{d}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<AppShell/>);
+</script>
+
+</body>
+</html>
