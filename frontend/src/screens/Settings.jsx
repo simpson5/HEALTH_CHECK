@@ -5,7 +5,7 @@ import { LoadingScreen } from './_Loading';
 import {
   Card, SectionLabel, Toast,
   NumberSettingRow, ToggleSettingRow, MenuSettingRow,
-  ProfileEditModal,
+  ProfileEditModal, MealPlanEditSheet,
 } from '../design/primitives';
 import Icon from '../design/Icon';
 import { daysSince, getToday } from '../lib/utils';
@@ -32,6 +32,7 @@ export function Settings() {
   const [toast, setToast] = useState('');
   const [openJob, setOpenJob] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [mealPlanOpen, setMealPlanOpen] = useState(false);
   const [notify, setNotify] = useState(() => {
     try { return localStorage.getItem('sh:notify') !== '0'; }
     catch { return true; }
@@ -205,6 +206,19 @@ export function Settings() {
             onSave={v => saveProfile({ daily_fat_target: Math.round(v) }, '지방 목표 저장')}
           />
           <ToggleSettingRow label="알림" checked={notify} onChange={toggleNotify} />
+
+          <button
+            type="button"
+            onClick={() => setMealPlanOpen(true)}
+            className="w-full flex items-center px-4 py-3.5 bg-transparent border-b border-line cursor-pointer text-left"
+          >
+            <span className="flex-1 text-[13px] text-text tracking-[-0.2px]">식단 플랜</span>
+            <span className="text-[12px] text-text-mid font-mono mr-2">
+              {(profile.meal_plan?.length || 0) > 0 ? `${profile.meal_plan.length}행` : '미설정'}
+            </span>
+            <Icon.chev s={14} />
+          </button>
+
           <MenuSettingRow
             label="데이터 내보내기"
             valueLabel="CSV · JSON"
@@ -217,6 +231,13 @@ export function Settings() {
           />
         </Card>
       </div>
+
+      <MealPlanEditSheet
+        open={mealPlanOpen}
+        mealPlan={profile.meal_plan || []}
+        onClose={() => setMealPlanOpen(false)}
+        onSaved={() => { refresh(); showToast('식단 플랜 저장됨'); }}
+      />
 
       {/* Recent AI jobs */}
       <SectionLabel
