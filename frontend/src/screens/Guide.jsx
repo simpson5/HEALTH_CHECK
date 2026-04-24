@@ -242,12 +242,35 @@ function TabFoods({ data }) {
 }
 
 function TabRoadmap() {
-  const milestones = [
-    { date: '5/01 (금)', weight: '104kg', delta: '▼ 4kg', d: 'D-8' },
-    { date: '6/01 (월)', weight: '100kg', delta: '▼ 4kg', d: 'D-39' },
-    { date: '7/01 (수)', weight: '97kg', delta: '▼ 3kg', d: 'D-69' },
-    { date: '8/01 (토)', weight: '94kg', delta: '▼ 3kg', d: 'D-100' },
-  ];
+  const { data } = useData();
+  const DOW_KR = ['일', '월', '화', '수', '목', '금', '토'];
+  const profile = data?.profile || {};
+  const weightRecs = data?.weight_records || [];
+  const cur = weightRecs.length > 0 ? weightRecs[weightRecs.length - 1].weight_kg : null;
+  const goal = profile.goal_weight_kg;
+
+  let milestones = [];
+  if (cur != null && goal != null && cur > goal) {
+    const today = new Date();
+    const remain = cur - goal;
+    const pace = Math.max(0.5, Math.min(4, remain / 4));
+    let prev = cur;
+    for (let i = 1; i <= 4; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+      const target = Math.max(goal, +(prev - pace).toFixed(1));
+      const deltaKg = Math.abs(+(target - prev).toFixed(1));
+      const days = Math.max(0, Math.round((d - today) / 86400000));
+      milestones.push({
+        date: `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, '0')} (${DOW_KR[d.getDay()]})`,
+        weight: `${target.toFixed(1)}kg`,
+        delta: `▼ ${deltaKg.toFixed(1)}kg`,
+        d: `D-${days}`,
+      });
+      prev = target;
+      if (target <= goal) break;
+    }
+  }
+
   return (
     <>
       <SectionLabel>다가오는 마일스톤</SectionLabel>

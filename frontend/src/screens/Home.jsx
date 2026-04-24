@@ -57,9 +57,15 @@ export function Home() {
   const proOk = tPro >= proGoal;
   const calOk = tCal > 0 && tCal <= calGoal;
 
+  const routine = profile.exercise?.daily_routine || {};
+  const amName = routine.morning?.name || routine.morning?.description || '오전 운동';
+  const amSub = routine.morning?.detail || routine.morning?.description || '운동 세션';
+  const pmName = routine.evening?.name || routine.evening?.description || '저녁 운동';
+  const pmSub = routine.evening?.detail || routine.evening?.description || '운동 세션';
+
   const todos = [
-    { id: 'am', label: '오전 운동', sub: '머신 6종 · 30분', done: amDone },
-    { id: 'pm', label: '저녁 운동', sub: '케틀벨 · 10R', done: pmDone },
+    { id: 'am', label: amName, sub: amSub, done: amDone },
+    { id: 'pm', label: pmName, sub: pmSub, done: pmDone },
     {
       id: 'pr', label: `단백질 ${proGoal}g`,
       sub: `${Math.round(tPro)}g · ${Math.max(0, Math.round(proGoal - tPro))}g 남음`,
@@ -230,7 +236,17 @@ export function Home() {
       </div>
 
       {/* Today timeline */}
-      <SectionLabel right={<span className="text-accent text-[11px]">모두 보기 →</span>}>
+      <SectionLabel
+        right={
+          <button
+            type="button"
+            onClick={() => nav('/?tab=record')}
+            className="text-accent bg-transparent border-none cursor-pointer text-[11px] font-mono"
+          >
+            모두 보기 →
+          </button>
+        }
+      >
         오늘 기록
       </SectionLabel>
       <div className="mx-5">
