@@ -5,6 +5,7 @@ import { LoadingScreen } from './_Loading';
 import {
   Card, SectionLabel, Toast,
   NumberSettingRow, ToggleSettingRow, MenuSettingRow,
+  ProfileEditModal,
 } from '../design/primitives';
 import Icon from '../design/Icon';
 import { daysSince, getToday } from '../lib/utils';
@@ -30,6 +31,7 @@ export function Settings() {
   const [jobs, setJobs] = useState([]);
   const [toast, setToast] = useState('');
   const [openJob, setOpenJob] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
   const [notify, setNotify] = useState(() => {
     try { return localStorage.getItem('sh:notify') !== '0'; }
     catch { return true; }
@@ -107,7 +109,7 @@ export function Settings() {
 
       {/* Profile */}
       <div className="mx-5 mt-[18px]">
-        <Card pad={16}>
+        <Card pad={16} onClick={() => setEditOpen(true)}>
           <div className="flex gap-3.5 items-center">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-[22px] font-serif font-medium"
@@ -121,13 +123,20 @@ export function Settings() {
             <div className="flex-1 min-w-0">
               <div className="text-[16px] text-text font-medium tracking-[-0.3px]">{profile.name || 'Simpson'}</div>
               <div className="text-[11px] text-text-dim font-mono mt-0.5 truncate">
-                simpson301599@gmail.com · D+{dPlus}
+                {profile.medication_start ? `${profile.medication_start} 시작 · ` : ''}D+{dPlus}
               </div>
             </div>
             <Icon.chev s={16} />
           </div>
         </Card>
       </div>
+
+      <ProfileEditModal
+        open={editOpen}
+        profile={profile}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => { refresh(); showToast('프로필 저장됨'); }}
+      />
 
       {/* AI connection */}
       <SectionLabel>AI 연결</SectionLabel>
