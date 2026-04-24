@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
-import { Card, Chip, TapBtn, SectionLabel, Toast } from '../design/primitives';
+import { Card, Chip, TapBtn, SectionLabel, Toast, WeightQuickInput } from '../design/primitives';
 import Icon from '../design/Icon';
 import { getToday, daysSince } from '../lib/utils';
-import { uploadPhoto } from '../lib/api';
+import { uploadPhoto, pollJob } from '../lib/api';
 
 export function Record() {
+  const nav = useNavigate();
   const { data, loading, refresh } = useData();
-  const [weight, setWeight] = useState('');
   const [dose, setDose] = useState('5mg');
   const [mealText, setMealText] = useState('');
   const [photo, setPhoto] = useState(null);
@@ -32,20 +33,6 @@ export function Record() {
     setTimeout(() => setToast(''), 1800);
   }
 
-  async function saveWeight() {
-    if (!weight || isNaN(parseFloat(weight))) return;
-    const res = await fetch('/api/weight', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: today, weight_kg: Number(weight), memo: '' }),
-    });
-    if (res.ok) {
-      refresh();
-      setWeight('');
-      showToast('체중 저장됨');
-    }
-  }
-
   async function saveMedication() {
     const res = await fetch('/api/medication', {
       method: 'POST',
@@ -67,20 +54,6 @@ export function Record() {
       setPhoto(result.path);
       showToast('사진 업로드됨');
     }
-  }
-
-  async function pollJob(jobId) {
-    for (let i = 0; i < 60; i++) {
-      await new Promise(r => setTimeout(r, 2000));
-      const res = await fetch('/api/ai/jobs/' + jobId);
-      const job = await res.json();
-      if (job.status === 'done') {
-        refresh();
-        return true;
-      }
-      if (job.status === 'failed') return false;
-    }
-    return false;
   }
 
   async function analyzeMeal() {
@@ -112,7 +85,8 @@ export function Record() {
         showToast('AI 분석 실패');
         return;
       }
-      const ok = await pollJob(d.job_id);
+      const { ok } = await pollJob(d.job_id);
+      if (ok) refresh();
       setMealText('');
       setPhoto(null);
       showToast(ok ? 'AI 분석 완료' : 'AI 분석 타임아웃');
@@ -145,7 +119,8 @@ export function Record() {
     });
     const d = await r.json();
     if (d.ok) {
-      const ok = await pollJob(d.job_id);
+      const { ok } = await pollJob(d.job_id);
+      if (ok) refresh();
       showToast(ok ? '일일 리포트 완료' : '일일 리포트 실패');
     } else {
       showToast('일일 리포트 실패');
@@ -164,22 +139,7 @@ export function Record() {
       {/* Weight input */}
       <SectionLabel>체중 입력</SectionLabel>
       <div className="mx-5">
-        <Card pad={16}>
-          <div className="flex gap-2.5 items-center">
-            <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-text-mid">
-              <Icon.scale s={18} />
-            </div>
-            <input
-              value={weight}
-              onChange={e => setWeight(e.target.value)}
-              placeholder="105.0"
-              inputMode="decimal"
-              className="flex-1 bg-transparent border-none outline-none text-text text-[22px] font-normal tracking-[-0.5px]"
-            />
-            <span className="text-text-dim font-mono text-[13px]">kg</span>
-            <TapBtn variant="accent" onClick={saveWeight}>저장</TapBtn>
-          </div>
-        </Card>
+        <WeightQuickInput onSaved={() => { refresh(); showToast('체중 저장됨'); }} />
       </div>
 
       {/* Medication */}
@@ -295,7 +255,7 @@ export function Record() {
           <div className="text-[13px] text-text font-medium tracking-[-0.2px]">일일 리포트</div>
           <div className="text-[11px] text-text-dim font-mono mt-0.5">오늘 요약</div>
         </Card>
-        <Card pad={14} onClick={() => showToast('준비 중')}>
+        <Card pad={14} onClick={() => nav('/coach')}>
           <div className="text-accent mb-2.5"><Icon.meal s={18} /></div>
           <div className="text-[13px] text-text font-medium tracking-[-0.2px]">건강 상담</div>
           <div className="text-[11px] text-text-dim font-mono mt-0.5">AI에게 질문</div>

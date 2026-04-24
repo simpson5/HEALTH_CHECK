@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
-import { Card, SectionLabel, Toast } from '../design/primitives';
+import {
+  Card, SectionLabel, Toast,
+  NumberSettingRow, ToggleSettingRow, MenuSettingRow,
+} from '../design/primitives';
 import Icon from '../design/Icon';
-import { daysSince } from '../lib/utils';
+import { daysSince, getToday } from '../lib/utils';
+import { updateProfile, fetchAiJobs } from '../lib/api';
 
 const JOB_TYPE_LABEL = {
   diet_draft: '식단 분석',
@@ -19,16 +24,58 @@ const JOB_STATUS_LABEL = {
 };
 
 export function Settings() {
-  const { data, loading } = useData();
+  const nav = useNavigate();
+  const { data, loading, refresh } = useData();
   const [settings, setSettings] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [toast, setToast] = useState('');
   const [openJob, setOpenJob] = useState(null);
+  const [notify, setNotify] = useState(() => {
+    try { return localStorage.getItem('sh:notify') !== '0'; }
+    catch { return true; }
+  });
 
   useEffect(() => {
     fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
-    fetch('/api/ai/jobs').then(r => r.json()).then(d => setJobs(Array.isArray(d) ? d : d.jobs || [])).catch(() => {});
+    fetchAiJobs().then(d => setJobs(Array.isArray(d) ? d : d.jobs || [])).catch(() => {});
   }, []);
+
+  async function saveProfile(patch, successMsg) {
+    const r = await updateProfile(patch);
+    if (r.ok) {
+      refresh();
+      showToast(successMsg || '저장됨');
+    } else {
+      showToast(r.error || '저장 실패');
+    }
+  }
+
+  function toggleNotify(next) {
+    try { localStorage.setItem('sh:notify', next ? '1' : '0'); }
+    catch { /* Safari private mode fallback: keep memory state only */ }
+    setNotify(next);
+    showToast(next ? '알림 켜짐' : '알림 꺼짐');
+  }
+
+  async function handleExport(format) {
+    try {
+      const data = await fetch('/api/data').then(r => r.json());
+      const filename = `simpson_health_${getToday()}.${format}`;
+      let blob;
+      if (format === 'json') {
+        blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      } else {
+        blob = new Blob([dietToCsv(data.diet_records || [])], { type: 'text/csv;charset=utf-8' });
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      showToast(`${filename} 다운로드`);
+    } catch {
+      showToast('내보내기 실패');
+    }
+  }
 
   if (loading || !data) return <LoadingScreen />;
 
@@ -116,32 +163,52 @@ export function Settings() {
       <SectionLabel>환경설정</SectionLabel>
       <div className="mx-5">
         <Card pad={0}>
-          {[
-            ['목표 체중', `${goal} kg`],
-            ['일일 단백질', `${proGoal} g`],
-            ['일일 칼로리', `${calGoal} kcal`],
-            ['알림', '켜짐'],
-            ['단위', '메트릭'],
-            ['데이터 내보내기', 'CSV · JSON'],
-          ].map(([k, v], i, a) => (
-            <button
-              type="button"
-              key={k}
-              onClick={() => showToast('준비 중')}
-              className={`w-full flex items-center px-4 py-3.5 bg-transparent border-none cursor-pointer text-left ${
-                i === a.length - 1 ? '' : 'border-b border-line'
-              }`}
-            >
-              <span className="flex-1 text-[13px] text-text tracking-[-0.2px]">{k}</span>
-              <span className="text-[12px] text-text-mid font-mono mr-2">{v}</span>
-              <Icon.chev s={14} />
-            </button>
-          ))}
+          <NumberSettingRow
+            label="목표 체중"
+            value={goal}
+            unit="kg"
+            onSave={v => saveProfile({ goal_weight_kg: v }, '목표 체중 저장')}
+          />
+          <NumberSettingRow
+            label="일일 단백질"
+            value={proGoal}
+            unit="g"
+            onSave={v => saveProfile({ daily_protein_target: Math.round(v) }, '단백질 목표 저장')}
+          />
+          <NumberSettingRow
+            label="일일 칼로리"
+            value={calGoal}
+            unit="kcal"
+            onSave={v => saveProfile({ daily_calorie_target: Math.round(v) }, '칼로리 목표 저장')}
+          />
+          <ToggleSettingRow label="알림" checked={notify} onChange={toggleNotify} />
+          <MenuSettingRow
+            label="데이터 내보내기"
+            valueLabel="CSV · JSON"
+            options={[
+              { label: 'CSV (식단 기록)', value: 'csv' },
+              { label: 'JSON (전체 데이터)', value: 'json' },
+            ]}
+            onSelect={handleExport}
+            last
+          />
         </Card>
       </div>
 
       {/* Recent AI jobs */}
-      <SectionLabel right={<span className="text-accent">전체 →</span>}>최근 AI 작업</SectionLabel>
+      <SectionLabel
+        right={
+          <button
+            type="button"
+            onClick={() => nav('/ai-jobs')}
+            className="text-accent bg-transparent border-none cursor-pointer text-[11px] font-mono"
+          >
+            전체 →
+          </button>
+        }
+      >
+        최근 AI 작업
+      </SectionLabel>
       <div className="mx-5">
         <Card pad={0}>
           {jobs.length === 0 ? (
@@ -157,11 +224,7 @@ export function Settings() {
                   : j.status === 'failed'
                     ? 'text-down'
                     : 'text-text-dim';
-              const sub = (j.output_json && (() => {
-                try { return JSON.parse(j.output_json).message; } catch { return null; }
-              })()) || (j.input_json && (() => {
-                try { return JSON.parse(j.input_json).memo; } catch { return null; }
-              })()) || '';
+              const sub = j.output?.message || j.input?.memo || j.input?.question || '';
               const isOpen = openJob === j.id;
               return (
                 <div
@@ -184,8 +247,12 @@ export function Settings() {
                     <div className="px-4 pb-3 text-[11px] text-text-mid font-mono whitespace-pre-wrap break-words">
                       {j.error ? (
                         <span className="text-down">{j.error}</span>
+                      ) : j.output ? (
+                        JSON.stringify(j.output, null, 2)
+                      ) : j.input ? (
+                        JSON.stringify(j.input, null, 2)
                       ) : (
-                        j.output_json || j.input_json || '(데이터 없음)'
+                        '(데이터 없음)'
                       )}
                     </div>
                   )}
@@ -199,4 +266,19 @@ export function Settings() {
       <Toast text={toast} />
     </div>
   );
+}
+
+function csvEscape(v) {
+  if (v == null) return '';
+  const s = String(v);
+  if (/[,"\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function dietToCsv(records) {
+  const headers = ['날짜', '시간', '끼니', '음식', '분량', '칼로리', '단백질(g)', '탄수(g)', '지방(g)', '메모'];
+  const keys = ['date', 'time', 'meal_type', 'food_name', 'quantity', 'calories_kcal', 'protein_g', 'carbs_g', 'fat_g', 'memo'];
+  const lines = [headers.join(',')];
+  for (const r of records) lines.push(keys.map(k => csvEscape(r[k])).join(','));
+  return '﻿' + lines.join('\r\n');
 }

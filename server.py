@@ -150,6 +150,24 @@ async def add_medication(request: Request):
     conn.close()
     return JSONResponse({"ok": True})
 
+# === 프로필 API ===
+@app.patch("/api/profile")
+async def update_profile(request: Request):
+    """프로필 필드 부분 업데이트 (profiles.id=1 단일 행)"""
+    body = await request.json()
+    allowed = {"goal_weight_kg", "daily_protein_target",
+               "daily_calorie_target", "weekly_exercise_target"}
+    fields = {k: v for k, v in body.items() if k in allowed}
+    if not fields:
+        return JSONResponse({"ok": False, "error": "변경할 필드 없음"}, status_code=400)
+    conn = get_db()
+    set_clause = ", ".join(f"{k}=?" for k in fields)
+    values = list(fields.values()) + [1]
+    conn.execute(f"UPDATE profiles SET {set_clause} WHERE id=?", values)
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
 # === 인바디 API ===
 @app.post("/api/inbody")
 async def add_inbody(request: Request):
@@ -223,6 +241,28 @@ async def ai_coach(request: Request):
     asyncio.create_task(process_queue())
     return JSONResponse({"ok": True, "job_id": job_id})
 
+@app.post("/api/ai/inbody-parse")
+async def ai_inbody_parse(request: Request):
+    """인바디 사진 AI 파싱 (저장 안 함, 결과를 프론트에 돌려줌)"""
+    from ai_engine import create_job, process_queue, is_configured
+    if not is_configured():
+        return JSONResponse({"ok": False, "error": "AI 미설정"}, status_code=400)
+    body = await request.json()
+    job_id = create_job("inbody_parse", body)
+    asyncio.create_task(process_queue())
+    return JSONResponse({"ok": True, "job_id": job_id})
+
+@app.post("/api/ai/weekly-report")
+async def ai_weekly_report(request: Request):
+    """주간 종합 분석 리포트 생성"""
+    from ai_engine import create_job, process_queue, is_configured
+    if not is_configured():
+        return JSONResponse({"ok": False, "error": "AI 미설정"}, status_code=400)
+    body = await request.json()
+    job_id = create_job("weekly_report", body)
+    asyncio.create_task(process_queue())
+    return JSONResponse({"ok": True, "job_id": job_id})
+
 @app.post("/api/ai/quick-diet")
 async def ai_quick_diet(request: Request):
     """frequent_foods 즉시 매칭 → 자동 저장"""
@@ -261,10 +301,10 @@ def get_ai_job(job_id: int):
     return JSONResponse(job)
 
 @app.get("/api/ai/jobs")
-def list_ai_jobs():
-    """최근 작업 목록"""
+def list_ai_jobs(limit: int = 10):
+    """최근 작업 목록 (limit 파라미터 지원)"""
     from ai_engine import get_recent_jobs
-    return get_recent_jobs(10)
+    return get_recent_jobs(limit)
 
 # === CSV 파싱 ===
 
