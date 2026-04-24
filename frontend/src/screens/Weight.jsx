@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
-import { Card, SectionLabel } from '../design/primitives';
+import { Card, SectionLabel, WeightQuickInput } from '../design/primitives';
 import Icon from '../design/Icon';
 import { fmtDate } from '../lib/utils';
 
@@ -14,7 +14,7 @@ const RANGES = [
 ];
 
 export function Weight() {
-  const { data, loading } = useData();
+  const { data, loading, refresh } = useData();
   const [range, setRange] = useState('1M');
   if (loading || !data) return <LoadingScreen />;
 
@@ -73,6 +73,11 @@ export function Weight() {
           </span>
           <span className="text-text-mid">▼ {Math.abs(avgPerDay).toFixed(2)}kg/일 평균</span>
         </div>
+      </div>
+
+      {/* Quick weight input */}
+      <div className="mx-5 mb-3">
+        <WeightQuickInput onSaved={refresh} />
       </div>
 
       {/* Range tabs */}

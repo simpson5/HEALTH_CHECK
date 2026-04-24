@@ -6,3 +6,4 @@ export { Chip } from './Chip';
 export { TapBtn } from './TapBtn';
 export { SectionLabel } from './SectionLabel';
 export { Toast } from './Toast';
+export { WeightQuickInput } from './WeightQuickInput';

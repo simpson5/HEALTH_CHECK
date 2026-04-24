@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
-import { Card, Chip, TapBtn, SectionLabel, Toast } from '../design/primitives';
+import { Card, Chip, TapBtn, SectionLabel, Toast, WeightQuickInput } from '../design/primitives';
 import Icon from '../design/Icon';
 import { getToday, daysSince } from '../lib/utils';
 import { uploadPhoto } from '../lib/api';
 
 export function Record() {
   const { data, loading, refresh } = useData();
-  const [weight, setWeight] = useState('');
   const [dose, setDose] = useState('5mg');
   const [mealText, setMealText] = useState('');
   const [photo, setPhoto] = useState(null);
@@ -30,20 +29,6 @@ export function Record() {
   function showToast(msg) {
     setToast(msg);
     setTimeout(() => setToast(''), 1800);
-  }
-
-  async function saveWeight() {
-    if (!weight || isNaN(parseFloat(weight))) return;
-    const res = await fetch('/api/weight', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: today, weight_kg: Number(weight), memo: '' }),
-    });
-    if (res.ok) {
-      refresh();
-      setWeight('');
-      showToast('체중 저장됨');
-    }
   }
 
   async function saveMedication() {
@@ -164,22 +149,7 @@ export function Record() {
       {/* Weight input */}
       <SectionLabel>체중 입력</SectionLabel>
       <div className="mx-5">
-        <Card pad={16}>
-          <div className="flex gap-2.5 items-center">
-            <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-text-mid">
-              <Icon.scale s={18} />
-            </div>
-            <input
-              value={weight}
-              onChange={e => setWeight(e.target.value)}
-              placeholder="105.0"
-              inputMode="decimal"
-              className="flex-1 bg-transparent border-none outline-none text-text text-[22px] font-normal tracking-[-0.5px]"
-            />
-            <span className="text-text-dim font-mono text-[13px]">kg</span>
-            <TapBtn variant="accent" onClick={saveWeight}>저장</TapBtn>
-          </div>
-        </Card>
+        <WeightQuickInput onSaved={() => { refresh(); showToast('체중 저장됨'); }} />
       </div>
 
       {/* Medication */}
