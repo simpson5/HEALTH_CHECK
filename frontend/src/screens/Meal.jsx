@@ -75,8 +75,8 @@ export function Meal() {
           <div className="flex gap-2.5 mt-4 pt-4 border-t border-line">
             {[
               ['단백질', total.p, proGoal, 'g', 'var(--color-protein)'],
-              ['탄수', total.c, 180, 'g', 'var(--color-carb)'],
-              ['지방', total.f, 60, 'g', 'var(--color-fat)'],
+              ['탄수', total.c, profile.daily_targets.carbs_g, 'g', 'var(--color-carb)'],
+              ['지방', total.f, profile.daily_targets.fat_g, 'g', 'var(--color-fat)'],
             ].map(([l, v, t, u, c]) => (
               <div key={l} className="flex-1">
                 <div className="text-[10px] text-text-dim font-mono tracking-[0.3px] uppercase">{l}</div>

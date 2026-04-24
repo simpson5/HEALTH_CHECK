@@ -83,6 +83,8 @@ export function Settings() {
   const dPlus = profile.medication_start ? daysSince(profile.medication_start) : 0;
   const proGoal = profile.daily_targets?.protein_g || 110;
   const calGoal = profile.daily_targets?.calories_kcal || 1500;
+  const carbGoal = profile.daily_targets?.carbs_g;
+  const fatGoal = profile.daily_targets?.fat_g;
   const goal = profile.goal_weight_kg || 80;
   const initial = (profile.name || 'S').charAt(0);
 
@@ -180,6 +182,18 @@ export function Settings() {
             value={calGoal}
             unit="kcal"
             onSave={v => saveProfile({ daily_calorie_target: Math.round(v) }, '칼로리 목표 저장')}
+          />
+          <NumberSettingRow
+            label="일일 탄수"
+            value={carbGoal}
+            unit="g"
+            onSave={v => saveProfile({ daily_carb_target: Math.round(v) }, '탄수 목표 저장')}
+          />
+          <NumberSettingRow
+            label="일일 지방"
+            value={fatGoal}
+            unit="g"
+            onSave={v => saveProfile({ daily_fat_target: Math.round(v) }, '지방 목표 저장')}
           />
           <ToggleSettingRow label="알림" checked={notify} onChange={toggleNotify} />
           <MenuSettingRow
