@@ -167,6 +167,16 @@ def init_db():
     CREATE INDEX IF NOT EXISTS idx_schedule_date ON schedule(date);
     """)
 
+    # Idempotent column additions (21번 계획 L1/L2)
+    def _ensure_column(table, col, ddl):
+        cols = [r[1] for r in c.execute(f"PRAGMA table_info({table})").fetchall()]
+        if col not in cols:
+            c.execute(f"ALTER TABLE {table} ADD COLUMN {ddl}")
+
+    _ensure_column("profiles", "daily_carb_target", "daily_carb_target INTEGER DEFAULT 180")
+    _ensure_column("profiles", "daily_fat_target",  "daily_fat_target INTEGER DEFAULT 60")
+    _ensure_column("profiles", "meal_plan_json",    "meal_plan_json TEXT")
+
     conn.commit()
     conn.close()
     print(f"DB initialized at {DB_PATH}")
@@ -185,13 +195,17 @@ def migrate_json_to_db():
     # 프로필
     p = data.get("profile", {})
     c.execute("""INSERT OR REPLACE INTO profiles (id, name, goal_weight_kg, start_weight_kg, medication, medication_start,
-        daily_protein_target, daily_calorie_target, weekly_exercise_target, exercise_config_json)
-        VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        daily_protein_target, daily_calorie_target, weekly_exercise_target, exercise_config_json,
+        daily_carb_target, daily_fat_target, meal_plan_json)
+        VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (p.get("name"), p.get("goal_weight_kg"), p.get("start_weight_kg"), p.get("medication"),
          p.get("medication_start"), (p.get("daily_targets") or {}).get("protein_g", 110),
          (p.get("daily_targets") or {}).get("calories_kcal", 1500),
          (p.get("weekly_targets") or {}).get("exercise_count", 4),
-         json.dumps(p.get("exercise", {}), ensure_ascii=False)))
+         json.dumps(p.get("exercise", {}), ensure_ascii=False),
+         (p.get("daily_targets") or {}).get("carbs_g", 180),
+         (p.get("daily_targets") or {}).get("fat_g", 60),
+         json.dumps(p.get("meal_plan") or [], ensure_ascii=False)))
 
     # 체중
     for r in data.get("weight_records", []):
@@ -291,6 +305,15 @@ def db_to_json():
     # 프로필
     profile_row = c.execute("SELECT * FROM profiles WHERE id=1").fetchone()
     exercise_config = json.loads(profile_row["exercise_config_json"] or "{}")
+    # meal_plan_json 방어 파싱 (L7): 깨진 JSON이어도 /api/data 전체가 안 깨지게
+    raw_mp = profile_row["meal_plan_json"] if "meal_plan_json" in profile_row.keys() else None
+    try:
+        meal_plan = json.loads(raw_mp) if raw_mp else []
+        if not isinstance(meal_plan, list):
+            meal_plan = []
+    except (json.JSONDecodeError, TypeError):
+        meal_plan = []
+
     profile = {
         "name": profile_row["name"],
         "goal_weight_kg": profile_row["goal_weight_kg"],
@@ -298,9 +321,12 @@ def db_to_json():
         "medication": profile_row["medication"],
         "medication_start": profile_row["medication_start"],
         "exercise": exercise_config,
+        "meal_plan": meal_plan,
         "daily_targets": {
-            "protein_g": profile_row["daily_protein_target"],
+            "protein_g":     profile_row["daily_protein_target"],
             "calories_kcal": profile_row["daily_calorie_target"],
+            "carbs_g":       profile_row["daily_carb_target"] if "daily_carb_target" in profile_row.keys() else 180,
+            "fat_g":         profile_row["daily_fat_target"]  if "daily_fat_target"  in profile_row.keys() else 60,
         },
         "weekly_targets": {
             "exercise_count": profile_row["weekly_exercise_target"],

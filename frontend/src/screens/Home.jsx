@@ -212,8 +212,8 @@ export function Home() {
               </div>
             </Ring>
             <div className="flex-1 flex flex-col gap-3.5">
-              <MacroRow label="탄수화물" value={tCarb} target={180} color="var(--color-carb)" unit="g" />
-              <MacroRow label="지방" value={tFat} target={60} color="var(--color-fat)" unit="g" />
+              <MacroRow label="탄수화물" value={tCarb} target={profile.daily_targets.carbs_g} color="var(--color-carb)" unit="g" />
+              <MacroRow label="지방" value={tFat} target={profile.daily_targets.fat_g} color="var(--color-fat)" unit="g" />
               <MacroRow label="칼로리" value={tCal} target={calGoal} color="var(--color-accent)" unit="kcal" />
             </div>
           </div>

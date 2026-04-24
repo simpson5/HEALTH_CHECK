@@ -151,19 +151,78 @@ async def add_medication(request: Request):
     return JSONResponse({"ok": True})
 
 # === 프로필 API ===
+def _validate_profile_patch(fields):
+    """21번 계획 L9 7종 검증. 실패 시 error string, OK면 None."""
+    def num_in(k, lo, hi, label):
+        if k in fields:
+            try: v = float(fields[k])
+            except (TypeError, ValueError): return f"{label}는 숫자여야 함"
+            if not (lo <= v <= hi): return f"{label} 범위는 {lo}~{hi}"
+        return None
+    def int_in(k, lo, hi, label):
+        if k in fields:
+            try: v = int(fields[k])
+            except (TypeError, ValueError): return f"{label}는 정수여야 함"
+            if not (lo <= v <= hi): return f"{label} 범위는 {lo}~{hi}"
+        return None
+
+    if "name" in fields:
+        v = fields["name"]
+        if not isinstance(v, str) or not v.strip():
+            return "name은 비울 수 없음"
+    for k, label in [("goal_weight_kg", "목표 체중"), ("start_weight_kg", "시작 체중")]:
+        err = num_in(k, 30, 300, label)
+        if err: return err
+    for k, label in [
+        ("daily_protein_target", "단백질"),
+        ("daily_carb_target", "탄수"),
+        ("daily_fat_target", "지방"),
+    ]:
+        err = int_in(k, 1, 500, label)
+        if err: return err
+    err = int_in("daily_calorie_target", 100, 10000, "칼로리")
+    if err: return err
+    err = int_in("weekly_exercise_target", 0, 21, "주간 운동")
+    if err: return err
+    if "meal_plan" in fields:
+        mp = fields["meal_plan"]
+        if not isinstance(mp, list): return "meal_plan은 배열이어야 함"
+        if len(mp) > 10: return "meal_plan 최대 10행"
+        for i, row in enumerate(mp):
+            if not isinstance(row, dict): return f"meal_plan[{i}]는 객체여야 함"
+            for key in ("meal", "food", "protein"):
+                v = row.get(key)
+                if not isinstance(v, str) or not (1 <= len(v) <= 60):
+                    return f"meal_plan[{i}].{key}는 1~60자 문자열"
+    return None
+
+
 @app.patch("/api/profile")
 async def update_profile(request: Request):
     """프로필 필드 부분 업데이트 (profiles.id=1 단일 행)"""
     body = await request.json()
-    allowed = {"goal_weight_kg", "daily_protein_target",
-               "daily_calorie_target", "weekly_exercise_target"}
+    allowed = {
+        "goal_weight_kg", "daily_protein_target", "daily_calorie_target", "weekly_exercise_target",
+        "name", "start_weight_kg", "daily_carb_target", "daily_fat_target", "meal_plan",
+    }
     fields = {k: v for k, v in body.items() if k in allowed}
     if not fields:
         return JSONResponse({"ok": False, "error": "변경할 필드 없음"}, status_code=400)
+    err = _validate_profile_patch(fields)
+    if err:
+        return JSONResponse({"ok": False, "error": err}, status_code=400)
+
     conn = get_db()
-    set_clause = ", ".join(f"{k}=?" for k in fields)
-    values = list(fields.values()) + [1]
-    conn.execute(f"UPDATE profiles SET {set_clause} WHERE id=?", values)
+    set_parts, values = [], []
+    for k, v in fields.items():
+        if k == "meal_plan":
+            set_parts.append("meal_plan_json=?")
+            values.append(json.dumps(v, ensure_ascii=False))
+        else:
+            set_parts.append(f"{k}=?")
+            values.append(v)
+    values.append(1)
+    conn.execute(f"UPDATE profiles SET {', '.join(set_parts)} WHERE id=?", values)
     conn.commit()
     conn.close()
     return JSONResponse({"ok": True})

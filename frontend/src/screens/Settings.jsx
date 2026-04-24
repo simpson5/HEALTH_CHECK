@@ -5,6 +5,7 @@ import { LoadingScreen } from './_Loading';
 import {
   Card, SectionLabel, Toast,
   NumberSettingRow, ToggleSettingRow, MenuSettingRow,
+  ProfileEditModal, MealPlanEditSheet,
 } from '../design/primitives';
 import Icon from '../design/Icon';
 import { daysSince, getToday } from '../lib/utils';
@@ -30,6 +31,8 @@ export function Settings() {
   const [jobs, setJobs] = useState([]);
   const [toast, setToast] = useState('');
   const [openJob, setOpenJob] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [mealPlanOpen, setMealPlanOpen] = useState(false);
   const [notify, setNotify] = useState(() => {
     try { return localStorage.getItem('sh:notify') !== '0'; }
     catch { return true; }
@@ -83,6 +86,8 @@ export function Settings() {
   const dPlus = profile.medication_start ? daysSince(profile.medication_start) : 0;
   const proGoal = profile.daily_targets?.protein_g || 110;
   const calGoal = profile.daily_targets?.calories_kcal || 1500;
+  const carbGoal = profile.daily_targets?.carbs_g;
+  const fatGoal = profile.daily_targets?.fat_g;
   const goal = profile.goal_weight_kg || 80;
   const initial = (profile.name || 'S').charAt(0);
 
@@ -105,7 +110,7 @@ export function Settings() {
 
       {/* Profile */}
       <div className="mx-5 mt-[18px]">
-        <Card pad={16}>
+        <Card pad={16} onClick={() => setEditOpen(true)}>
           <div className="flex gap-3.5 items-center">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-[22px] font-serif font-medium"
@@ -119,13 +124,20 @@ export function Settings() {
             <div className="flex-1 min-w-0">
               <div className="text-[16px] text-text font-medium tracking-[-0.3px]">{profile.name || 'Simpson'}</div>
               <div className="text-[11px] text-text-dim font-mono mt-0.5 truncate">
-                simpson301599@gmail.com · D+{dPlus}
+                {profile.medication_start ? `${profile.medication_start} 시작 · ` : ''}D+{dPlus}
               </div>
             </div>
             <Icon.chev s={16} />
           </div>
         </Card>
       </div>
+
+      <ProfileEditModal
+        open={editOpen}
+        profile={profile}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => { refresh(); showToast('프로필 저장됨'); }}
+      />
 
       {/* AI connection */}
       <SectionLabel>AI 연결</SectionLabel>
@@ -181,7 +193,32 @@ export function Settings() {
             unit="kcal"
             onSave={v => saveProfile({ daily_calorie_target: Math.round(v) }, '칼로리 목표 저장')}
           />
+          <NumberSettingRow
+            label="일일 탄수"
+            value={carbGoal}
+            unit="g"
+            onSave={v => saveProfile({ daily_carb_target: Math.round(v) }, '탄수 목표 저장')}
+          />
+          <NumberSettingRow
+            label="일일 지방"
+            value={fatGoal}
+            unit="g"
+            onSave={v => saveProfile({ daily_fat_target: Math.round(v) }, '지방 목표 저장')}
+          />
           <ToggleSettingRow label="알림" checked={notify} onChange={toggleNotify} />
+
+          <button
+            type="button"
+            onClick={() => setMealPlanOpen(true)}
+            className="w-full flex items-center px-4 py-3.5 bg-transparent border-b border-line cursor-pointer text-left"
+          >
+            <span className="flex-1 text-[13px] text-text tracking-[-0.2px]">식단 플랜</span>
+            <span className="text-[12px] text-text-mid font-mono mr-2">
+              {(profile.meal_plan?.length || 0) > 0 ? `${profile.meal_plan.length}행` : '미설정'}
+            </span>
+            <Icon.chev s={14} />
+          </button>
+
           <MenuSettingRow
             label="데이터 내보내기"
             valueLabel="CSV · JSON"
@@ -194,6 +231,13 @@ export function Settings() {
           />
         </Card>
       </div>
+
+      <MealPlanEditSheet
+        open={mealPlanOpen}
+        mealPlan={profile.meal_plan || []}
+        onClose={() => setMealPlanOpen(false)}
+        onSaved={() => { refresh(); showToast('식단 플랜 저장됨'); }}
+      />
 
       {/* Recent AI jobs */}
       <SectionLabel

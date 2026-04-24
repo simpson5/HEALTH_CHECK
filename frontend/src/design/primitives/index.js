@@ -8,3 +8,5 @@ export { SectionLabel } from './SectionLabel';
 export { Toast } from './Toast';
 export { WeightQuickInput } from './WeightQuickInput';
 export { NumberSettingRow, ToggleSettingRow, MenuSettingRow } from './SettingRows';
+export { ProfileEditModal } from './ProfileEditModal';
+export { MealPlanEditSheet } from './MealPlanEditSheet';

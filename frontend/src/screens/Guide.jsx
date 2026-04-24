@@ -1,8 +1,23 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
-import { Card, Chip, SectionLabel } from '../design/primitives';
+import { Card, Chip, SectionLabel, TapBtn } from '../design/primitives';
 import Icon from '../design/Icon';
+
+function computeProteinTotal(mealPlan) {
+  let lo = 0, hi = 0, any = false;
+  for (const r of mealPlan || []) {
+    const m = (r.protein || '').match(/(\d+(?:\.\d+)?)\s*(?:~\s*(\d+(?:\.\d+)?))?/);
+    if (!m) continue;
+    any = true;
+    const a = parseFloat(m[1]);
+    const b = m[2] ? parseFloat(m[2]) : a;
+    lo += a; hi += b;
+  }
+  if (!any) return null;
+  return lo === hi ? `${Math.round(lo)}g` : `${Math.round(lo)}~${Math.round(hi)}g`;
+}
 
 const TABS = ['하루일과', '식단', '운동', '식품도감', '로드맵'];
 
@@ -122,28 +137,42 @@ function TabDailyRoutine({ data }) {
 }
 
 function TabMeal({ data }) {
-  const mealPlan = data.profile?.meal_plan;
-  const rows = mealPlan && mealPlan.length
-    ? mealPlan.map(m => [m.meal, m.food, m.protein])
-    : [
-        ['아침', '닥터유PRO 드링크 40g + 고구마', '41g'],
-        ['점심', '일반식 (고기 위주)', '20~30g'],
-        ['저녁', '훈제닭가슴살 2개 + 야채', '44~54g'],
-      ];
+  const nav = useNavigate();
+  const mealPlan = data.profile?.meal_plan || [];
+  const proteinTotal = computeProteinTotal(mealPlan);
+
+  if (mealPlan.length === 0) {
+    return (
+      <>
+        <SectionLabel>하루 식단</SectionLabel>
+        <div className="mx-5">
+          <Card pad={18} className="text-center">
+            <div className="text-[12px] text-text-dim">식단 플랜 미설정</div>
+            <div className="mt-3">
+              <TapBtn variant="soft" onClick={() => nav('/settings')}>설정에서 추가 →</TapBtn>
+            </div>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      <SectionLabel right={<span className="text-protein">105~125g</span>}>하루 식단</SectionLabel>
+      <SectionLabel right={proteinTotal ? <span className="text-protein">{proteinTotal}</span> : null}>
+        하루 식단
+      </SectionLabel>
       <div className="mx-5">
         <Card pad={0}>
-          {rows.map(([m, food, p], i, a) => (
+          {mealPlan.map((row, i, a) => (
             <div
-              key={m}
+              key={i}
               className={`grid gap-3 items-center px-4 py-3.5 ${i === a.length - 1 ? '' : 'border-b border-line'}`}
               style={{ gridTemplateColumns: '50px 1fr auto' }}
             >
-              <span className="text-[11px] text-text-dim font-mono tracking-[0.5px] uppercase">{m}</span>
-              <span className="text-[13px] text-text tracking-[-0.2px]">{food}</span>
-              <span className="text-[12px] text-protein font-mono font-medium">{p}</span>
+              <span className="text-[11px] text-text-dim font-mono tracking-[0.5px] uppercase">{row.meal}</span>
+              <span className="text-[13px] text-text tracking-[-0.2px]">{row.food}</span>
+              <span className="text-[12px] text-protein font-mono font-medium">{row.protein}</span>
             </div>
           ))}
         </Card>
