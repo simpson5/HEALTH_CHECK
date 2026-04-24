@@ -6,7 +6,8 @@ from datetime import datetime
 
 def parse_inbody_csv(filepath):
     """인바디 CSV → dict 변환"""
-    with open(filepath, encoding="utf-8") as f:
+    # utf-8-sig: BOM 자동 제거 (BOM 있으면 "날짜" 키가 "﻿날짜"로 읽히는 문제)
+    with open(filepath, encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         row = next(reader)
 
