@@ -65,14 +65,22 @@ def get_job(job_id):
 
 
 def get_recent_jobs(limit=10):
-    """최근 작업 목록"""
+    """최근 작업 목록 — 상세 보기용 input/output 포함"""
     conn = get_db()
     rows = conn.execute(
-        "SELECT id, type, status, created_at, finished_at FROM ai_jobs ORDER BY id DESC LIMIT ?",
+        """SELECT id, type, status, created_at, started_at, finished_at,
+                  input_json, output_json, error
+           FROM ai_jobs ORDER BY id DESC LIMIT ?""",
         (limit,)
     ).fetchall()
     conn.close()
-    return [dict(r) for r in rows]
+    result = []
+    for r in rows:
+        d = dict(r)
+        d["input"] = json.loads(d.pop("input_json") or "null")
+        d["output"] = json.loads(d.pop("output_json") or "null")
+        result.append(d)
+    return result
 
 
 def update_job(job_id, status, output=None, error=None):
@@ -169,6 +177,21 @@ DB에서 {date} 식단/운동/체중 데이터를 확인하고 분석해줘.
 질문: {question}
 반드시 아래 JSON 형식으로만 응답해:
 {{"mode":"coach","message":"답변 내용"}}"""
+
+    elif job_type == "inbody_parse":
+        photo = input_data.get("photo", "")
+        return f"""인바디 결과지 사진에서 수치를 추출해 JSON으로 돌려줘. DB 저장 금지.
+사진 경로: {photo}
+먼저 Read 툴로 이미지를 읽어서 숫자를 확인해. 모르는 필드는 null. 반드시 아래 JSON만 응답:
+{{"mode":"inbody_parse","message":"추출 요약","payload":{{"weight_kg":0,"muscle_kg":0,"fat_kg":0,"fat_pct":0,"bmi":0,"bmr_kcal":0,"visceral_fat_level":0,"inbody_score":0}}}}"""
+
+    elif job_type == "weekly_report":
+        start = input_data.get("start_date", "")
+        end = input_data.get("end_date", "")
+        return f"""건강관리자로서 {start}~{end} 1주일 종합 분석 리포트를 작성해줘.
+DB에서 해당 기간의 weight_records / diet_records / exercise_sessions / inbody_records 를 조회하고 분석.
+반드시 아래 JSON 형식으로만 응답:
+{{"mode":"weekly_report","message":"한줄 요약","payload":{{"start_date":"{start}","end_date":"{end}","summary":"주간 총평","weight_trend":"체중 변화 분석","diet_analysis":"식단 분석","exercise_analysis":"운동 분석","highlights":["잘한 점들"],"advice":"다음 주 조언"}}}}"""
 
     return input_data.get("prompt", "")
 
