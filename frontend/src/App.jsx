@@ -10,6 +10,10 @@ import { Session } from './screens/Session';
 import { Calendar } from './screens/Calendar';
 import { Guide } from './screens/Guide';
 import { Settings } from './screens/Settings';
+import { Coach } from './screens/Coach';
+import { AIJobsAll } from './screens/AIJobsAll';
+import { InbodyNew } from './screens/InbodyNew';
+import { WeeklyReport } from './screens/WeeklyReport';
 
 function HomeRouter() {
   const [params] = useSearchParams();
@@ -34,6 +38,10 @@ export default function App() {
             <Route path="/guide" element={<Guide />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/session" element={<Session />} />
+            <Route path="/coach" element={<Coach />} />
+            <Route path="/ai-jobs" element={<AIJobsAll />} />
+            <Route path="/inbody/new" element={<InbodyNew />} />
+            <Route path="/weekly-report" element={<WeeklyReport />} />
           </Route>
         </Routes>
       </BrowserRouter>

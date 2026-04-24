@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
 import { Card, Chip, TapBtn, SectionLabel, Toast, WeightQuickInput } from '../design/primitives';
 import Icon from '../design/Icon';
 import { getToday, daysSince } from '../lib/utils';
-import { uploadPhoto } from '../lib/api';
+import { uploadPhoto, pollJob } from '../lib/api';
 
 export function Record() {
+  const nav = useNavigate();
   const { data, loading, refresh } = useData();
   const [dose, setDose] = useState('5mg');
   const [mealText, setMealText] = useState('');
@@ -54,20 +56,6 @@ export function Record() {
     }
   }
 
-  async function pollJob(jobId) {
-    for (let i = 0; i < 60; i++) {
-      await new Promise(r => setTimeout(r, 2000));
-      const res = await fetch('/api/ai/jobs/' + jobId);
-      const job = await res.json();
-      if (job.status === 'done') {
-        refresh();
-        return true;
-      }
-      if (job.status === 'failed') return false;
-    }
-    return false;
-  }
-
   async function analyzeMeal() {
     if (!mealText.trim() && !photo) return;
     setAnalyzing(true);
@@ -97,7 +85,8 @@ export function Record() {
         showToast('AI 분석 실패');
         return;
       }
-      const ok = await pollJob(d.job_id);
+      const { ok } = await pollJob(d.job_id);
+      if (ok) refresh();
       setMealText('');
       setPhoto(null);
       showToast(ok ? 'AI 분석 완료' : 'AI 분석 타임아웃');
@@ -130,7 +119,8 @@ export function Record() {
     });
     const d = await r.json();
     if (d.ok) {
-      const ok = await pollJob(d.job_id);
+      const { ok } = await pollJob(d.job_id);
+      if (ok) refresh();
       showToast(ok ? '일일 리포트 완료' : '일일 리포트 실패');
     } else {
       showToast('일일 리포트 실패');
@@ -265,7 +255,7 @@ export function Record() {
           <div className="text-[13px] text-text font-medium tracking-[-0.2px]">일일 리포트</div>
           <div className="text-[11px] text-text-dim font-mono mt-0.5">오늘 요약</div>
         </Card>
-        <Card pad={14} onClick={() => showToast('준비 중')}>
+        <Card pad={14} onClick={() => nav('/coach')}>
           <div className="text-accent mb-2.5"><Icon.meal s={18} /></div>
           <div className="text-[13px] text-text font-medium tracking-[-0.2px]">건강 상담</div>
           <div className="text-[11px] text-text-dim font-mono mt-0.5">AI에게 질문</div>

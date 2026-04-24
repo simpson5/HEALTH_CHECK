@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
 import { Card, SectionLabel, WeightQuickInput } from '../design/primitives';
@@ -14,6 +15,7 @@ const RANGES = [
 ];
 
 export function Weight() {
+  const nav = useNavigate();
   const { data, loading, refresh } = useData();
   const [range, setRange] = useState('1M');
   if (loading || !data) return <LoadingScreen />;
@@ -152,7 +154,38 @@ export function Weight() {
       </div>
 
       {/* Last inbody summary */}
-      <SectionLabel right={<span>{lastInbodyDateLabel}</span>}>최근 인바디</SectionLabel>
+      <SectionLabel
+        right={
+          <div className="flex items-center gap-2">
+            <span>{lastInbodyDateLabel}</span>
+            {lastInbody && (
+              <button
+                type="button"
+                onClick={() =>
+                  nav('/coach', {
+                    state: {
+                      initialQuestion:
+                        `최근 인바디 결과를 해석해줘. 체중 ${lastInbody.weight_kg}kg, 골격근 ${lastInbody.muscle_kg}kg, 체지방 ${lastInbody.fat_kg}kg, 체지방률 ${lastInbody.fat_pct}%, BMI ${lastInbody.bmi}. 좋은 점/개선점 알려줘.`,
+                    },
+                  })
+                }
+                className="text-accent bg-transparent border-none cursor-pointer text-[11px] font-mono"
+              >
+                AI 해석
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => nav('/inbody/new')}
+              className="text-accent bg-transparent border-none cursor-pointer text-[11px] font-mono"
+            >
+              + 기록
+            </button>
+          </div>
+        }
+      >
+        최근 인바디
+      </SectionLabel>
       <div className="mx-5">
         <Card pad={0}>
           {lastInbody
