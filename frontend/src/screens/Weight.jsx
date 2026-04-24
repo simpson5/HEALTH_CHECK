@@ -78,8 +78,24 @@ export function Weight() {
       </div>
 
       {/* Quick weight input */}
-      <div className="mx-5 mb-3">
+      <div className="mx-5 mb-2">
         <WeightQuickInput onSaved={refresh} />
+      </div>
+
+      {/* Inbody record shortcut */}
+      <div className="mx-5 mb-3">
+        <Card pad={14} onClick={() => nav('/inbody/new')}>
+          <div className="flex gap-2.5 items-center">
+            <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-accent">
+              <Icon.scale s={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] text-text tracking-[-0.2px]">인바디 기록하기</div>
+              <div className="text-[11px] text-text-dim font-mono mt-0.5">CSV 파일 · 사진 AI · 수동 입력</div>
+            </div>
+            <Icon.chev s={14} />
+          </div>
+        </Card>
       </div>
 
       {/* Range tabs */}

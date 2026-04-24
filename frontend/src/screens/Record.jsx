@@ -142,6 +142,23 @@ export function Record() {
         <WeightQuickInput onSaved={() => { refresh(); showToast('체중 저장됨'); }} />
       </div>
 
+      {/* Inbody */}
+      <SectionLabel right={<span className="text-text-dim">CSV · 사진 · 수동</span>}>인바디 기록</SectionLabel>
+      <div className="mx-5">
+        <Card pad={16} onClick={() => nav('/inbody/new')}>
+          <div className="flex gap-2.5 items-center">
+            <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-accent">
+              <Icon.scale s={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] text-text tracking-[-0.2px]">인바디 기록하기</div>
+              <div className="text-[11px] text-text-dim font-mono mt-0.5">CSV 파일 또는 사진(AI 자동 인식)</div>
+            </div>
+            <Icon.chev s={14} />
+          </div>
+        </Card>
+      </div>
+
       {/* Medication */}
       <SectionLabel right={<span>주 1회 · 금요일</span>}>투약</SectionLabel>
       <div className="mx-5">
