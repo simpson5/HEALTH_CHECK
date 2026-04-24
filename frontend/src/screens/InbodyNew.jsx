@@ -195,7 +195,6 @@ export function InbodyNew() {
               ref={photoRef}
               type="file"
               accept="image/*"
-              capture="environment"
               onChange={handleAiPick}
               className="hidden"
             />
