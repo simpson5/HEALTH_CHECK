@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
-import { Card, SectionLabel, WeightQuickInput } from '../design/primitives';
+import { Card, SectionLabel } from '../design/primitives';
 import Icon from '../design/Icon';
 import { fmtDate } from '../lib/utils';
 
@@ -16,7 +16,7 @@ const RANGES = [
 
 export function Weight() {
   const nav = useNavigate();
-  const { data, loading, refresh } = useData();
+  const { data, loading } = useData();
   const [range, setRange] = useState('1M');
   if (loading || !data) return <LoadingScreen />;
 
@@ -75,27 +75,6 @@ export function Weight() {
           </span>
           <span className="text-text-mid">▼ {Math.abs(avgPerDay).toFixed(2)}kg/일 평균</span>
         </div>
-      </div>
-
-      {/* Quick weight input */}
-      <div className="mx-5 mb-2">
-        <WeightQuickInput onSaved={refresh} />
-      </div>
-
-      {/* Inbody record shortcut */}
-      <div className="mx-5 mb-3">
-        <Card pad={14} onClick={() => nav('/inbody/new')}>
-          <div className="flex gap-2.5 items-center">
-            <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-accent">
-              <Icon.scale s={18} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[13px] text-text tracking-[-0.2px]">인바디 기록하기</div>
-              <div className="text-[11px] text-text-dim font-mono mt-0.5">CSV 파일 · 사진 AI · 수동 입력</div>
-            </div>
-            <Icon.chev s={14} />
-          </div>
-        </Card>
       </div>
 
       {/* Range tabs */}
@@ -162,56 +141,62 @@ export function Weight() {
       <div className="mx-5 mt-4">
         <Card pad={18}>
           <div className="flex justify-between mb-3.5">
-            <span className="text-[12px] text-text-mid">근육 vs 지방 · 최근 4회</span>
+            <span className="text-[12px] text-text-mid">근육 vs 지방 · 최근 {Math.min(inbodyRecs.length, 6)}회</span>
             <span className="text-[11px] text-text-dim font-mono">인바디</span>
           </div>
-          <BodyCompChart recs={inbodyRecs.slice(-4)} />
+          <BodyCompChart recs={inbodyRecs.slice(-6)} />
         </Card>
       </div>
+
+      {/* Inbody trend lines */}
+      {inbodyRecs.length >= 2 && (
+        <div className="mx-5 mt-2.5">
+          <Card pad={18}>
+            <div className="flex justify-between mb-3.5">
+              <span className="text-[12px] text-text-mid">체지방률 · 골격근 추이</span>
+              <span className="text-[11px] text-text-dim font-mono">{inbodyRecs.length}회</span>
+            </div>
+            <InbodyTrendChart recs={inbodyRecs} />
+          </Card>
+        </div>
+      )}
 
       {/* Last inbody summary */}
       <SectionLabel
         right={
-          <div className="flex items-center gap-2">
-            <span>{lastInbodyDateLabel}</span>
-            {lastInbody && (
-              <button
-                type="button"
-                onClick={() =>
-                  nav('/coach', {
-                    state: {
-                      initialQuestion:
-                        `최근 인바디 결과를 해석해줘. 체중 ${lastInbody.weight_kg}kg, 골격근 ${lastInbody.muscle_kg}kg, 체지방 ${lastInbody.fat_kg}kg, 체지방률 ${lastInbody.fat_pct}%, BMI ${lastInbody.bmi}. 좋은 점/개선점 알려줘.`,
-                    },
-                  })
-                }
-                className="text-accent bg-transparent border-none cursor-pointer text-[11px] font-mono"
-              >
-                AI 해석
-              </button>
-            )}
+          lastInbody ? (
             <button
               type="button"
-              onClick={() => nav('/inbody/new')}
+              onClick={() =>
+                nav('/coach', {
+                  state: {
+                    initialQuestion:
+                      `최근 인바디 결과를 해석해주세요. 체중 ${lastInbody.weight_kg}kg, 골격근 ${lastInbody.muscle_kg}kg, 체지방 ${lastInbody.fat_kg}kg, 체지방률 ${lastInbody.fat_pct}%, BMI ${lastInbody.bmi}, 인바디 점수 ${lastInbody.inbody_score}. 좋은 점과 개선점을 알려주세요.`,
+                  },
+                })
+              }
               className="text-accent bg-transparent border-none cursor-pointer text-[11px] font-mono"
             >
-              + 기록
+              AI 해석 →
             </button>
-          </div>
+          ) : <span>{lastInbodyDateLabel}</span>
         }
       >
-        최근 인바디
+        최근 인바디 {lastInbody && <span className="text-text-dim ml-1">· {lastInbodyDateLabel}</span>}
       </SectionLabel>
       <div className="mx-5">
         <Card pad={0}>
           {lastInbody
             ? [
-                ['골격근', `${lastInbody.muscle_kg?.toFixed(1) ?? '--'} kg`, deltaFmt(lastInbody.muscle_change_kg, false), 'up'],
-                ['체지방', `${lastInbody.fat_kg?.toFixed(1) ?? '--'} kg`, deltaFmt(lastInbody.fat_change_kg, true), 'up'],
-                ['BMI', `${lastInbody.bmi?.toFixed(1) ?? '--'}`, deltaFmt(lastInbody.weight_change_kg, true), 'up'],
-                ['체지방률', `${lastInbody.fat_pct?.toFixed(1) ?? '--'} %`, deltaFmt(lastInbody.fat_change_kg, true), 'up'],
-                ['내장지방', `레벨 ${lastInbody.visceral_fat_level ?? '--'}`, '— 0.0', 'mid'],
-              ].map(([k, v, d, c], i, a) => (
+                ['체중', `${lastInbody.weight_kg?.toFixed(1) ?? '--'} kg`, deltaFmt(lastInbody.weight_change_kg, true)],
+                ['골격근', `${lastInbody.muscle_kg?.toFixed(1) ?? '--'} kg`, deltaFmt(lastInbody.muscle_change_kg, false)],
+                ['체지방', `${lastInbody.fat_kg?.toFixed(1) ?? '--'} kg`, deltaFmt(lastInbody.fat_change_kg, true)],
+                ['체지방률', `${lastInbody.fat_pct?.toFixed(1) ?? '--'} %`, '—'],
+                ['BMI', `${lastInbody.bmi?.toFixed(1) ?? '--'}`, '—'],
+                ['기초대사량', `${lastInbody.bmr_kcal ?? '--'} kcal`, '—'],
+                ['내장지방', `레벨 ${lastInbody.visceral_fat_level ?? '--'}`, '—'],
+                ['인바디 점수', `${lastInbody.inbody_score ?? '--'} 점`, '—'],
+              ].map(([k, v, d], i, a) => (
                 <div
                   key={k}
                   className={`flex justify-between items-baseline px-4 py-3.5 ${i === a.length - 1 ? '' : 'border-b border-line'}`}
@@ -219,12 +204,114 @@ export function Weight() {
                   <span className="text-[14px] text-text tracking-[-0.2px]">{k}</span>
                   <div className="flex gap-3.5 items-baseline">
                     <span className="font-mono text-[14px] text-text font-medium">{v}</span>
-                    <span className={`font-mono text-[11px] w-16 text-right ${c === 'up' ? 'text-up' : 'text-text-mid'}`}>{d}</span>
+                    <span className={`font-mono text-[11px] w-16 text-right ${deltaColorClass(d)}`}>{d}</span>
                   </div>
                 </div>
               ))
             : <div className="px-4 py-6 text-center text-text-dim text-[12px]">인바디 기록 없음</div>}
         </Card>
+      </div>
+
+      {/* Full inbody history */}
+      {inbodyRecs.length > 0 && (
+        <>
+          <SectionLabel right={<span>{inbodyRecs.length}회 측정</span>}>인바디 이력</SectionLabel>
+          <div className="mx-5">
+            <Card pad={0}>
+              {[...inbodyRecs].reverse().map((r, i, a) => (
+                <div
+                  key={r.date}
+                  className={`flex items-center gap-3 px-4 py-3 ${i === a.length - 1 ? '' : 'border-b border-line'}`}
+                >
+                  <div className="w-12 text-[11px] text-text-dim font-mono tracking-[0.3px]">
+                    {String(new Date(r.date).getMonth() + 1).padStart(2, '0')}/{String(new Date(r.date).getDate()).padStart(2, '0')}
+                  </div>
+                  <div className="flex-1 min-w-0 grid grid-cols-3 gap-2 text-[11px] font-mono">
+                    <div>
+                      <div className="text-text-dim">체중</div>
+                      <div className="text-text">{r.weight_kg?.toFixed(1) ?? '--'}<span className="text-text-dim">kg</span></div>
+                    </div>
+                    <div>
+                      <div className="text-text-dim">골격근</div>
+                      <div className="text-text">{r.muscle_kg?.toFixed(1) ?? '--'}<span className="text-text-dim">kg</span></div>
+                    </div>
+                    <div>
+                      <div className="text-text-dim">체지방률</div>
+                      <div className="text-text">{r.fat_pct?.toFixed(1) ?? '--'}<span className="text-text-dim">%</span></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Card>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function deltaColorClass(d) {
+  if (!d || d === '—' || d.startsWith('— ')) return 'text-text-dim';
+  if (d.startsWith('▼')) return 'text-up';
+  if (d.startsWith('▲')) return 'text-up';
+  return 'text-text-mid';
+}
+
+function InbodyTrendChart({ recs }) {
+  const W = 400, H = 120;
+  const pad = { l: 36, r: 12, t: 12, b: 18 };
+
+  const fatPcts = recs.map(r => r.fat_pct ?? null);
+  const muscles = recs.map(r => r.muscle_kg ?? null);
+  const validFat = fatPcts.filter(v => v != null);
+  const validMus = muscles.filter(v => v != null);
+
+  if (validFat.length < 2 && validMus.length < 2) {
+    return <div className="h-[120px] flex items-center justify-center text-text-dim text-[11px] font-mono">데이터 부족</div>;
+  }
+
+  // Two separate y-axes: fat_pct (0~60), muscle_kg (auto-scaled)
+  const fMin = 0, fMax = Math.max(60, Math.ceil(Math.max(...validFat) + 2));
+  const mMin = Math.floor(Math.min(...validMus) - 2);
+  const mMax = Math.ceil(Math.max(...validMus) + 2);
+
+  const n = recs.length;
+  const xs = recs.map((_, i) => pad.l + (i / (n - 1 || 1)) * (W - pad.l - pad.r));
+
+  const fatY = v => pad.t + (1 - (v - fMin) / (fMax - fMin)) * (H - pad.t - pad.b);
+  const musY = v => pad.t + (1 - (v - mMin) / (mMax - mMin || 1)) * (H - pad.t - pad.b);
+
+  const fatPath = recs.map((r, i) => r.fat_pct == null ? '' : `${xs[i].toFixed(1)} ${fatY(r.fat_pct).toFixed(1)}`).filter(Boolean).map((p, i) => (i === 0 ? 'M' : 'L') + p).join(' ');
+  const musPath = recs.map((r, i) => r.muscle_kg == null ? '' : `${xs[i].toFixed(1)} ${musY(r.muscle_kg).toFixed(1)}`).filter(Boolean).map((p, i) => (i === 0 ? 'M' : 'L') + p).join(' ');
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full block" style={{ height: H }}>
+        {/* fat_pct line (red-ish / down color) */}
+        <path d={fatPath} fill="none" stroke="var(--color-down)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        {/* muscle line (accent) */}
+        <path d={musPath} fill="none" stroke="var(--color-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        {/* dots */}
+        {recs.map((r, i) => (
+          <g key={i}>
+            {r.fat_pct != null && <circle cx={xs[i]} cy={fatY(r.fat_pct)} r="2.5" fill="var(--color-down)" />}
+            {r.muscle_kg != null && <circle cx={xs[i]} cy={musY(r.muscle_kg)} r="2.5" fill="var(--color-accent)" />}
+          </g>
+        ))}
+        {/* x-axis labels */}
+        {recs.map((r, i) => (
+          <text key={i} x={xs[i]} y={H - 4} textAnchor="middle" fontSize="9" fill="var(--color-text-dim)" fontFamily="monospace">
+            {fmtDate(r.date)}
+          </text>
+        ))}
+      </svg>
+      <div className="flex gap-3.5 mt-1.5 text-[11px]">
+        <span className="inline-flex items-center gap-1.5 text-text-mid">
+          <span className="w-2 h-2 rounded-full bg-down" />체지방률 %
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-text-mid">
+          <span className="w-2 h-2 rounded-full bg-accent" />골격근 kg
+        </span>
       </div>
     </div>
   );

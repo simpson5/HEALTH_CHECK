@@ -214,19 +214,18 @@ export function Home() {
         </Card>
       </div>
 
-      {/* Weekly AI report entry */}
-      <div className="mx-5 mt-5">
-        <Card pad={0} onClick={() => nav('/weekly-report')}>
-          <div className="flex items-center gap-3 px-4 py-3.5">
-            <div className="w-9 h-9 rounded-[10px] bg-accent-soft flex items-center justify-center text-accent">
-              <Icon.book s={18} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[13px] text-text font-medium tracking-[-0.2px]">주간 AI 리포트</div>
-              <div className="text-[11px] text-text-dim font-mono mt-0.5">이번 주 · 지난 주 종합 분석</div>
-            </div>
-            <Icon.chev s={14} />
-          </div>
+      {/* AI shortcuts */}
+      <SectionLabel>AI 기능</SectionLabel>
+      <div className="mx-5 grid grid-cols-2 gap-2.5">
+        <Card pad={14} onClick={() => nav('/coach')}>
+          <div className="text-accent mb-2.5"><Icon.meal s={18} /></div>
+          <div className="text-[13px] text-text font-medium tracking-[-0.2px]">건강 상담</div>
+          <div className="text-[11px] text-text-dim font-mono mt-0.5">AI에게 질문</div>
+        </Card>
+        <Card pad={14} onClick={() => nav('/weekly-report')}>
+          <div className="text-accent mb-2.5"><Icon.book s={18} /></div>
+          <div className="text-[13px] text-text font-medium tracking-[-0.2px]">주간 리포트</div>
+          <div className="text-[11px] text-text-dim font-mono mt-0.5">종합 분석</div>
         </Card>
       </div>
 
