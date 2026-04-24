@@ -4,6 +4,7 @@ import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
 import { Card, Ring, SectionLabel } from '../design/primitives';
 import Icon from '../design/Icon';
+import { ExerciseDetailSheet } from '../components/ExerciseDetailSheet';
 import { getToday, daysSince, getWeekRange } from '../lib/utils';
 import {
   GROUP_LABEL,
@@ -22,6 +23,7 @@ export function Workout() {
   const nav = useNavigate();
   const [cat, setCat] = useState('machine');
   const [filter, setFilter] = useState('favorite');
+  const [detailEx, setDetailEx] = useState(null);
 
   if (loading || !data) return <LoadingScreen />;
 
@@ -86,6 +88,16 @@ export function Workout() {
   }
 
   const remain = Math.max(0, weekGoal - weekDone);
+
+  // ETA from session median (L8) — needs at least 3 records, else fallback
+  const recentDurations = exerciseRecs
+    .slice(-5)
+    .map(r => r.total_duration_min)
+    .filter(v => typeof v === 'number' && v > 0)
+    .sort((a, b) => a - b);
+  const etaMin = recentDurations.length >= 3
+    ? Math.round(recentDurations[Math.floor(recentDurations.length / 2)])
+    : null;
 
   return (
     <div className="pb-[100px]">
@@ -157,7 +169,7 @@ export function Workout() {
         <div className="flex justify-center gap-3.5 mt-2.5 font-mono text-[11px] text-text-dim">
           <span>오늘 · {today}</span>
           <span>·</span>
-          <span>예상 45분</span>
+          <span>{etaMin ? `예상 ${etaMin}분` : '약 40~60분'}</span>
         </div>
       </div>
 
@@ -202,7 +214,7 @@ export function Workout() {
           <Card className="text-center text-text-dim text-[12px]" pad={16}>해당하는 운동이 없습니다</Card>
         ) : (
           filteredList.map(ex => (
-            <Card key={ex.id} pad={14}>
+            <Card key={ex.id} pad={14} onClick={() => setDetailEx(ex)}>
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-[10px] flex items-center justify-center text-text-mid"
@@ -222,7 +234,7 @@ export function Workout() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => toggleFav(ex)}
+                  onClick={(e) => { e.stopPropagation(); toggleFav(ex); }}
                   aria-label="즐겨찾기 토글"
                   className="w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center text-text-mid"
                   style={{ background: 'rgba(255,255,255,0.04)' }}
@@ -234,6 +246,12 @@ export function Workout() {
           ))
         )}
       </div>
+
+      <ExerciseDetailSheet
+        exercise={detailEx}
+        records={exerciseRecs}
+        onClose={() => setDetailEx(null)}
+      />
     </div>
   );
 }
