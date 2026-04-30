@@ -4,6 +4,7 @@ import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
 import { Card, Chip, SectionLabel, TapBtn } from '../design/primitives';
 import Icon from '../design/Icon';
+import { computeMilestones } from '../lib/roadmap';
 
 function computeProteinTotal(mealPlan) {
   let lo = 0, hi = 0, any = false;
@@ -272,33 +273,17 @@ function TabFoods({ data }) {
 
 function TabRoadmap() {
   const { data } = useData();
-  const DOW_KR = ['일', '월', '화', '수', '목', '금', '토'];
-  const profile = data?.profile || {};
-  const weightRecs = data?.weight_records || [];
-  const cur = weightRecs.length > 0 ? weightRecs[weightRecs.length - 1].weight_kg : null;
-  const goal = profile.goal_weight_kg;
+  const items = computeMilestones(data);
 
-  let milestones = [];
-  if (cur != null && goal != null && cur > goal) {
-    const today = new Date();
-    const remain = cur - goal;
-    const pace = Math.max(0.5, Math.min(4, remain / 4));
-    let prev = cur;
-    for (let i = 1; i <= 4; i++) {
-      const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-      const target = Math.max(goal, +(prev - pace).toFixed(1));
-      const deltaKg = Math.abs(+(target - prev).toFixed(1));
-      const days = Math.max(0, Math.round((d - today) / 86400000));
-      milestones.push({
-        date: `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, '0')} (${DOW_KR[d.getDay()]})`,
-        weight: `${target.toFixed(1)}kg`,
-        delta: `▼ ${deltaKg.toFixed(1)}kg`,
-        d: `D-${days}`,
-      });
-      prev = target;
-      if (target <= goal) break;
-    }
-  }
+  const milestones = items.map(m => {
+    const deltaKg = Math.abs(parseFloat(m.delta));
+    return {
+      date: `${m.date} (${m.dow})`,
+      weight: m.kg,
+      delta: `▼ ${deltaKg.toFixed(1)}kg`,
+      d: `D-${m.days}`,
+    };
+  });
 
   return (
     <>

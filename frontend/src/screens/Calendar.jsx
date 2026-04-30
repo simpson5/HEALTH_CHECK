@@ -4,43 +4,10 @@ import { LoadingScreen } from './_Loading';
 import { Card, SectionLabel } from '../design/primitives';
 import Icon from '../design/Icon';
 import { getToday } from '../lib/utils';
+import { computeMilestones } from '../lib/roadmap';
 
 const DOWS = ['일', '월', '화', '수', '목', '금', '토'];
 const DOW_KR = ['일', '월', '화', '수', '목', '금', '토'];
-
-function computeMilestones(data) {
-  const profile = data.profile || {};
-  const weightRecs = data.weight_records || [];
-  const cur = weightRecs.length > 0 ? weightRecs[weightRecs.length - 1].weight_kg : null;
-  const goal = profile.goal_weight_kg;
-  if (cur == null || goal == null || cur <= goal) return [];
-
-  const today = new Date(getToday());
-  const items = [];
-  // Next 4 monthly milestones: 1st of next N months, target descending to goal
-  const totalRemain = cur - goal;
-  // Assume 0.9kg/week ≈ 3.9kg/month pace, ensure min 0.5kg/month delta
-  const monthlyPace = Math.max(0.5, Math.min(4, totalRemain / 4));
-  let prev = cur;
-  for (let i = 1; i <= 4; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-    const target = Math.max(goal, +(prev - monthlyPace).toFixed(1));
-    const delta = +(target - prev).toFixed(1);
-    const daysLeft = Math.max(0, Math.round((d - today) / 86400000));
-    items.push({
-      date: `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, '0')}`,
-      dow: DOW_KR[d.getDay()],
-      label: `${d.getMonth() + 1}월 목표`,
-      kg: `${target.toFixed(1)}kg`,
-      delta: `${delta.toFixed(1)}kg`,
-      days: daysLeft,
-      reached: target <= goal,
-    });
-    prev = target;
-    if (target <= goal) break;
-  }
-  return items;
-}
 
 export function Calendar() {
   const { data, loading } = useData();
