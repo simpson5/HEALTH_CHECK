@@ -24,6 +24,16 @@ cd health_check
 
 ---
 
+## 운영 환경 이전 (맥북 → 맥미니)
+
+집 맥미니에 24시간 서버를 구축하고 외부에서 접속하려면:
+
+📘 **[docs/22_macmini_migration_guide.md](docs/22_macmini_migration_guide.md)**
+
+데이터 백업/복원 · 슬립 방지 · Claude CLI 설치 · Cloudflare Tunnel · LaunchAgent 자동 실행 · 트러블슈팅 9가지.
+
+---
+
 ## 설치 가이드 (첫 실행)
 
 ### 1. 필수 소프트웨어 설치
