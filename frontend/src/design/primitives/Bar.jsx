@@ -10,7 +10,7 @@
 // inline style 허용: height (동적), width (동적 %), color (동적)
 import React from 'react';
 
-export function Bar({ pct, color = 'var(--color-accent)', height = 4, track = 'rgba(255,255,255,0.06)' }) {
+export function Bar({ pct, color = 'var(--color-amber)', height = 4, track = 'var(--color-surface-3)' }) {
   const clamped = Math.max(0, Math.min(1, pct));
   return (
     <div

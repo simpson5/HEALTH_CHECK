@@ -50,23 +50,21 @@ export function Meal() {
           <div className="flex items-center gap-[18px]">
             <Ring size={94} stroke={8} pct={total.p / proGoal} color="var(--color-protein)">
               <div className="text-center">
-                <div className="text-[22px] font-medium text-text tracking-[-0.5px]">
+                <div className="text-[22px] font-bold text-text tracking-[-0.5px]">
                   {Math.round(total.p)}<span className="text-[10px] text-text-dim font-normal">g</span>
                 </div>
                 <div className="text-[9px] text-text-dim font-mono tracking-[0.4px] uppercase">단백질</div>
               </div>
             </Ring>
             <div className="flex-1">
-              <div className="text-[11px] text-text-dim font-mono tracking-[0.6px] uppercase">
-                섭취 / 목표
-              </div>
+              <div className="text-[11px] text-text-mid font-medium">섭취 / 목표</div>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-[32px] font-normal text-text tracking-[-1px]">{Math.round(total.kc)}</span>
-                <span className="text-[13px] text-text-dim">/ {calGoal} kcal</span>
+                <span className="text-[32px] font-bold text-text tracking-[-1px]">{Math.round(total.kc)}</span>
+                <span className="text-[13px] text-text-mid">/ {calGoal} kcal</span>
               </div>
-              <div className="text-[11px] text-accent font-mono mt-1">
+              <div className={`text-[11px] font-semibold mt-1 ${total.p >= proGoal ? 'text-sage' : 'text-amber'}`}>
                 {total.p < proGoal
-                  ? `▲ 단백질 ${Math.max(0, (proGoal - total.p)).toFixed(1)}g 남음`
+                  ? `단백질 ${Math.max(0, (proGoal - total.p)).toFixed(1)}g 남음`
                   : '✓ 단백질 목표 달성'}
               </div>
             </div>
@@ -79,19 +77,30 @@ export function Meal() {
               ['지방', total.f, profile.daily_targets.fat_g, 'g', 'var(--color-fat)'],
             ].map(([l, v, t, u, c]) => (
               <div key={l} className="flex-1">
-                <div className="text-[10px] text-text-dim font-mono tracking-[0.3px] uppercase">{l}</div>
+                <div className="text-[10px] text-text-mid font-medium">{l}</div>
                 <div className="flex items-baseline gap-[3px] mt-[3px]">
-                  <span className="text-[17px] text-text font-medium tracking-[-0.3px]">
+                  <span className="text-[17px] text-text font-bold tracking-[-0.3px]">
                     {v % 1 ? v.toFixed(1) : v.toFixed(0)}
                   </span>
                   <span className="text-[10px] text-text-dim font-mono">/{t}{u}</span>
                 </div>
-                <Bar pct={v / t} color={c} height={2} />
+                <Bar pct={v / t} color={c} height={3} />
               </div>
             ))}
           </div>
         </Card>
       </div>
+
+      {/* AI 인사이트 — 단백질 부족 시 */}
+      {total.p > 0 && total.p < proGoal && (
+        <div className="mx-5 mt-3 px-3.5 py-3 rounded-[12px] bg-amber-soft border border-amber-line flex gap-3 items-start">
+          <div className="text-amber font-bold text-[11px] mt-0.5">AI</div>
+          <div className="text-[12px] text-text leading-relaxed flex-1">
+            단백질이 <b className="text-amber">{Math.max(0, (proGoal - total.p)).toFixed(0)}g</b> 부족해요.
+            저녁에 닭가슴살 1조각(28g) 또는 단백질 쉐이크를 추천해요.
+          </div>
+        </div>
+      )}
 
       {/* Meal cards */}
       {meals.map(m => <MealCard key={m.name} meal={m} onAdd={() => nav('/?tab=record')} />)}

@@ -85,8 +85,31 @@ export function Coach() {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
         {messages.length === 0 && !pending && (
-          <div className="text-center text-text-dim text-[12px] py-10">
-            마운자로, 단백질, 운동, 인바디 무엇이든 질문해보세요.
+          <div className="pt-8">
+            <div className="text-[22px] font-bold tracking-[-0.4px]">
+              안녕하세요, <span className="text-amber">Simpson</span>님
+            </div>
+            <div className="text-[13px] text-text-mid mt-2 leading-relaxed">
+              마운자로 · 단백질 · 운동 · 인바디 — 무엇이든 질문해보세요.
+            </div>
+            <div className="mt-5 text-[11px] text-text-dim font-semibold">추천 질문</div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[
+                '오늘 단백질이 부족한데 뭐 먹을까?',
+                '최근 근손실 어떻게 막을까요?',
+                '마운자로 5mg 부작용 줄이는 법',
+                '주말 외식 시 칼로리 어떻게 관리?',
+              ].map(q => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => send(q)}
+                  className="px-3.5 py-2 rounded-full bg-surface border border-line text-text-mid text-[12px] cursor-pointer active:scale-[.98] hover:border-line-strong hover:text-text transition-colors"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((m, i) => (
@@ -94,10 +117,10 @@ export function Coach() {
         ))}
         {pending && (
           <div className="flex">
-            <div className="bg-bg-elev-2 text-text rounded-2xl px-4 py-2.5 inline-flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" style={{ animationDelay: '300ms' }} />
+            <div className="bg-surface text-text rounded-2xl px-4 py-2.5 inline-flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-amber animate-pulse" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 rounded-full bg-amber animate-pulse" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -126,7 +149,8 @@ function Bubble({ msg, onRetry }) {
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="bg-accent text-accent-on rounded-2xl px-4 py-2.5 max-w-[80%] text-[14px] leading-[1.45] whitespace-pre-wrap break-words">
+        {/* design_handoff §6 #09: 사용자 메시지 = amber-soft */}
+        <div className="bg-amber-soft text-text rounded-2xl px-4 py-2.5 max-w-[80%] text-[14px] leading-relaxed whitespace-pre-wrap break-words border border-amber-line">
           {msg.text}
         </div>
       </div>
@@ -134,14 +158,14 @@ function Bubble({ msg, onRetry }) {
   }
   return (
     <div className="flex flex-col items-start gap-1 max-w-[88%]">
-      <div className={`rounded-2xl px-4 py-2.5 text-[14px] leading-[1.45] whitespace-pre-wrap break-words ${msg.error ? 'bg-down/10 text-down border border-down/30' : 'bg-bg-elev-2 text-text'}`}>
+      <div className={`rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap break-words ${msg.error ? 'bg-coral-soft text-coral border border-coral/30' : 'bg-surface text-text border border-line'}`}>
         {msg.text}
       </div>
       {msg.error && msg.retryText && (
         <button
           type="button"
           onClick={() => onRetry(msg.retryText)}
-          className="text-[11px] text-accent bg-transparent border-none cursor-pointer font-mono"
+          className="text-[11px] text-amber bg-transparent border-none cursor-pointer font-mono"
         >
           다시 시도 ↻
         </button>

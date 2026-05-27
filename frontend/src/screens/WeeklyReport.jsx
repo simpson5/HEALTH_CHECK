@@ -77,16 +77,47 @@ export function WeeklyReport() {
         </div>
 
         {!report && (
-          <div className="pt-6">
-            <TapBtn full variant="accent" onClick={generate} disabled={loading}>
-              {loading ? '생성 중... (최대 3분)' : 'AI 리포트 생성'}
-            </TapBtn>
+          <>
+            {/* 미리보기 카드 — design_handoff §3 Empty state 패턴 */}
+            <Card pad={20}>
+              <div className="text-[12px] text-text-mid mb-2">
+                {offset === 0 ? '아직 이번 주 리포트가 없어요' : '아직 지난 주 리포트가 없어요'}
+              </div>
+              <div className="text-[14px] text-text leading-relaxed mb-3.5">
+                지금 만들면 이런 내용을 볼 수 있어요:
+              </div>
+              <ul className="space-y-2 text-[12px] text-text-mid">
+                {[
+                  '이번 주 평균 체중 · 변화량',
+                  '식단 단백질 달성률 · 부족 끼니',
+                  '운동 횟수 · 강도 · 휴식 패턴',
+                  '인바디 변화 (근육·체지방)',
+                  'AI 추천 다음 주 액션',
+                ].map(t => (
+                  <li key={t} className="flex gap-2.5 items-start">
+                    <span className="text-sage mt-0.5">·</span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={generate}
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-[12px] bg-amber text-[#1a1208] font-bold text-[14px] border-none cursor-pointer disabled:opacity-50 active:scale-[.98] transition-transform"
+                >
+                  {loading ? '생성 중... (최대 3분)' : '지금 생성'}
+                </button>
+              </div>
+            </Card>
             {loading && (
-              <div className="text-center text-text-dim text-[11px] font-mono mt-4">
-                체중/식단/운동/인바디 데이터를 분석 중...
+              <div className="text-center text-text-dim text-[11px] font-mono mt-4 inline-flex items-center justify-center gap-2 w-full animate-pulse-soft">
+                <span className="text-amber">AI</span>
+                체중·식단·운동·인바디 데이터를 분석 중...
               </div>
             )}
-          </div>
+          </>
         )}
 
         {report && (

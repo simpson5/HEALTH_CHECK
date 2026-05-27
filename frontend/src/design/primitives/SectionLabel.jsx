@@ -6,9 +6,9 @@ import React from 'react';
 
 export function SectionLabel({ children, right }) {
   return (
-    <div className="flex items-baseline justify-between mx-5 mt-5 mb-2.5 text-[11px] tracking-[1.2px] uppercase font-mono text-text-dim font-medium">
+    <div className="flex items-baseline justify-between mx-5 mt-5 mb-2.5 text-[14px] font-semibold tracking-[-0.2px] text-text">
       <span>{children}</span>
-      {right && <span className="text-text-mid tracking-normal">{right}</span>}
+      {right && <span className="text-[11px] text-text-mid font-medium tracking-normal">{right}</span>}
     </div>
   );
 }

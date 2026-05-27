@@ -82,109 +82,101 @@ export function Home() {
   const now = new Date();
   const dateLabel = now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
 
+  // ETA: 평균 감량 페이스로 80kg 도달 예상월 계산
+  const paceKgPerDay = (() => {
+    if (weightRecs.length < 5 || start == null) return null;
+    const first = weightRecs[0];
+    const days = Math.max(1, Math.round((new Date(latest.date) - new Date(first.date)) / 86400000));
+    const drop = first.weight_kg - cur;
+    if (drop <= 0) return null;
+    return drop / days;
+  })();
+  const etaMonth = (() => {
+    if (!paceKgPerDay || remainKg <= 0) return null;
+    const etaDays = remainKg / paceKgPerDay;
+    const eta = new Date(now);
+    eta.setDate(eta.getDate() + Math.round(etaDays));
+    return eta.toLocaleDateString('ko-KR', { month: 'long' });
+  })();
+
   return (
     <div className="pb-[100px]">
-      {/* Greeting header */}
-      <div className="px-5 pt-3 pb-1">
-        <div className="text-[12px] text-text-dim tracking-[0.5px] uppercase font-mono">
+      {/* Greeting header — design_handoff §5 HomeScreen */}
+      <div className="px-5 pt-4 pb-2">
+        <div className="text-[12px] text-text-dim font-medium">
           {dateLabel}
         </div>
-        <div className="text-[22px] font-medium text-text mt-1 tracking-[-0.6px]">
-          {getGreeting(now)}이에요, <span className="text-accent">{profile.name || ''}</span>님
+        <div className="text-[22px] font-bold text-text mt-1.5 tracking-[-0.4px]">
+          {getGreeting(now)}이에요, <span className="text-amber">{profile.name || ''}</span>님
         </div>
       </div>
 
       <StatusLine data={data} />
 
-      {/* Hero — weight progress */}
+      {/* Hero — weight progress (sage progress, amber 강조는 현재값만) */}
       <div className="mx-5 mt-[18px]">
-        <Card
-          pad={20}
-          className="relative overflow-hidden"
-          style={{ background: 'linear-gradient(165deg, var(--color-bg-elev-2) 0%, var(--color-bg-elev) 100%)' }}
-        >
-          {/* decorative arcs */}
-          <svg width="240" height="240" viewBox="0 0 240 240" className="absolute -right-20 -top-20 opacity-[0.14]">
-            <circle cx="120" cy="120" r="100" fill="none" stroke="var(--color-accent)" strokeWidth="1" />
-            <circle cx="120" cy="120" r="70" fill="none" stroke="var(--color-accent)" strokeWidth="1" />
-            <circle cx="120" cy="120" r="40" fill="none" stroke="var(--color-accent)" strokeWidth="1" />
-          </svg>
+        <Card pad={20} className="bg-surface">
+          <div className="flex items-baseline justify-between">
+            <div className="text-[12px] text-text-mid font-medium">현재 체중</div>
+            <div className="text-[11px] text-text-faint font-mono">D-{dDay > 0 ? dDay : '—'}</div>
+          </div>
 
-          <div className="flex items-start justify-between relative">
-            <div>
-              <div className="text-[11px] text-text-dim tracking-[1px] uppercase font-mono">
-                현재 체중
+          <div className="flex items-baseline gap-1.5 mt-2">
+            <span className="text-[44px] font-bold text-text tracking-[-2px] leading-none">
+              {cur != null ? cur.toFixed(1) : '--'}
+            </span>
+            <span className="text-[14px] text-text-mid font-medium">kg</span>
+            <span className="flex-1" />
+            <div className="text-right">
+              <div className="text-[11px] text-sage font-semibold inline-flex items-center gap-1">
+                <span>▼</span> {totalLost.toFixed(1)}kg 누적
               </div>
-              <div className="flex items-baseline gap-1.5 mt-2">
-                <span className="text-[64px] font-light text-text tracking-[-2.5px] leading-none">
-                  {cur != null ? cur.toFixed(1) : '--'}
-                </span>
-                <span className="text-[18px] text-text-mid font-normal">kg</span>
-              </div>
-              <div className="flex gap-2.5 mt-2.5 font-mono text-[12px]">
-                {prevDelta != null && (
-                  <>
-                    <span
-                      className={`inline-flex items-center gap-1 ${prevDelta < 0 ? 'text-up' : prevDelta > 0 ? 'text-down' : 'text-text-mid'}`}
-                    >
-                      <Icon.arrow dir={prevDelta < 0 ? 'down' : 'up'} s={11} />
-                      {Math.abs(prevDelta).toFixed(1)}kg 전일
-                    </span>
-                    <span className="text-text-dim">/</span>
-                  </>
-                )}
-                <span className="text-text-mid">
-                  총 ▼{totalLost.toFixed(1)}kg
-                </span>
-              </div>
-            </div>
-
-            <div className="text-right relative">
-              <div className="text-[11px] text-text-dim tracking-[1px] uppercase font-mono">
-                목표까지
-              </div>
-              <div className="text-[28px] font-normal text-text tracking-[-0.8px] mt-1.5">
-                {remainKg.toFixed(0)}<span className="text-[14px] text-text-dim font-normal">kg</span>
-              </div>
-              <div className="mt-2 text-[11px] text-text-mid font-mono">
-                예상 D-{dDay}일
-              </div>
+              {prevDelta != null && (
+                <div className="text-[10px] text-text-dim mt-0.5">
+                  어제보다 {prevDelta < 0 ? '▼' : prevDelta > 0 ? '▲' : ''} {Math.abs(prevDelta).toFixed(1)}kg
+                </div>
+              )}
             </div>
           </div>
 
-          {/* progress bar w/ milestones */}
-          <div className="mt-[22px]">
-            <div className="relative h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+          {/* progress bar — sage */}
+          <div className="mt-[18px]">
+            <div className="relative h-2 rounded-full bg-surface-3 overflow-visible">
               <div
                 className="absolute left-0 top-0 bottom-0 rounded-full"
                 style={{
                   width: `${pct * 100}%`,
-                  background: 'linear-gradient(90deg, var(--color-accent), #F5C574)',
+                  background: 'linear-gradient(90deg, var(--color-sage), #B0CD8A)',
                   transition: 'width .8s',
                 }}
               />
-              {[0.25, 0.5, 0.75].map(m => (
-                <div
-                  key={m}
-                  className="absolute -top-[3px] -bottom-[3px] w-px"
-                  style={{ left: `${m * 100}%`, background: 'rgba(255,255,255,0.2)' }}
-                />
-              ))}
               <div
-                className="absolute top-1/2 w-3.5 h-3.5 rounded-full bg-accent"
+                className="absolute top-1/2 w-3.5 h-3.5 rounded-full bg-sage"
                 style={{
                   left: `${pct * 100}%`,
                   transform: 'translate(-50%, -50%)',
-                  boxShadow: '0 0 0 3px var(--color-bg), 0 0 12px rgba(245,165,36,0.53)',
+                  boxShadow: '0 0 0 3px var(--color-bg), 0 0 0 4px var(--color-sage)',
                 }}
               />
             </div>
-            <div className="flex justify-between mt-2.5 font-mono text-[10px] text-text-dim tracking-[0.2px]">
-              <span>{start ?? '--'}<span className="opacity-60">kg</span> 시작</span>
-              <span className="text-accent font-semibold">{Math.round(pct * 100)}% 달성</span>
-              <span>{goal ?? '--'}<span className="opacity-60">kg</span> 목표</span>
+            <div className="flex justify-between mt-2 font-mono text-[10px] text-text-dim">
+              <span>{start ?? '--'} 시작</span>
+              <span className="text-sage font-semibold">
+                {Math.round(pct * 100)}% 달성 · {remainKg.toFixed(1)}kg 남음
+              </span>
+              <span>{goal ?? '--'} 목표</span>
             </div>
           </div>
+
+          {/* AI insight chip — design_handoff §3 패턴 */}
+          {etaMonth && (
+            <div className="mt-4 px-3 py-2.5 rounded-[8px] bg-amber-soft flex gap-2.5 items-start">
+              <div className="text-amber font-bold text-[11px] mt-0.5">AI</div>
+              <div className="text-[12px] text-text leading-relaxed flex-1">
+                이 페이스라면 <b className="text-amber">{etaMonth} 중순</b>에 {goal}kg 도달 예상이에요.
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -272,24 +264,25 @@ function TodoRow({ item, last }) {
   return (
     <div className={`flex items-center gap-3.5 px-4 py-3.5 ${last ? '' : 'border-b border-line'}`}>
       <div
-        className={`w-[22px] h-[22px] rounded-[7px] flex items-center justify-center shrink-0 transition-all ${done ? 'bg-accent' : ''}`}
+        className="w-[22px] h-[22px] rounded-full flex items-center justify-center shrink-0 transition-all"
         style={{
-          border: `1.5px solid ${done ? 'var(--color-accent)' : 'var(--color-line-strong)'}`,
-          color: '#171309',
+          background: done ? 'var(--color-sage)' : 'transparent',
+          border: `1.6px solid ${done ? 'var(--color-sage)' : 'var(--color-border-hi)'}`,
+          color: done ? '#0E0B07' : 'transparent',
         }}
       >
-        {done && <Icon.check s={14} />}
+        {done && <Icon.check s={13} />}
       </div>
       <div className="flex-1 min-w-0">
         <div
-          className={`text-[14px] font-medium tracking-[-0.3px] ${done ? 'text-text-mid line-through decoration-white/20' : 'text-text'}`}
+          className={`text-[13px] font-medium tracking-[-0.2px] ${done ? 'text-text-mid line-through decoration-white/20' : 'text-text'}`}
         >
           {label}
         </div>
-        <div className="text-[11px] text-text-dim mt-0.5 font-mono">{sub}</div>
+        <div className="text-[11px] text-text-mid mt-0.5 font-mono">{sub}</div>
         {progress != null && (
           <div className="mt-1.5">
-            <Bar pct={progress} color="var(--color-accent)" height={2} />
+            <Bar pct={progress} color="var(--color-amber)" height={3} />
           </div>
         )}
       </div>
@@ -328,7 +321,7 @@ function TimelineItem({ ev, last }) {
         <span className="font-mono text-[10px] text-text-dim tracking-[0.4px] w-9">{time}</span>
         <span
           className={`text-[9px] px-1.5 py-0.5 rounded font-mono tracking-[0.3px] ${accent ? 'bg-accent-soft text-accent' : 'text-text-mid'}`}
-          style={accent ? undefined : { background: 'rgba(255,255,255,0.06)' }}
+          style={accent ? undefined : { background: 'var(--color-surface-3)' }}
         >
           {tag}
         </span>

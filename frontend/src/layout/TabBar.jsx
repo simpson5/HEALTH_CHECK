@@ -21,8 +21,12 @@ export function TabBar() {
   const nav = useNavigate();
   return (
     <div
-      className="absolute left-0 right-0 bottom-0 h-[88px] pt-2.5 pb-[22px] flex items-center justify-around z-10"
-      style={{ background: 'linear-gradient(180deg, rgba(14,15,18,0) 0%, rgba(14,15,18,0.88) 35%, #0E0F12 65%)' }}
+      className="absolute left-0 right-0 bottom-0 h-[88px] pt-2.5 pb-[22px] flex items-center justify-around z-10 border-t border-line"
+      style={{
+        background: 'linear-gradient(180deg, rgba(14,11,7,0) 0%, rgba(14,11,7,0.85) 35%, var(--color-bg) 70%)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+      }}
     >
       {TABS.map(t => {
         const active = t.match(loc.pathname);

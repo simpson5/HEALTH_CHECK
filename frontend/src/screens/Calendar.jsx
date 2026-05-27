@@ -185,7 +185,7 @@ export function Calendar() {
                     </span>
                     <div className="flex gap-0.5">
                       {hasWeight && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-accent-on' : 'bg-accent'}`} />}
-                      {hasExercise && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-accent-on' : 'bg-info'}`} />}
+                      {hasExercise && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-accent-on' : 'bg-sage'}`} />}
                       {hasDiet && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-accent-on' : 'bg-protein'}`} />}
                     </div>
                   </button>
@@ -193,8 +193,8 @@ export function Calendar() {
               })}
             </div>
             <div className="flex gap-3 justify-center mt-3 pt-2.5 border-t border-line text-[10px]">
-              <Legend color="var(--color-accent)" label="체중" />
-              <Legend color="var(--color-info)" label="운동" />
+              <Legend color="var(--color-amber)" label="체중" />
+              <Legend color="var(--color-sage)" label="운동" />
               <Legend color="var(--color-protein)" label="식단" />
             </div>
           </Card>
@@ -297,13 +297,13 @@ function WeekView({ weekStart, selDate, onSelect, data, todayStr }) {
               </div>
               <div className="flex-1 min-w-0 flex gap-0.5">
                 {weightSet.has(ds) && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
-                {exerciseSet.has(ds) && <span className="w-1.5 h-1.5 rounded-full bg-info" />}
+                {exerciseSet.has(ds) && <span className="w-1.5 h-1.5 rounded-full bg-sage" />}
                 {dietSet.has(ds) && <span className="w-1.5 h-1.5 rounded-full bg-protein" />}
               </div>
               <div className="text-right text-[11px] font-mono text-text-dim">
                 {weight && <div>{weight.weight_kg}kg</div>}
                 {diets.length > 0 && <div>P{Math.round(totalPro)}g · {Math.round(totalKc)}kcal</div>}
-                {exes.length > 0 && <div className="text-info">운동 {exes.length}회</div>}
+                {exes.length > 0 && <div className="text-sage">운동 {exes.length}회</div>}
                 {!weight && diets.length === 0 && exes.length === 0 && <div className="opacity-50">—</div>}
               </div>
             </button>
@@ -348,11 +348,11 @@ function DaySummary({ s }) {
             const first = (e.exercises || [])[0];
             return `${e.total_duration_min || 0}분` + (first ? ` · ${first.name}` : '');
           }).join(' / ')}
-          color="var(--color-info)"
+          color="var(--color-sage)"
         />
       )}
       {meds.length > 0 && (
-        <Row label="투약" value={meds.map(m => m.dose).join(', ')} color="var(--color-text-mid)" last />
+        <Row label="투약" value={meds.map(m => m.dose).join(', ')} color="var(--color-slate)" last />
       )}
     </Card>
   );

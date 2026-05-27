@@ -17,8 +17,8 @@ export function Ring({
   size = 80,
   stroke = 7,
   pct = 0.5,
-  color = 'var(--color-accent)',
-  track = 'rgba(255,255,255,0.08)',
+  color = 'var(--color-amber)',
+  track = 'var(--color-surface-3)',
   children,
 }) {
   const r = (size - stroke) / 2;

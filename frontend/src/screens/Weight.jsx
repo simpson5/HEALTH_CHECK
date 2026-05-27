@@ -57,35 +57,34 @@ export function Weight() {
 
   return (
     <div className="pb-[100px]">
-      {/* Hero number */}
-      <div className="px-5 pt-2 pb-5">
-        <div className="text-[11px] text-text-dim font-mono tracking-[1px] uppercase">
-          현재 체중
-        </div>
-        <div className="flex items-baseline gap-2 mt-1.5">
-          <span className="text-[72px] font-light text-text tracking-[-3px] leading-none">
-            {curInt}<span className="text-[36px] text-text-mid">{curDec}</span>
+      {/* Hero number — design_handoff §5 WeightScreen */}
+      <div className="px-5 pt-4 pb-2">
+        <div className="text-[12px] text-text-mid font-medium">현재 체중</div>
+        <div className="flex items-baseline gap-1.5 mt-1.5">
+          <span className="text-[48px] font-bold text-text tracking-[-2px] leading-none">
+            {cur.toFixed(1)}
           </span>
-          <span className="text-[18px] text-text-mid ml-1">kg</span>
+          <span className="text-[16px] text-text-mid font-medium ml-1">kg</span>
         </div>
-        <div className="flex gap-3.5 mt-2.5 font-mono text-[12px]">
-          <span className="text-up inline-flex items-center gap-1">
-            <Icon.arrow dir="down" s={11} />
-            {totalLost.toFixed(1)}kg <span className="text-text-dim ml-0.5">시작 대비</span>
+        <div className="flex gap-3.5 mt-2.5 text-[11px] text-text-mid">
+          <span className="inline-flex items-center gap-1">
+            <span className="text-sage font-bold">▼ {totalLost.toFixed(1)}kg</span> 시작 대비
           </span>
-          <span className="text-text-mid">▼ {Math.abs(avgPerDay).toFixed(2)}kg/일 평균</span>
+          <span className="inline-flex items-center gap-1">
+            <span className="text-sage font-bold">▼ {Math.abs(avgPerDay).toFixed(2)}kg</span> /일 평균
+          </span>
         </div>
       </div>
 
-      {/* Range tabs */}
-      <div className="mx-5 flex gap-1.5 p-1 bg-bg-elev rounded-[12px]">
+      {/* Range tabs — pill group */}
+      <div className="mx-5 mt-3.5 flex gap-0.5 p-1 bg-surface-2 rounded-full">
         {RANGES.map(r => (
           <button
             key={r.key}
             type="button"
             onClick={() => setRange(r.key)}
-            className={`flex-1 h-8 rounded-[9px] border-none cursor-pointer text-[12px] font-medium transition-all ${
-              range === r.key ? 'bg-bg-elev-3 text-text' : 'bg-transparent text-text-dim'
+            className={`flex-1 py-1.5 rounded-full border-none cursor-pointer text-[12px] transition-colors ${
+              range === r.key ? 'bg-surface-3 text-text font-semibold' : 'bg-transparent text-text-mid font-medium'
             }`}
           >
             {r.key}
@@ -95,15 +94,38 @@ export function Weight() {
 
       {/* Chart card */}
       <div className="mx-5 mt-3.5">
-        <Card pad={0} className="overflow-hidden">
+        <Card pad={18}>
           <WeightChart data={rangeData} range={range} goal={goal} />
-          <div className="px-[18px] py-3.5 border-t border-line flex justify-between font-mono text-[11px] text-text-dim">
-            <span>{start.toFixed(1)} <span className="opacity-50">시작</span></span>
-            <span className="text-accent">{cur.toFixed(1)} <span className="opacity-60">현재</span></span>
-            <span>{goal.toFixed(1)} <span className="opacity-50">목표</span></span>
+          <div className="mt-3.5 flex justify-between font-mono text-[10px] text-text-dim">
+            <span>{start.toFixed(1)} 시작</span>
+            <span className="text-amber font-bold">{cur.toFixed(1)} 현재</span>
+            <span>{goal.toFixed(1)} 목표</span>
           </div>
         </Card>
       </div>
+
+      {/* AI insight chip — handoff §5 */}
+      {inbodyRecs.length >= 2 && (
+        <div className="mx-5 mt-3 px-3.5 py-3 rounded-[12px] bg-amber-soft border border-amber-line flex gap-3 items-start">
+          <div className="text-amber font-bold text-[11px] mt-0.5">AI</div>
+          <div className="text-[12px] leading-relaxed text-text flex-1">
+            {(() => {
+              const muscleDelta = (() => {
+                const recent = inbodyRecs.slice(-2);
+                if (recent.length < 2) return 0;
+                return (recent[1].muscle_kg ?? 0) - (recent[0].muscle_kg ?? 0);
+              })();
+              if (muscleDelta < -0.5) {
+                return <>최근 페이스 안정적이에요. <b className="text-amber">근손실 {Math.abs(muscleDelta).toFixed(1)}kg</b> 있으니 단백질 110g 이상 유지해주세요.</>;
+              }
+              if (avgPerDay > 0.05) {
+                return <>이 페이스라면 <b className="text-amber">월 {(avgPerDay * 30).toFixed(1)}kg</b> 감량 페이스에요. 무리하지 않게 유지해보세요.</>;
+              }
+              return <>최근 4주 페이스가 <b className="text-amber">안정적</b>이에요. 단백질·운동 루틴을 그대로 이어가세요.</>;
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Metric switcher */}
       <SectionLabel>체성분</SectionLabel>
@@ -287,18 +309,16 @@ function InbodyTrendChart({ recs }) {
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full block" style={{ height: H }}>
-        {/* fat_pct line (red-ish / down color) */}
-        <path d={fatPath} fill="none" stroke="var(--color-down)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        {/* muscle line (accent) */}
-        <path d={musPath} fill="none" stroke="var(--color-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        {/* dots */}
+        {/* fat_pct line — slate (보조 데이터) */}
+        <path d={fatPath} fill="none" stroke="var(--color-slate)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        {/* muscle line — amber (주 시리즈) */}
+        <path d={musPath} fill="none" stroke="var(--color-amber)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         {recs.map((r, i) => (
           <g key={i}>
-            {r.fat_pct != null && <circle cx={xs[i]} cy={fatY(r.fat_pct)} r="2.5" fill="var(--color-down)" />}
-            {r.muscle_kg != null && <circle cx={xs[i]} cy={musY(r.muscle_kg)} r="2.5" fill="var(--color-accent)" />}
+            {r.fat_pct != null && <circle cx={xs[i]} cy={fatY(r.fat_pct)} r="2.5" fill="var(--color-slate)" />}
+            {r.muscle_kg != null && <circle cx={xs[i]} cy={musY(r.muscle_kg)} r="2.5" fill="var(--color-amber)" />}
           </g>
         ))}
-        {/* x-axis labels */}
         {recs.map((r, i) => (
           <text key={i} x={xs[i]} y={H - 4} textAnchor="middle" fontSize="9" fill="var(--color-text-dim)" fontFamily="monospace">
             {fmtDate(r.date)}
@@ -307,10 +327,10 @@ function InbodyTrendChart({ recs }) {
       </svg>
       <div className="flex gap-3.5 mt-1.5 text-[11px]">
         <span className="inline-flex items-center gap-1.5 text-text-mid">
-          <span className="w-2 h-2 rounded-full bg-down" />체지방률 %
+          <span className="w-2 h-2 rounded-full bg-amber" />골격근 kg
         </span>
         <span className="inline-flex items-center gap-1.5 text-text-mid">
-          <span className="w-2 h-2 rounded-full bg-accent" />골격근 kg
+          <span className="w-2 h-2 rounded-full bg-slate" />체지방률 %
         </span>
       </div>
     </div>
@@ -328,61 +348,75 @@ function deltaFmt(delta, goodIsDecrease = true) {
 function WeightChart({ data, range, goal }) {
   if (!data || data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-[180px] text-text-dim text-[11px] font-mono">
+      <div className="flex items-center justify-center h-[140px] text-text-dim text-[11px] font-mono">
         데이터 부족
       </div>
     );
   }
-  const W = 400, H = 180;
-  const pad = { l: 12, r: 12, t: 20, b: 14 };
+  const W = 400, H = 160;
+  const pad = { l: 12, r: 12, t: 14, b: 18 };
   const weights = data.map(r => r.weight_kg);
   let min = Math.min(...weights);
   let max = Math.max(...weights);
-  if (range === '전체' && goal) {
+  // goal line(80kg) 항상 시각 영역에 포함 — design_handoff §6 19_weight_range
+  if (goal) {
     min = Math.min(min, goal);
-    max = Math.max(max, goal);
+    max = Math.max(max, weights[0]);
   }
-  // padding range
   const span = max - min || 1;
-  min -= span * 0.1;
-  max += span * 0.1;
+  min -= span * 0.08;
+  max += span * 0.08;
 
   const xs = data.map((_, i) => pad.l + (i / (data.length - 1)) * (W - pad.l - pad.r));
   const ys = data.map(r => pad.t + (1 - (r.weight_kg - min) / (max - min)) * (H - pad.t - pad.b));
+  const goalY = goal ? pad.t + (1 - (goal - min) / (max - min)) * (H - pad.t - pad.b) : null;
   const path = xs.map((x, i) => (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + ys[i].toFixed(1)).join(' ');
   const area = path + ` L${xs[xs.length - 1]} ${H - pad.b} L${xs[0]} ${H - pad.b} Z`;
+
+  const lastX = xs[xs.length - 1];
+  const lastY = ys[ys.length - 1];
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full block" style={{ height: H }}>
       <defs>
         <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--color-amber)" stopOpacity="0.30" />
+          <stop offset="100%" stopColor="var(--color-amber)" stopOpacity="0" />
         </linearGradient>
       </defs>
+      {/* 목표 80kg 점선 (sage) — 항상 표시 */}
+      {goalY != null && (
+        <>
+          <line x1={pad.l} y1={goalY} x2={W - pad.r} y2={goalY} stroke="var(--color-sage)" strokeWidth="1" strokeDasharray="3 3" opacity="0.7" />
+          <text x={W - pad.r} y={goalY - 4} fontSize="9" fill="var(--color-sage)" textAnchor="end" fontFamily="monospace">목표 {goal}</text>
+        </>
+      )}
       <path d={area} fill="url(#wg)" />
-      <path d={path} fill="none" stroke="var(--color-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      {xs.map((x, i) => (i % 7 === 0 ? (
-        <circle key={i} cx={x} cy={ys[i]} r="2" fill="var(--color-bg)" stroke="var(--color-accent)" strokeWidth="1.5" />
-      ) : null))}
-      <circle cx={xs[xs.length - 1]} cy={ys[ys.length - 1]} r="4" fill="var(--color-accent)" />
-      <circle cx={xs[xs.length - 1]} cy={ys[ys.length - 1]} r="8" fill="var(--color-accent)" opacity="0.2" />
+      <path d={path} fill="none" stroke="var(--color-amber)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      {/* dim dots (마지막 제외) */}
+      {xs.map((x, i) => i === xs.length - 1 ? null : (
+        <circle key={i} cx={x} cy={ys[i]} r="1.6" fill="var(--color-amber-dim)" opacity={i % Math.max(1, Math.floor(xs.length / 8)) === 0 ? 0.7 : 0} />
+      ))}
+      {/* 마지막 포인트 — amber 큰 점 + bg 테두리 */}
+      <circle cx={lastX} cy={lastY} r="4" fill="var(--color-amber)" stroke="var(--color-bg)" strokeWidth="2" />
     </svg>
   );
 }
 
 function MetricCard({ label, value, unit, delta, good }) {
-  const colorClass = delta && delta.startsWith('▼') ? (good ? 'text-up' : 'text-down')
-    : delta && delta.startsWith('▲') ? 'text-up'
-    : 'text-text-dim';
+  const isDecrease = delta && delta.startsWith('▼');
+  const isIncrease = delta && delta.startsWith('▲');
+  // good=true(체지방·BMI): 감소가 좋음 / good=false(골격근): 증가가 좋음
+  const goodChange = good ? isDecrease : isIncrease;
+  const colorClass = goodChange ? 'text-sage' : (isDecrease || isIncrease ? 'text-coral' : 'text-text-dim');
   return (
     <Card pad={14}>
-      <div className="text-[10px] text-text-dim tracking-[0.6px] uppercase font-mono">{label}</div>
-      <div className="flex items-baseline gap-[3px] mt-1.5">
-        <span className="text-[26px] font-medium text-text tracking-[-0.8px]">{value}</span>
-        <span className="text-[11px] text-text-dim font-mono">{unit}</span>
+      <div className="text-[11px] text-text-mid font-medium">{label}</div>
+      <div className="flex items-baseline gap-1 mt-1.5">
+        <span className="text-[22px] font-bold text-text tracking-[-0.6px]">{value}</span>
+        <span className="text-[11px] text-text-mid font-medium">{unit}</span>
       </div>
-      <div className={`text-[11px] font-mono mt-0.5 ${colorClass}`}>{delta}</div>
+      <div className={`text-[11px] font-semibold mt-1.5 font-mono ${colorClass}`}>{delta}</div>
     </Card>
   );
 }
@@ -391,32 +425,33 @@ function BodyCompChart({ recs }) {
   if (!recs || recs.length === 0) {
     return <div className="text-text-dim text-[11px] font-mono text-center py-4">인바디 데이터 없음</div>;
   }
+  // design_handoff §5: 골격근 amber + 체지방 slate
   const max = 85;
   return (
     <div>
-      <div className="flex gap-2.5 items-end h-[100px]">
+      <div className="flex gap-2 items-end h-[110px]">
         {recs.map((d, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full">
+          <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full">
             <div className="flex-1 w-full flex flex-col justify-end gap-0.5">
               <div
-                className="bg-accent rounded-t-[3px]"
+                className="bg-amber rounded-t-[3px]"
                 style={{ height: `${((d.muscle_kg || 0) / max) * 100}%` }}
               />
               <div
-                className="rounded-t-[3px]"
-                style={{ height: `${((d.fat_kg || 0) / max) * 100}%`, background: 'rgba(255,255,255,0.15)' }}
+                className="bg-slate"
+                style={{ height: `${((d.fat_kg || 0) / max) * 100}%` }}
               />
             </div>
-            <span className="text-[10px] text-text-dim font-mono">{fmtDate(d.date)}</span>
+            <span className="text-[9px] text-text-dim font-mono">{fmtDate(d.date)}</span>
           </div>
         ))}
       </div>
-      <div className="flex gap-3.5 mt-2.5 text-[11px]">
+      <div className="flex gap-3.5 mt-3 text-[11px]">
         <span className="inline-flex items-center gap-1.5 text-text-mid">
-          <span className="w-2 h-2 rounded-[2px] bg-accent" />골격근
+          <span className="w-2 h-2 rounded-[2px] bg-amber" />골격근
         </span>
         <span className="inline-flex items-center gap-1.5 text-text-mid">
-          <span className="w-2 h-2 rounded-[2px]" style={{ background: 'rgba(255,255,255,0.15)' }} />체지방
+          <span className="w-2 h-2 rounded-[2px] bg-slate" />체지방
         </span>
       </div>
     </div>

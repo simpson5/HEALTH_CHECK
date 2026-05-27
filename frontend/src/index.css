@@ -1,67 +1,97 @@
 /* ============================================================
- * Simpson Health — Global CSS (v2)
+ * Simpson Health — Global CSS (v3, design_handoff 적용)
  * Tailwind 4 @theme 기반 디자인 토큰 + 최소 전역 규칙
  *
- * 원본: docs/design_handoff/project/tokens.js
- * 적용 위치 (실제 구현): frontend/src/index.css 에 통째로 덮어쓰기
+ * 원본: design_handoff/README.md §2 + reference/tokens.jsx
+ * 사용 규칙: amber(CTA·현재값·AI·★) / sage(진행·긍정) / slate(보조 데이터) / coral(진짜 경고)
  * ============================================================ */
 
 @import "tailwindcss";
-@import "@fontsource/geist-sans/300.css";
-@import "@fontsource/geist-sans/400.css";
-@import "@fontsource/geist-sans/500.css";
-@import "@fontsource/geist-sans/600.css";
-@import "@fontsource/geist-sans/700.css";
-@import "@fontsource/geist-mono/400.css";
-@import "@fontsource/geist-mono/500.css";
-@import "pretendard/dist/web/static/pretendard.css";
+
+/* 한글·Latin 공용 Pretendard Variable (가변 폰트) */
+@import "pretendard/dist/web/variable/pretendardvariable.css";
+
+/* 숫자·날짜·메타 — JetBrains Mono는 index.html의 Google Fonts 링크로 로드 */
+/* Settings 아바타용 Serif */
 @import "@fontsource/instrument-serif/400.css";
 
-/* ── 디자인 토큰 (tokens.js 1:1 변환) ────────────────────────── */
+/* ── 디자인 토큰 ─────────────────────────────────────────────── */
 @theme {
-  /* Surfaces (warm-cool dark, oklch 기반) */
-  --color-bg:          #0E0F12;
-  --color-bg-elev:     #151619;
-  --color-bg-elev-2:   #1C1D21;
-  --color-bg-elev-3:   #24262B;
+  /* ── Surfaces (warm-leaning dark, 절대 순흑 금지) ── */
+  --color-bg:          #0E0B07;
+  --color-surface:     #16120D;
+  --color-surface-2:   #1F1A14;
+  --color-surface-3:   #2A241C;
 
-  --color-line:        rgba(255,255,255,0.07);
-  --color-line-strong: rgba(255,255,255,0.14);
+  /* 기존 클래스명 backwards-compat (bg-bg-elev 등 그대로 동작) */
+  --color-bg-elev:     #16120D;
+  --color-bg-elev-2:   #1F1A14;
+  --color-bg-elev-3:   #2A241C;
 
-  /* Text hierarchy (3단계 + faint) */
-  --color-text:        #EDEDEE;
-  --color-text-mid:    rgba(237,237,238,0.68);
-  --color-text-dim:    rgba(237,237,238,0.42);
-  --color-text-faint:  rgba(237,237,238,0.22);
+  /* ── Borders (warm tint) ── */
+  --color-border:      rgba(255, 240, 220, 0.07);
+  --color-border-hi:   rgba(255, 240, 220, 0.14);
+  --color-line:        rgba(255, 240, 220, 0.07);
+  --color-line-strong: rgba(255, 240, 220, 0.14);
 
-  /* Accent — 단일 앰버 (oklch 0.78 0.14 65 ≈ #F5A524)
-     사용 규칙: CTA / 활성 상태 / 강조 메트릭에만. 카테고리/상태색과 혼동 금지 */
-  --color-accent:      #F5A524;
-  --color-accent-soft: rgba(245,165,36,0.14);
-  --color-accent-line: rgba(245,165,36,0.35);
-  --color-accent-on:   #171309;   /* 앰버 배경 위 텍스트 */
+  /* ── Text hierarchy (4단계, warm off-white) ── */
+  --color-text:        #F5EAD8;
+  --color-text-mid:    rgba(245, 234, 216, 0.62);
+  --color-text-dim:    rgba(245, 234, 216, 0.40);
+  --color-text-faint:  rgba(245, 234, 216, 0.22);
 
-  /* Semantic — 델타/상태 전용 (up/down/info). 엑센트 아님 */
-  --color-up:    #6FCF8E;
-  --color-down:  #E87C5C;
-  --color-info:  #7EA8FF;
-  --color-warn:  #F5A524;   /* warn은 앰버와 동색 (경고=엑센트) */
+  /* ── Amber (1차 CTA · 현재값 · AI 라벨 · 즐겨찾기 ★) ── */
+  --color-amber:       #F2A93C;
+  --color-amber-hi:    #FFC267;
+  --color-amber-dim:   #A36C1E;
+  --color-amber-soft:  rgba(242, 169, 60, 0.14);
+  --color-amber-line:  rgba(242, 169, 60, 0.35);
 
-  /* Macro — 카테고리 구분 전용 (탄단지). 엑센트 아님 */
-  --color-protein: #C9A96E;  /* champagne */
-  --color-carb:    #8FB8E0;  /* dusty blue */
-  --color-fat:     #D68FA5;  /* dusty rose */
+  /* accent = amber (기존 클래스 호환) */
+  --color-accent:      #F2A93C;
+  --color-accent-soft: rgba(242, 169, 60, 0.14);
+  --color-accent-line: rgba(242, 169, 60, 0.35);
+  --color-accent-on:   #1A1208;
 
-  /* Type — Geist(영문) / Pretendard(한글) / Geist Mono(숫자) / Instrument Serif(감성) */
-  --font-sans:  "Geist", "Pretendard", -apple-system, "SF Pro Text", system-ui, sans-serif;
-  --font-mono:  "Geist Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+  /* ── Sage (진행 · 긍정 · streak · 좋아진 지표) ── */
+  --color-sage:        #8FB46B;
+  --color-sage-soft:   rgba(143, 180, 107, 0.16);
+
+  /* ── Slate (차트 보조 시리즈 · 부가 메타) ── */
+  --color-slate:       #7C9FC4;
+  --color-slate-soft:  rgba(124, 159, 196, 0.16);
+
+  /* ── Coral (진짜 경고에만 — "오래 안 했어요"에 쓰지 말 것) ── */
+  --color-coral:       #D87A60;
+  --color-coral-soft:  rgba(216, 122, 96, 0.16);
+
+  /* ── Semantic 별칭 (기존 클래스 호환: 새 톤으로 매핑) ── */
+  --color-up:          #8FB46B;   /* good direction = sage */
+  --color-down:        #D87A60;   /* warning = coral */
+  --color-info:        #7C9FC4;   /* neutral data = slate */
+  --color-warn:        #F2A93C;   /* warn = amber */
+
+  /* ── Macro (탄단지 카테고리 전용 — 엑센트 아님) ── */
+  --color-protein:     #C9A96E;   /* champagne */
+  --color-carb:        #8FB8E0;   /* dusty blue */
+  --color-fat:         #D68FA5;   /* dusty rose */
+
+  /* ── Typography ── */
+  --font-sans:  "Pretendard Variable", Pretendard, -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono:  "JetBrains Mono", ui-monospace, "Geist Mono", Menlo, monospace;
   --font-serif: "Instrument Serif", "Noto Serif KR", Georgia, serif;
 
-  /* Radius (tokens.js radius 매핑 — rounded-sm=10, md=14, lg=20, xl=28) */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  /* ── Radii (handoff: 8 · 12 · 16 · 20 · 24) ── */
+  --radius-sm:  10px;   /* 기존 alias 보존 */
+  --radius-md:  14px;   /* 기존 alias 보존 */
+  --radius-lg:  20px;   /* 기존 alias 보존 */
+  --radius-xl:  28px;   /* 기존 alias 보존 */
+
+  --radius-r3:  8px;
+  --radius-r4:  12px;
+  --radius-r5:  16px;
+  --radius-r6:  20px;
+  --radius-r7:  24px;
 
   /* 모션 */
   --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
@@ -75,27 +105,33 @@ html, body {
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* 한글 line-height: 1.55~1.7 권장 */
+  line-height: 1.55;
+  letter-spacing: -0.01em;
 }
 * { box-sizing: border-box; }
-::selection { background: rgba(245, 165, 36, 0.3); }
+::selection { background: rgba(242, 169, 60, 0.3); }
 
 /* ── 스크롤바 ──────────────────────────────────────────────── */
 ::-webkit-scrollbar        { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.08); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+::-webkit-scrollbar-thumb  { background: rgba(245, 234, 216, 0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(245, 234, 216, 0.16); }
 .nosb::-webkit-scrollbar { display: none; }
 .nosb { scrollbar-width: none; }
 
 /* ── 유틸 ─────────────────────────────────────────────────── */
 .tnum { font-variant-numeric: tabular-nums; }
+.font-mono, .tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ── 애니메이션 ────────────────────────────────────────────── */
 @keyframes fade-up  { from { opacity: 0; transform: translateY(6px); } }
 @keyframes spin     { to   { transform: rotate(360deg); } }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } }
+@keyframes pulse-soft { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
 
 .animate-fade-up { animation: fade-up .28s var(--ease-out); }
 .animate-spin    { animation: spin .8s linear infinite; }
 .animate-toast   { animation: toast-in .24s var(--ease-out); }
+.animate-pulse-soft { animation: pulse-soft 2.4s ease-in-out infinite; }
 
 #root { min-height: 100vh; }

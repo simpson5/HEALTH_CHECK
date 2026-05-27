@@ -101,11 +101,11 @@ export function Workout() {
 
   return (
     <div className="pb-[100px]">
-      {/* Weekly ring */}
+      {/* Weekly ring — 진행/긍정은 sage. 죄책감 카피 금지 */}
       <div className="px-5 pt-3">
         <Card pad={18}>
           <div className="flex items-center gap-[18px]">
-            <Ring size={78} stroke={7} pct={weekDone / weekGoal} color="var(--color-accent)">
+            <Ring size={78} stroke={7} pct={weekDone / weekGoal} color="var(--color-sage)">
               <div className="text-center">
                 <div className="text-[20px] font-medium text-text tracking-[-0.5px]">
                   {weekDone}<span className="text-[11px] text-text-dim font-normal">/{weekGoal}</span>
@@ -113,12 +113,15 @@ export function Workout() {
               </div>
             </Ring>
             <div className="flex-1">
-              <div className="text-[11px] text-text-dim font-mono tracking-[0.6px] uppercase">이번 주</div>
-              <div className="text-[17px] text-text font-medium mt-0.5 tracking-[-0.3px]">
-                {remain > 0 ? `${remain}회 남음` : '이번 주 목표 달성'}
+              <div className="text-[11px] text-text-mid font-medium">이번 주</div>
+              <div className="text-[17px] text-text font-semibold mt-0.5 tracking-[-0.3px]">
+                {remain > 0 ? `${weekGoal}회 도전 중` : '이번 주 목표 달성'}
               </div>
-              <div className={`text-[11px] font-mono mt-1 ${restDays >= 2 ? 'text-down' : 'text-text-mid'}`}>
-                {restDays === 0 ? '오늘 운동 완료' : `${restDays}일째 쉬는 중 · 오늘 해봐요`}
+              <div className="text-[11px] mt-1.5 leading-relaxed text-text-mid">
+                {restDays === 0
+                  ? <span className="text-sage font-semibold">오늘 운동 완료</span>
+                  : <>마지막 운동 <b className="text-text">{restDays}일 전</b> · 가볍게 시작해볼까요?</>
+                }
               </div>
             </div>
           </div>
@@ -132,44 +135,43 @@ export function Workout() {
                   style={{
                     background:
                       d.state === 'done'
-                        ? 'var(--color-accent)'
-                        : d.state === 'rest'
-                          ? 'rgba(255,255,255,0.04)'
-                          : 'transparent',
-                    border: d.state === 'today' ? '1.5px dashed var(--color-accent)' : 'none',
-                    color: d.state === 'done' ? '#171309' : 'var(--color-text-dim)',
+                        ? 'var(--color-sage)'
+                        : d.state === 'today'
+                          ? 'var(--color-amber-soft)'
+                          : d.state === 'rest'
+                            ? 'rgba(255,240,220,0.04)'
+                            : 'transparent',
+                    border: d.state === 'today' ? '1.5px dashed var(--color-amber)' : 'none',
+                    color: d.state === 'done' ? '#0E0B07' : d.state === 'today' ? 'var(--color-amber)' : 'var(--color-text-dim)',
                   }}
                 >
                   {d.state === 'done' && <Icon.check s={14} />}
                   {d.state === 'today' && (
-                    <span className="text-[10px] text-accent font-mono">TODAY</span>
+                    <span className="text-[9px] font-mono font-bold">TODAY</span>
                   )}
                 </div>
-                <span className="text-[10px] text-text-dim font-mono">{d.dow}</span>
+                <span className={`text-[10px] font-mono ${d.state === 'today' ? 'text-amber font-semibold' : 'text-text-dim'}`}>{d.dow}</span>
               </div>
             ))}
           </div>
         </Card>
       </div>
 
-      {/* Start session CTA */}
+      {/* Start session CTA — calm, not glowing */}
       <div className="mx-5 mt-3.5">
         <button
           type="button"
           onClick={handleStart}
-          className="w-full h-16 rounded-[18px] border-none cursor-pointer text-[17px] font-semibold inline-flex items-center justify-center gap-2.5 tracking-[-0.4px]"
-          style={{
-            background: 'linear-gradient(135deg, var(--color-accent) 0%, #F5C574 100%)',
-            color: '#171309',
-            boxShadow: '0 8px 24px rgba(245,165,36,0.25)',
-          }}
+          className="w-full py-4 rounded-[14px] bg-amber text-[#1a1208] border-none cursor-pointer text-[15px] font-bold inline-flex items-center justify-center gap-2.5 tracking-[-0.2px] active:scale-[.98] transition-transform"
         >
-          <Icon.play s={20} />운동 시작
+          <Icon.play s={16} />오늘 운동 시작
         </button>
-        <div className="flex justify-center gap-3.5 mt-2.5 font-mono text-[11px] text-text-dim">
-          <span>오늘 · {today}</span>
-          <span>·</span>
-          <span>{etaMin ? `예상 ${etaMin}분` : '약 40~60분'}</span>
+        <div className="flex justify-center gap-2.5 mt-2 text-[11px] text-text-mid">
+          <span>오늘</span>
+          <span className="text-text-faint">·</span>
+          <span className="font-mono">{today}</span>
+          <span className="text-text-faint">·</span>
+          <span>{etaMin ? `예상 ${etaMin}분` : '예상 30분'}</span>
         </div>
       </div>
 
@@ -218,7 +220,7 @@ export function Workout() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-[10px] flex items-center justify-center text-text-mid"
-                  style={{ background: 'rgba(255,255,255,0.04)' }}
+                  style={{ background: 'var(--color-surface-3)' }}
                 >
                   <Icon.dumbbell s={18} />
                 </div>
@@ -237,7 +239,7 @@ export function Workout() {
                   onClick={(e) => { e.stopPropagation(); toggleFav(ex); }}
                   aria-label="즐겨찾기 토글"
                   className="w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center text-text-mid"
-                  style={{ background: 'rgba(255,255,255,0.04)' }}
+                  style={{ background: 'var(--color-surface-3)' }}
                 >
                   {ex.is_favorite ? <Icon.star s={14} fill="var(--color-accent)" /> : <Icon.plus s={16} />}
                 </button>

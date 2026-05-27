@@ -224,7 +224,7 @@ export function Record() {
                 disabled={(!mealText.trim() && !photo) || analyzing}
                 className="h-8 px-3.5 rounded-[9px] border-none text-[12px] font-semibold cursor-pointer inline-flex items-center gap-1.5 disabled:cursor-default"
                 style={{
-                  background: mealText.trim() || photo ? 'var(--color-accent)' : 'rgba(255,255,255,0.08)',
+                  background: mealText.trim() || photo ? 'var(--color-amber)' : 'var(--color-surface-3)',
                   color: mealText.trim() || photo ? '#171309' : 'var(--color-text-dim)',
                 }}
               >
