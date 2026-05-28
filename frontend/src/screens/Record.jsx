@@ -308,6 +308,7 @@ function FastingSection({ records, latestWeight, onChange }) {
   const [startWeight, setStartWeight] = useState('');
   const [endWeight, setEndWeight] = useState('');
   const [memo, setMemo] = useState('');
+  const [goalHours, setGoalHours] = useState(16);   // 기본 16:8
   const [busy, setBusy] = useState(false);
 
   // latestWeight 자동 채우기 (사용자 미입력 시)
@@ -319,6 +320,7 @@ function FastingSection({ records, latestWeight, onChange }) {
     try {
       const r = await startFasting({
         start_weight_kg: startWeightAuto ? parseFloat(startWeightAuto) : null,
+        goal_hours: goalHours,
         memo: memo || null,
       });
       if (!r.ok) { onChange(r.error || '시작 실패'); return; }
@@ -360,6 +362,8 @@ function FastingSection({ records, latestWeight, onChange }) {
           <IdleFastingCard
             startWeight={startWeightAuto}
             onStartWeightChange={setStartWeight}
+            goalHours={goalHours}
+            onGoalChange={setGoalHours}
             memo={memo}
             onMemoChange={setMemo}
             onStart={handleStart}
@@ -392,12 +396,21 @@ function ActiveFastingCard({ row, endWeight, onEndWeightChange, memo, onMemoChan
   const hh = Math.floor(elapsedMin / 60);
   const mm = elapsedMin % 60;
 
+  // 목표 진행률
+  const goal = row.goal_hours || null;
+  const goalMin = goal ? goal * 60 : null;
+  const pct = goalMin ? Math.min(1, elapsedMin / goalMin) : null;
+  const reached = goalMin != null && elapsedMin >= goalMin;
+  const remainMin = goalMin != null ? Math.max(0, goalMin - elapsedMin) : null;
+  const remainH = remainMin != null ? Math.floor(remainMin / 60) : null;
+  const remainM = remainMin != null ? remainMin % 60 : null;
+
   return (
     <Card pad={16} className="!border-amber-line">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-amber font-semibold text-[12px]">
           <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
-          단식 진행 중
+          단식 진행 중{goal ? ` · 목표 ${goal}h` : ''}
         </div>
         <div className="text-[10px] text-text-faint font-mono">
           시작 {fmtFastTime(row.start_at)}
@@ -409,8 +422,27 @@ function ActiveFastingCard({ row, endWeight, onEndWeightChange, memo, onMemoChan
         <span className="text-[36px] font-bold tracking-[-1.5px] leading-none font-mono ml-2">{mm}</span>
         <span className="text-[13px] text-text-mid">분</span>
       </div>
+
+      {/* 목표 진행률 bar */}
+      {goalMin != null && (
+        <div className="mt-3">
+          <div className="h-2 rounded-full bg-surface-3 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${pct * 100}%`, background: reached ? 'var(--color-sage)' : 'var(--color-amber)' }}
+            />
+          </div>
+          <div className="mt-1.5 text-[11px] font-mono">
+            {reached
+              ? <span className="text-sage font-semibold">목표 {goal}시간 달성 🎉</span>
+              : <span className="text-text-mid">목표까지 <b className="text-amber">{remainH}시간 {remainM}분</b> · {Math.round(pct * 100)}%</span>
+            }
+          </div>
+        </div>
+      )}
+
       {row.start_weight_kg != null && (
-        <div className="mt-1.5 text-[11px] text-text-mid font-mono">
+        <div className="mt-2.5 text-[11px] text-text-mid font-mono">
           시작 체중 {row.start_weight_kg.toFixed(1)}kg
         </div>
       )}
@@ -447,7 +479,14 @@ function ActiveFastingCard({ row, endWeight, onEndWeightChange, memo, onMemoChan
   );
 }
 
-function IdleFastingCard({ startWeight, onStartWeightChange, memo, onMemoChange, onStart, busy }) {
+const FAST_GOALS = [
+  { label: '16:8', hours: 16 },
+  { label: '18:6', hours: 18 },
+  { label: '20:4', hours: 20 },
+  { label: '24h', hours: 24 },
+];
+
+function IdleFastingCard({ startWeight, onStartWeightChange, goalHours, onGoalChange, memo, onMemoChange, onStart, busy }) {
   return (
     <Card pad={16}>
       <div className="flex items-center gap-2.5">
@@ -457,6 +496,28 @@ function IdleFastingCard({ startWeight, onStartWeightChange, memo, onMemoChange,
         <div className="flex-1">
           <div className="text-[13px] text-text font-semibold tracking-[-0.2px]">단식 시작</div>
           <div className="text-[11px] text-text-mid mt-0.5">시작 시각이 지금으로 기록됩니다</div>
+        </div>
+      </div>
+
+      {/* 목표 시간 선택 */}
+      <div className="mt-3.5">
+        <div className="text-[11px] text-text-mid mb-2">목표 시간</div>
+        <div className="flex gap-2">
+          {FAST_GOALS.map(g => {
+            const on = goalHours === g.hours;
+            return (
+              <button
+                key={g.hours}
+                type="button"
+                onClick={() => onGoalChange(g.hours)}
+                className={`flex-1 py-2 rounded-[10px] text-[12px] font-semibold border cursor-pointer transition-colors active:scale-[.97] ${
+                  on ? 'bg-amber-soft border-amber-line text-amber' : 'bg-surface-3 border-line text-text-mid'
+                }`}
+              >
+                {g.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

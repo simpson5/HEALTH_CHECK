@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../hooks/useData.jsx';
 import { LoadingScreen } from './_Loading';
@@ -38,6 +39,21 @@ export function Home() {
   const totalLost = cur != null && start ? (start - cur) : 0;
   const remainKg = cur != null && goal != null ? (cur - goal) : 0;
   const dDay = remainKg > 0 ? Math.round(remainKg / 0.9 * 7) : 0;
+
+  // 반등 경고: 최근 14일 최저점 대비 현재가 +0.5kg 이상이면 표시
+  const rebound = (() => {
+    if (cur == null || weightRecs.length < 2) return null;
+    const latestDate = new Date(latest.date);
+    const cutoff = new Date(latestDate); cutoff.setDate(cutoff.getDate() - 14);
+    const window = weightRecs.filter(r => new Date(r.date) >= cutoff);
+    if (window.length < 2) return null;
+    let lo = window[0];
+    for (const r of window) if (r.weight_kg < lo.weight_kg) lo = r;
+    const gain = +(cur - lo.weight_kg).toFixed(1);
+    if (gain < 0.5) return null;   // 의미 있는 반등만
+    const days = Math.max(1, Math.round((latestDate - new Date(lo.date)) / 86400000));
+    return { gain, days, lowKg: lo.weight_kg };
+  })();
 
   // Today macros
   const todayDiet = dietRecs.filter(r => r.date === today);
@@ -101,6 +117,18 @@ export function Home() {
     etaDate.setDate(etaDate.getDate() + etaDays);
     const daysFromNow = Math.max(1, Math.round((etaDate - new Date(now.toISOString().slice(0, 10))) / 86400000));
 
+    // 추세: 최근 14일 페이스 vs 전체 평균 → 가속/감속/유지
+    let trend = null;
+    const cutoff = new Date(latestDate); cutoff.setDate(cutoff.getDate() - 14);
+    const recent = weightRecs.filter(r => new Date(r.date) >= cutoff);
+    if (recent.length >= 2) {
+      const rFirst = recent[0];
+      const rDays = Math.max(1, Math.round((latestDate - new Date(rFirst.date)) / 86400000));
+      const recentPace = (rFirst.weight_kg - cur) / rDays;
+      if (recentPace > pace * 1.15) trend = 'up';        // 최근 더 빠름
+      else if (recentPace < pace * 0.85) trend = 'down';  // 최근 느려짐/반등
+    }
+
     const sameYear = etaDate.getFullYear() === now.getFullYear();
     const yearPrefix = sameYear ? '' : `${etaDate.getFullYear()}년 `;
     return {
@@ -108,6 +136,7 @@ export function Home() {
       daysFromNow,
       paceLabel: `${pace.toFixed(2)}kg/일`,
       daysElapsed,
+      trend,
     };
   })();
 
@@ -124,6 +153,9 @@ export function Home() {
       </div>
 
       <StatusLine data={data} />
+
+      {/* 단식 진행 중 라이브 배지 */}
+      <FastingBadge records={data.fasting_records || []} onClick={() => nav('/?tab=record')} />
 
       {/* Hero — weight progress (sage progress, amber 강조는 현재값만) */}
       <div className="mx-5 mt-[18px]">
@@ -150,6 +182,17 @@ export function Home() {
               )}
             </div>
           </div>
+
+          {/* 반등 경고 — 최근 최저점 대비 증가 (정직한 신호) */}
+          {rebound && (
+            <div className="mt-3 px-3 py-2 rounded-[8px] bg-coral-soft flex items-center gap-2">
+              <span className="text-coral text-[12px]">▲</span>
+              <span className="text-[11px] text-text leading-snug">
+                최근 {rebound.days}일 <b className="text-coral">+{rebound.gain.toFixed(1)}kg</b>
+                <span className="text-text-mid"> · 최저 {rebound.lowKg.toFixed(1)}kg에서 반등</span>
+              </span>
+            </div>
+          )}
 
           {/* progress bar — sage */}
           <div className="mt-[18px]">
@@ -180,14 +223,16 @@ export function Home() {
             </div>
           </div>
 
-          {/* AI insight chip — 80kg 도달 ETA */}
+          {/* 도달 예상 chip — 전체 평균 페이스 기반 선형 추정 (실제 AI 아님) */}
           {eta && (
             <div className="mt-4 px-3 py-2.5 rounded-[8px] bg-amber-soft flex gap-2.5 items-start">
-              <div className="text-amber font-bold text-[11px] mt-0.5">AI</div>
+              <div className="text-amber font-bold text-[10px] mt-0.5 shrink-0 font-mono">예상</div>
               <div className="text-[12px] text-text leading-relaxed flex-1">
-                현재 페이스 <span className="font-mono text-amber font-semibold">{eta.paceLabel}</span> ·
-                <b className="text-amber"> {eta.label}</b>에 {goal}kg 도달 예상
+                평균 <span className="font-mono text-amber font-semibold">{eta.paceLabel}</span> 페이스로
+                <b className="text-amber"> {eta.label}</b> {goal}kg 도달
                 <span className="text-text-mid"> (D-{eta.daysFromNow})</span>
+                {eta.trend === 'up' && <span className="text-sage font-semibold"> · 최근 가속 ▲</span>}
+                {eta.trend === 'down' && <span className="text-coral font-semibold"> · 최근 둔화 ▼</span>}
               </div>
             </div>
           )}
@@ -301,6 +346,49 @@ function TodoRow({ item, last }) {
         )}
       </div>
     </div>
+  );
+}
+
+function FastingBadge({ records, onClick }) {
+  const active = records.find(r => !r.end_at);
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    const id = setInterval(() => setTick(t => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, [active]);
+  if (!active) return null;
+
+  const elapsedMin = Math.max(0, Math.floor((Date.now() - new Date(active.start_at).getTime()) / 60_000));
+  const hh = Math.floor(elapsedMin / 60);
+  const mm = String(elapsedMin % 60).padStart(2, '0');
+  const goal = active.goal_hours || null;
+  const goalMin = goal ? goal * 60 : null;
+  const pct = goalMin ? Math.min(1, elapsedMin / goalMin) : null;
+  const reached = goalMin != null && elapsedMin >= goalMin;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mx-5 mt-2 w-[calc(100%-40px)] px-3.5 py-2.5 rounded-[12px] bg-amber-soft border border-amber-line flex items-center gap-3 cursor-pointer active:scale-[.99] transition-transform text-left"
+    >
+      <span className="text-[16px]">⏳</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[12px] text-text">
+          단식 <b className="font-mono text-amber">{hh}:{mm}</b> 진행 중
+          {goal && <span className="text-text-mid"> · 목표 {goal}h</span>}
+        </div>
+        {goalMin != null && (
+          <div className="mt-1.5 h-1.5 rounded-full bg-surface-3 overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: reached ? 'var(--color-sage)' : 'var(--color-amber)' }} />
+          </div>
+        )}
+      </div>
+      {reached
+        ? <span className="text-[10px] text-sage font-bold shrink-0">목표 달성</span>
+        : <Icon.chev s={14} className="text-text-faint shrink-0" />}
+    </button>
   );
 }
 

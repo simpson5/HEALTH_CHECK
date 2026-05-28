@@ -107,7 +107,7 @@ export function Weight() {
       {/* AI insight chip — handoff §5 */}
       {inbodyRecs.length >= 2 && (
         <div className="mx-5 mt-3 px-3.5 py-3 rounded-[12px] bg-amber-soft border border-amber-line flex gap-3 items-start">
-          <div className="text-amber font-bold text-[11px] mt-0.5">AI</div>
+          <div className="text-amber font-bold text-[10px] mt-0.5 shrink-0 font-mono">분석</div>
           <div className="text-[12px] leading-relaxed text-text flex-1">
             {(() => {
               const muscleDelta = (() => {
@@ -116,12 +116,12 @@ export function Weight() {
                 return (recent[1].muscle_kg ?? 0) - (recent[0].muscle_kg ?? 0);
               })();
               if (muscleDelta < -0.5) {
-                return <>최근 페이스 안정적이에요. <b className="text-amber">근손실 {Math.abs(muscleDelta).toFixed(1)}kg</b> 있으니 단백질 110g 이상 유지해주세요.</>;
+                return <><b className="text-coral">근손실 {Math.abs(muscleDelta).toFixed(1)}kg</b> 감지 — 단백질 110g 이상 유지하세요.</>;
               }
               if (avgPerDay > 0.05) {
-                return <>이 페이스라면 <b className="text-amber">월 {(avgPerDay * 30).toFixed(1)}kg</b> 감량 페이스에요. 무리하지 않게 유지해보세요.</>;
+                return <>현재 <b className="text-amber">월 {(avgPerDay * 30).toFixed(1)}kg</b> 감량 페이스. 무리하지 않게 유지해보세요.</>;
               }
-              return <>최근 4주 페이스가 <b className="text-amber">안정적</b>이에요. 단백질·운동 루틴을 그대로 이어가세요.</>;
+              return <>최근 페이스 <b className="text-amber">안정적</b>. 단백질·운동 루틴을 그대로 이어가세요.</>;
             })()}
           </div>
         </div>

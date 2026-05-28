@@ -395,10 +395,11 @@ async def fasting_start(request: Request):
 
     start_at = body.get("start_at") or datetime.now().isoformat(timespec="seconds")
     start_weight = body.get("start_weight_kg")
+    goal_hours = body.get("goal_hours")
     memo = body.get("memo") or ""
     cur = conn.execute(
-        "INSERT INTO fasting_records (start_at, start_weight_kg, memo) VALUES (?, ?, ?)",
-        (start_at, start_weight, memo),
+        "INSERT INTO fasting_records (start_at, start_weight_kg, goal_hours, memo) VALUES (?, ?, ?, ?)",
+        (start_at, start_weight, goal_hours, memo),
     )
     conn.commit()
     new_id = cur.lastrowid

@@ -2,6 +2,7 @@ const BASE = '';
 
 export async function fetchData() {
   const res = await fetch(`${BASE}/api/data`);
+  if (!res.ok) throw new Error(`서버 응답 ${res.status}`);
   return res.json();
 }
 
@@ -104,11 +105,11 @@ export async function requestWeeklyReport(startDate, endDate) {
   return res.json();
 }
 
-export async function startFasting({ start_weight_kg, memo } = {}) {
+export async function startFasting({ start_weight_kg, goal_hours, memo } = {}) {
   const res = await fetch(`${BASE}/api/fasting/start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ start_weight_kg, memo }),
+    body: JSON.stringify({ start_weight_kg, goal_hours, memo }),
   });
   return res.json();
 }

@@ -190,6 +190,7 @@ def init_db():
     _ensure_column("profiles", "daily_carb_target", "daily_carb_target INTEGER DEFAULT 180")
     _ensure_column("profiles", "daily_fat_target",  "daily_fat_target INTEGER DEFAULT 60")
     _ensure_column("profiles", "meal_plan_json",    "meal_plan_json TEXT")
+    _ensure_column("fasting_records", "goal_hours", "goal_hours REAL")
 
     conn.commit()
     conn.close()
@@ -438,6 +439,7 @@ def db_to_json():
             "end_weight_kg": r["end_weight_kg"],
             "duration_min": r["duration_min"],
             "weight_change_kg": r["weight_change_kg"],
+            "goal_hours": r["goal_hours"] if "goal_hours" in r.keys() else None,
             "memo": r["memo"],
         })
 
