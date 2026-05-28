@@ -108,7 +108,12 @@ html, body {
   /* 한글 line-height: 1.55~1.7 권장 */
   line-height: 1.55;
   letter-spacing: -0.01em;
+  /* 전체 페이지 스크롤 방지 (앱 셸 내부 main만 스크롤) */
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
+html { height: 100%; }
 * { box-sizing: border-box; }
 ::selection { background: rgba(242, 169, 60, 0.3); }
 
@@ -134,4 +139,9 @@ html, body {
 .animate-toast   { animation: toast-in .24s var(--ease-out); }
 .animate-pulse-soft { animation: pulse-soft 2.4s ease-in-out infinite; }
 
-#root { min-height: 100vh; }
+#root {
+  height: 100dvh;       /* dynamic viewport — iOS URL bar 토글에 안전 */
+  height: 100vh;        /* dvh 미지원 폴백 */
+  height: 100%;         /* 진짜 폴백: html이 100% */
+  overflow: hidden;
+}

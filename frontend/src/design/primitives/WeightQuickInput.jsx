@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Card } from './Card';
-import Icon from '../Icon';
 import { getToday } from '../../lib/utils';
 
 const STEP = 0.1;
@@ -48,14 +47,10 @@ export function WeightQuickInput({ defaultValue, onSaved }) {
   const hasValue = weight !== '' && !isNaN(parseFloat(weight));
 
   return (
-    <Card pad={14}>
-      <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-[10px] bg-surface-3 flex items-center justify-center text-amber shrink-0">
-          <Icon.scale s={18} />
-        </div>
-
+    <Card pad={12}>
+      {/* Row 1: stepper + 큰 숫자 (좁은 화면에서도 안 잘리게) */}
+      <div className="flex items-center gap-2">
         <StepButton dir="-" onClick={() => adjust(-STEP)} />
-
         <div className="flex-1 min-w-0 flex items-baseline justify-center gap-1">
           <input
             value={weight}
@@ -64,22 +59,22 @@ export function WeightQuickInput({ defaultValue, onSaved }) {
             placeholder="—"
             inputMode="decimal"
             type="text"
-            className="w-full bg-transparent border-none outline-none text-text text-[24px] font-bold tracking-[-0.8px] font-mono text-center placeholder:text-text-faint min-w-0"
+            className="flex-1 min-w-0 bg-transparent border-none outline-none text-text text-[26px] font-bold tracking-[-0.8px] font-mono text-right placeholder:text-text-faint"
           />
-          <span className="text-text-mid font-mono text-[12px] -ml-1">kg</span>
+          <span className="text-text-mid font-mono text-[12px] shrink-0">kg</span>
         </div>
-
         <StepButton dir="+" onClick={() => adjust(STEP)} />
-
-        <button
-          type="button"
-          onClick={save}
-          disabled={saving || !hasValue}
-          className="px-3.5 h-9 rounded-[10px] bg-amber text-[#1a1208] font-bold text-[12px] border-none cursor-pointer active:scale-[.98] transition-transform disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-        >
-          {saving ? '저장 중' : '저장'}
-        </button>
       </div>
+
+      {/* Row 2: 저장 버튼 (full width — 폭 어떤 폰이든 안 잘림) */}
+      <button
+        type="button"
+        onClick={save}
+        disabled={saving || !hasValue}
+        className="w-full mt-2.5 py-2.5 rounded-[10px] bg-amber text-[#1a1208] font-bold text-[13px] border-none cursor-pointer active:scale-[.98] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {saving ? '저장 중...' : '저장'}
+      </button>
     </Card>
   );
 }
@@ -90,7 +85,7 @@ function StepButton({ dir, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={dir === '+' ? '0.1kg 증가' : '0.1kg 감소'}
-      className="w-9 h-9 rounded-full bg-surface-3 border border-line text-text-mid font-bold text-[16px] cursor-pointer flex items-center justify-center active:scale-[.92] transition-transform shrink-0 leading-none"
+      className="w-10 h-10 rounded-full bg-surface-3 border border-line text-text font-bold text-[18px] cursor-pointer flex items-center justify-center active:scale-[.92] transition-transform shrink-0 leading-none"
     >
       {dir === '+' ? '+' : '−'}
     </button>

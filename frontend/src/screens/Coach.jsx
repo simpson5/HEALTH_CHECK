@@ -3,10 +3,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../design/Icon';
 import { TapBtn } from '../design/primitives';
 import { requestCoach, pollJob } from '../lib/api';
+import { usePref } from '../lib/prefs';
 
 export function Coach() {
   const nav = useNavigate();
   const loc = useLocation();
+  const [showMed] = usePref('medication');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [pending, setPending] = useState(false);
@@ -90,14 +92,14 @@ export function Coach() {
               안녕하세요, <span className="text-amber">Simpson</span>님
             </div>
             <div className="text-[13px] text-text-mid mt-2 leading-relaxed">
-              마운자로 · 단백질 · 운동 · 인바디 — 무엇이든 질문해보세요.
+              {showMed ? '마운자로 · 단백질 · 운동 · 인바디 — 무엇이든 질문해보세요.' : '단백질 · 운동 · 인바디 — 무엇이든 질문해보세요.'}
             </div>
             <div className="mt-5 text-[11px] text-text-dim font-semibold">추천 질문</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {[
                 '오늘 단백질이 부족한데 뭐 먹을까?',
                 '최근 근손실 어떻게 막을까요?',
-                '마운자로 5mg 부작용 줄이는 법',
+                showMed ? '마운자로 5mg 부작용 줄이는 법' : '체중 정체기 어떻게 돌파할까?',
                 '주말 외식 시 칼로리 어떻게 관리?',
               ].map(q => (
                 <button

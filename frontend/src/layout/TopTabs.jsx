@@ -25,7 +25,7 @@ export function TopTabs() {
     else setParams({ tab: key }, { replace: false });
   };
   return (
-    <div className="px-5 pt-3.5 pb-2.5 flex gap-5 items-center">
+    <div className="px-5 pt-3.5 pb-2.5 flex gap-5 items-center shrink-0 bg-bg border-b border-line/50">
       {TABS.map(t => {
         const active = cur === t.key;
         return (

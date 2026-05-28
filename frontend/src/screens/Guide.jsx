@@ -5,6 +5,7 @@ import { LoadingScreen } from './_Loading';
 import { Card, Chip, SectionLabel, TapBtn } from '../design/primitives';
 import Icon from '../design/Icon';
 import { computeMilestones } from '../lib/roadmap';
+import { usePref } from '../lib/prefs';
 
 function computeProteinTotal(mealPlan) {
   let lo = 0, hi = 0, any = false;
@@ -24,6 +25,7 @@ const TABS = ['하루일과', '식단', '운동', '식품도감', '로드맵'];
 
 export function Guide() {
   const { data, loading } = useData();
+  const [showMed] = usePref('medication');
   const [tab, setTab] = useState('하루일과');
 
   if (loading || !data) return <LoadingScreen />;
@@ -45,7 +47,7 @@ export function Guide() {
           운동 &amp; 식단 가이드
         </div>
         <div className="text-[12px] text-text-mid mt-1.5">
-          {cur.toFixed(1)}kg · 근손실 방지 · 마운자로 복용 중
+          {cur.toFixed(1)}kg · 근손실 방지{showMed ? ' · 마운자로 복용 중' : ''}
         </div>
         <div className="flex gap-1.5 mt-2.5">
           <Chip label="목표" value={`${goal}kg`} color="var(--color-accent)" />

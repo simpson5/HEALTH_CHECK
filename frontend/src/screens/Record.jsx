@@ -6,10 +6,12 @@ import { Card, Chip, TapBtn, SectionLabel, Toast, WeightQuickInput } from '../de
 import Icon from '../design/Icon';
 import { getToday, daysSince } from '../lib/utils';
 import { uploadPhoto, pollJob, startFasting, endFasting } from '../lib/api';
+import { usePref } from '../lib/prefs';
 
 export function Record() {
   const nav = useNavigate();
   const { data, loading, refresh } = useData();
+  const [showMed] = usePref('medication');
   const [dose, setDose] = useState('5mg');
   const [mealText, setMealText] = useState('');
   const [photo, setPhoto] = useState(null);
@@ -169,29 +171,33 @@ export function Record() {
         </Card>
       </div>
 
-      {/* Medication */}
-      <SectionLabel right={<span>주 1회 · 금요일</span>}>투약</SectionLabel>
-      <div className="mx-5">
-        <Card pad={16}>
-          <div className="flex gap-2.5 items-center">
-            <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-text-mid">
-              <Icon.pill s={18} />
-            </div>
-            <div className="flex-1">
-              <div className="text-[13px] text-text tracking-[-0.2px]">마운자로</div>
-              <div className="text-[11px] text-text-dim font-mono">GLP-1 주사</div>
-            </div>
-            <select
-              value={dose}
-              onChange={e => setDose(e.target.value)}
-              className="bg-bg-elev-3 border border-line text-text px-3 py-2 rounded-[10px] font-mono text-[13px]"
-            >
-              {['2.5mg', '5mg', '7.5mg', '10mg'].map(d => <option key={d}>{d}</option>)}
-            </select>
-            <TapBtn variant="soft" onClick={saveMedication}>투약</TapBtn>
+      {/* Medication — 설정에서 비활성화 가능 */}
+      {showMed && (
+        <>
+          <SectionLabel right={<span>주 1회 · 금요일</span>}>투약</SectionLabel>
+          <div className="mx-5">
+            <Card pad={16}>
+              <div className="flex gap-2.5 items-center">
+                <div className="w-9 h-9 rounded-[10px] bg-bg-elev-3 flex items-center justify-center text-text-mid">
+                  <Icon.pill s={18} />
+                </div>
+                <div className="flex-1">
+                  <div className="text-[13px] text-text tracking-[-0.2px]">마운자로</div>
+                  <div className="text-[11px] text-text-dim font-mono">GLP-1 주사</div>
+                </div>
+                <select
+                  value={dose}
+                  onChange={e => setDose(e.target.value)}
+                  className="bg-bg-elev-3 border border-line text-text px-3 py-2 rounded-[10px] font-mono text-[13px]"
+                >
+                  {['2.5mg', '5mg', '7.5mg', '10mg'].map(d => <option key={d}>{d}</option>)}
+                </select>
+                <TapBtn variant="soft" onClick={saveMedication}>투약</TapBtn>
+              </div>
+            </Card>
           </div>
-        </Card>
-      </div>
+        </>
+      )}
 
       {/* Meal AI input */}
       <SectionLabel right={<span className="text-accent">AI 분석</span>}>식단 기록</SectionLabel>

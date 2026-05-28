@@ -25,11 +25,12 @@ export function MobileShell() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <div className="w-full min-h-screen bg-bg text-text font-sans flex flex-col relative overflow-hidden">
+    <div className="w-full h-full bg-bg text-text font-sans flex flex-col relative overflow-hidden">
       {!immersive && <BrandHeader onSearchClick={() => setSearchOpen(true)} />}
       {showTopTabs && <TopTabs />}
+      {/* main: flex-1 + min-h-0 (flex 자식이 줄어들 수 있게) + 자체 스크롤 */}
       <main
-        className="flex-1 overflow-y-auto overflow-x-hidden animate-fade-up"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden animate-fade-up"
         key={loc.key}
       >
         <Outlet />
@@ -42,7 +43,7 @@ export function MobileShell() {
 
 function BrandHeader({ onSearchClick }) {
   return (
-    <div className="px-5 h-12 flex items-center justify-between shrink-0">
+    <div className="px-5 h-12 flex items-center justify-between shrink-0 border-b border-line bg-bg">
       <div className="flex items-center gap-2">
         <div className="w-[22px] h-[22px] rounded-[7px] bg-accent text-accent-on font-mono font-bold text-xs flex items-center justify-center">S</div>
         <span className="text-[13px] font-medium tracking-[-0.2px]">Simpson Health</span>

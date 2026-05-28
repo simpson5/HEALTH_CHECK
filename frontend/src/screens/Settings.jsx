@@ -10,6 +10,7 @@ import {
 import Icon from '../design/Icon';
 import { daysSince, getToday } from '../lib/utils';
 import { updateProfile, fetchAiJobs } from '../lib/api';
+import { usePref } from '../lib/prefs';
 
 const JOB_TYPE_LABEL = {
   diet_draft: '식단 분석',
@@ -33,10 +34,8 @@ export function Settings() {
   const [openJob, setOpenJob] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [mealPlanOpen, setMealPlanOpen] = useState(false);
-  const [notify, setNotify] = useState(() => {
-    try { return localStorage.getItem('sh:notify') !== '0'; }
-    catch { return true; }
-  });
+  const [notify, setNotify] = usePref('notify');
+  const [showMed, setShowMed] = usePref('medication');
 
   useEffect(() => {
     fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
@@ -54,10 +53,13 @@ export function Settings() {
   }
 
   function toggleNotify(next) {
-    try { localStorage.setItem('sh:notify', next ? '1' : '0'); }
-    catch { /* Safari private mode fallback: keep memory state only */ }
     setNotify(next);
     showToast(next ? '알림 켜짐' : '알림 꺼짐');
+  }
+
+  function toggleShowMed(next) {
+    setShowMed(next);
+    showToast(next ? '마운자로 표시 켜짐' : '마운자로 표시 꺼짐');
   }
 
   async function handleExport(format) {
@@ -206,6 +208,7 @@ export function Settings() {
             onSave={v => saveProfile({ daily_fat_target: Math.round(v) }, '지방 목표 저장')}
           />
           <ToggleSettingRow label="알림" checked={notify} onChange={toggleNotify} />
+          <ToggleSettingRow label="마운자로 표시" checked={showMed} onChange={toggleShowMed} />
 
           <button
             type="button"

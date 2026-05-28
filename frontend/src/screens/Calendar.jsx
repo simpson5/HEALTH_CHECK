@@ -5,12 +5,14 @@ import { Card, SectionLabel } from '../design/primitives';
 import Icon from '../design/Icon';
 import { getToday } from '../lib/utils';
 import { computeMilestones } from '../lib/roadmap';
+import { usePref } from '../lib/prefs';
 
 const DOWS = ['일', '월', '화', '수', '목', '금', '토'];
 const DOW_KR = ['일', '월', '화', '수', '목', '금', '토'];
 
 export function Calendar() {
   const { data, loading } = useData();
+  const [showMed] = usePref('medication');
   const todayStr = getToday();
   const today = new Date(todayStr);
   const [mode, setMode] = useState('월간');
@@ -219,7 +221,7 @@ export function Calendar() {
             })()}
           </SectionLabel>
           <div className="mx-5">
-            <DaySummary s={daySummary(selDate)} />
+            <DaySummary s={daySummary(selDate)} showMed={showMed} />
           </div>
         </>
       )}
@@ -314,9 +316,10 @@ function WeekView({ weekStart, selDate, onSelect, data, todayStr }) {
   );
 }
 
-function DaySummary({ s }) {
+function DaySummary({ s, showMed = true }) {
   const { weight, diets, exes, meds, inbody, totalPro, totalKc } = s;
-  const nothing = !weight && diets.length === 0 && exes.length === 0 && !inbody && meds.length === 0;
+  const showMeds = showMed && meds.length > 0;
+  const nothing = !weight && diets.length === 0 && exes.length === 0 && !inbody && !showMeds;
   if (nothing) {
     return (
       <Card className="text-center text-text-dim text-[12px]" pad={18}>기록 없음</Card>
@@ -351,7 +354,7 @@ function DaySummary({ s }) {
           color="var(--color-sage)"
         />
       )}
-      {meds.length > 0 && (
+      {showMeds && (
         <Row label="투약" value={meds.map(m => m.dose).join(', ')} color="var(--color-slate)" last />
       )}
     </Card>
