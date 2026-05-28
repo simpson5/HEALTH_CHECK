@@ -139,7 +139,10 @@ export function Record() {
       {/* Weight input */}
       <SectionLabel>체중 입력</SectionLabel>
       <div className="mx-5">
-        <WeightQuickInput onSaved={() => { refresh(); showToast('체중 저장됨'); }} />
+        <WeightQuickInput
+          defaultValue={(data.weight_records || []).slice(-1)[0]?.weight_kg}
+          onSaved={() => { refresh(); showToast('체중 저장됨'); }}
+        />
       </div>
 
       {/* Fasting */}
