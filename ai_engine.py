@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -10,6 +11,24 @@ from database import get_db
 
 PROJECT_ROOT = Path(__file__).parent
 CONFIG_PATH = PROJECT_ROOT / "data" / "config.json"
+
+# 흔한 claude CLI 설치 경로 (Homebrew, npm global, 구버전 local)
+_CLAUDE_CANDIDATES = [
+    "/opt/homebrew/bin/claude",
+    "/usr/local/bin/claude",
+    str(Path.home() / ".claude" / "local" / "claude"),
+]
+
+
+def find_claude():
+    """claude CLI 실행 파일 경로 탐지. PATH 우선, 없으면 알려진 후보 경로."""
+    found = shutil.which("claude")
+    if found:
+        return found
+    for c in _CLAUDE_CANDIDATES:
+        if os.path.exists(c):
+            return c
+    return None
 
 
 def get_token():
@@ -24,11 +43,11 @@ def get_token():
 
 
 def is_configured():
-    """AI 엔진 사용 가능 여부 — 토큰 있거나, 이미 로그인된 상태면 OK"""
+    """AI 엔진 사용 가능 여부 — 토큰 있거나, claude CLI가 설치돼 있으면 OK.
+    (claude CLI는 자체 로그인 자격증명을 사용하므로 토큰 없어도 동작)"""
     if get_token():
         return True
-    # 토큰 없어도 로그인된 상태일 수 있음
-    return os.path.exists("/Users/simpson/.claude/local/claude")
+    return find_claude() is not None
 
 
 def create_job(job_type, input_data):
@@ -106,9 +125,13 @@ async def run_claude(prompt, timeout=120):
         env["CLAUDE_CODE_OAUTH_TOKEN"] = token
     # 토큰 없어도 로그인된 상태면 동작함
 
+    claude_bin = find_claude()
+    if not claude_bin:
+        return {"ok": False, "error": "claude CLI 미설치"}
+
     try:
         proc = await asyncio.create_subprocess_exec(
-            "/Users/simpson/.claude/local/claude", "-p", prompt,
+            claude_bin, "-p", prompt,
             cwd=str(PROJECT_ROOT),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
