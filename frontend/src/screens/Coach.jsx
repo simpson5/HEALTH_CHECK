@@ -5,11 +5,22 @@ import { TapBtn } from '../design/primitives';
 import { requestCoach, pollJob } from '../lib/api';
 import { usePref } from '../lib/prefs';
 
+const COACH_STORE_KEY = 'sh:coach:messages';
+const COACH_MAX = 100;   // 너무 길어지지 않게 최근 100개만 유지
+
+function loadMessages() {
+  try {
+    const raw = localStorage.getItem(COACH_STORE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+
 export function Coach() {
   const nav = useNavigate();
   const loc = useLocation();
   const [showMed] = usePref('medication');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(loadMessages);
   const [input, setInput] = useState('');
   const [pending, setPending] = useState(false);
   const scrollRef = useRef(null);
@@ -20,6 +31,18 @@ export function Coach() {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, pending]);
+
+  // 대화 내역 영속화 (화면 나갔다 와도, 새로고침해도 유지)
+  useEffect(() => {
+    try {
+      localStorage.setItem(COACH_STORE_KEY, JSON.stringify(messages.slice(-COACH_MAX)));
+    } catch { /* 저장 실패해도 대화 흐름은 유지 */ }
+  }, [messages]);
+
+  function clearMessages() {
+    setMessages([]);
+    try { localStorage.removeItem(COACH_STORE_KEY); } catch {}
+  }
 
   // Optional: auto-send initial question passed via nav state
   useEffect(() => {
@@ -82,7 +105,18 @@ export function Coach() {
           <Icon.chev s={18} style={{ transform: 'rotate(180deg)' }} />
         </button>
         <div className="text-[14px] text-text font-medium tracking-[-0.2px]">건강 상담</div>
-        <div className="w-9" />
+        {messages.length > 0 ? (
+          <button
+            type="button"
+            onClick={clearMessages}
+            className="h-9 px-2 rounded-full bg-transparent border-none text-text-mid text-[11px] cursor-pointer flex items-center"
+            aria-label="대화 지우기"
+          >
+            지우기
+          </button>
+        ) : (
+          <div className="w-9" />
+        )}
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
