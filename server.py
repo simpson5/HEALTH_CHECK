@@ -379,6 +379,85 @@ async def parse_inbody(request: Request):
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=400)
 
+# === 단식 API ===
+
+@app.post("/api/fasting/start")
+async def fasting_start(request: Request):
+    """단식 세션 시작. 진행 중인 단식이 있으면 에러."""
+    body = await request.json()
+    conn = get_db()
+    active = conn.execute(
+        "SELECT id FROM fasting_records WHERE end_at IS NULL ORDER BY start_at DESC LIMIT 1"
+    ).fetchone()
+    if active:
+        conn.close()
+        return JSONResponse({"ok": False, "error": "이미 진행 중인 단식이 있습니다"}, status_code=400)
+
+    start_at = body.get("start_at") or datetime.now().isoformat(timespec="seconds")
+    start_weight = body.get("start_weight_kg")
+    memo = body.get("memo") or ""
+    cur = conn.execute(
+        "INSERT INTO fasting_records (start_at, start_weight_kg, memo) VALUES (?, ?, ?)",
+        (start_at, start_weight, memo),
+    )
+    conn.commit()
+    new_id = cur.lastrowid
+    conn.close()
+    return {"ok": True, "id": new_id, "start_at": start_at}
+
+@app.post("/api/fasting/end")
+async def fasting_end(request: Request):
+    """진행 중인 단식 종료. duration·weight delta 자동 계산."""
+    body = await request.json()
+    conn = get_db()
+    # 명시적 id 있으면 그걸, 없으면 진행 중인 가장 최신 단식
+    fid = body.get("id")
+    if fid:
+        row = conn.execute("SELECT * FROM fasting_records WHERE id=?", (fid,)).fetchone()
+    else:
+        row = conn.execute(
+            "SELECT * FROM fasting_records WHERE end_at IS NULL ORDER BY start_at DESC LIMIT 1"
+        ).fetchone()
+    if not row:
+        conn.close()
+        return JSONResponse({"ok": False, "error": "진행 중인 단식이 없습니다"}, status_code=400)
+    if row["end_at"]:
+        conn.close()
+        return JSONResponse({"ok": False, "error": "이미 종료된 단식입니다"}, status_code=400)
+
+    end_at_str = body.get("end_at") or datetime.now().isoformat(timespec="seconds")
+    end_weight = body.get("end_weight_kg")
+    memo = body.get("memo")
+
+    # duration_min · weight_change_kg 계산
+    try:
+        start_dt = datetime.fromisoformat(row["start_at"])
+        end_dt = datetime.fromisoformat(end_at_str)
+        duration_min = max(0, int((end_dt - start_dt).total_seconds() / 60))
+    except Exception:
+        duration_min = None
+    wc = None
+    if end_weight is not None and row["start_weight_kg"] is not None:
+        wc = round(float(end_weight) - float(row["start_weight_kg"]), 2)
+
+    conn.execute(
+        """UPDATE fasting_records SET end_at=?, end_weight_kg=?, duration_min=?,
+           weight_change_kg=?, memo=COALESCE(?, memo) WHERE id=?""",
+        (end_at_str, end_weight, duration_min, wc, memo, row["id"]),
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True, "id": row["id"], "duration_min": duration_min, "weight_change_kg": wc}
+
+@app.delete("/api/fasting/{fid}")
+async def fasting_delete(fid: int):
+    """단식 세션 삭제"""
+    conn = get_db()
+    conn.execute("DELETE FROM fasting_records WHERE id=?", (fid,))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
 # === 설정 API ===
 
 @app.get("/api/settings")

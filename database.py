@@ -165,6 +165,20 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_schedule_date ON schedule(date);
+
+    -- 단식 세션 (end_at IS NULL이면 진행 중)
+    CREATE TABLE IF NOT EXISTS fasting_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        start_at TIMESTAMP NOT NULL,
+        end_at TIMESTAMP,
+        start_weight_kg REAL,
+        end_weight_kg REAL,
+        duration_min INTEGER,
+        weight_change_kg REAL,
+        memo TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_fasting_start ON fasting_records(start_at);
     """)
 
     # Idempotent column additions (21번 계획 L1/L2)
@@ -413,6 +427,20 @@ def db_to_json():
             "analysis": r["analysis"], "recommendations": json.loads(r["recommendations_json"] or "[]"),
         })
 
+    # 단식 세션 (start_at DESC: 최신순)
+    fasting_records = []
+    for r in c.execute("SELECT * FROM fasting_records ORDER BY start_at DESC").fetchall():
+        fasting_records.append({
+            "id": r["id"],
+            "start_at": r["start_at"],
+            "end_at": r["end_at"],
+            "start_weight_kg": r["start_weight_kg"],
+            "end_weight_kg": r["end_weight_kg"],
+            "duration_min": r["duration_min"],
+            "weight_change_kg": r["weight_change_kg"],
+            "memo": r["memo"],
+        })
+
     conn.close()
 
     return {
@@ -427,6 +455,7 @@ def db_to_json():
         "exercise_records": exercise_records,
         "daily_reports": daily_reports,
         "weekly_analysis": weekly_analysis,
+        "fasting_records": fasting_records,
     }
 
 

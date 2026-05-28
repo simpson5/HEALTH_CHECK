@@ -82,21 +82,33 @@ export function Home() {
   const now = new Date();
   const dateLabel = now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
 
-  // ETA: 평균 감량 페이스로 80kg 도달 예상월 계산
-  const paceKgPerDay = (() => {
-    if (weightRecs.length < 5 || start == null) return null;
-    const first = weightRecs[0];
-    const days = Math.max(1, Math.round((new Date(latest.date) - new Date(first.date)) / 86400000));
-    const drop = first.weight_kg - cur;
+  // ETA: 다이어트 시작 이후 전체 평균 페이스로 80kg 도달 예측
+  // 단기(14일) 변동은 노이즈 많아서 사용 안 함 — 실제 체감 페이스와 맞춰줌
+  const eta = (() => {
+    if (start == null || cur == null || remainKg <= 0) return null;
+    const startDateStr = profile.medication_start || weightRecs[0]?.date;
+    if (!startDateStr) return null;
+
+    const startDate = new Date(startDateStr);
+    const latestDate = new Date(latest?.date || now);
+    const daysElapsed = Math.max(1, Math.round((latestDate - startDate) / 86400000));
+    const drop = start - cur;
     if (drop <= 0) return null;
-    return drop / days;
-  })();
-  const etaMonth = (() => {
-    if (!paceKgPerDay || remainKg <= 0) return null;
-    const etaDays = remainKg / paceKgPerDay;
-    const eta = new Date(now);
-    eta.setDate(eta.getDate() + Math.round(etaDays));
-    return eta.toLocaleDateString('ko-KR', { month: 'long' });
+
+    const pace = drop / daysElapsed;          // kg/day, 전체 평균
+    const etaDays = Math.round(remainKg / pace);
+    const etaDate = new Date(latestDate);
+    etaDate.setDate(etaDate.getDate() + etaDays);
+    const daysFromNow = Math.max(1, Math.round((etaDate - new Date(now.toISOString().slice(0, 10))) / 86400000));
+
+    const sameYear = etaDate.getFullYear() === now.getFullYear();
+    const yearPrefix = sameYear ? '' : `${etaDate.getFullYear()}년 `;
+    return {
+      label: `${yearPrefix}${etaDate.getMonth() + 1}월 ${etaDate.getDate()}일경`,
+      daysFromNow,
+      paceLabel: `${pace.toFixed(2)}kg/일`,
+      daysElapsed,
+    };
   })();
 
   return (
@@ -168,12 +180,14 @@ export function Home() {
             </div>
           </div>
 
-          {/* AI insight chip — design_handoff §3 패턴 */}
-          {etaMonth && (
+          {/* AI insight chip — 80kg 도달 ETA */}
+          {eta && (
             <div className="mt-4 px-3 py-2.5 rounded-[8px] bg-amber-soft flex gap-2.5 items-start">
               <div className="text-amber font-bold text-[11px] mt-0.5">AI</div>
               <div className="text-[12px] text-text leading-relaxed flex-1">
-                이 페이스라면 <b className="text-amber">{etaMonth} 중순</b>에 {goal}kg 도달 예상이에요.
+                현재 페이스 <span className="font-mono text-amber font-semibold">{eta.paceLabel}</span> ·
+                <b className="text-amber"> {eta.label}</b>에 {goal}kg 도달 예상
+                <span className="text-text-mid"> (D-{eta.daysFromNow})</span>
               </div>
             </div>
           )}

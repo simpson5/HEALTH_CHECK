@@ -104,6 +104,29 @@ export async function requestWeeklyReport(startDate, endDate) {
   return res.json();
 }
 
+export async function startFasting({ start_weight_kg, memo } = {}) {
+  const res = await fetch(`${BASE}/api/fasting/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ start_weight_kg, memo }),
+  });
+  return res.json();
+}
+
+export async function endFasting({ end_weight_kg, memo } = {}) {
+  const res = await fetch(`${BASE}/api/fasting/end`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ end_weight_kg, memo }),
+  });
+  return res.json();
+}
+
+export async function deleteFasting(id) {
+  const res = await fetch(`${BASE}/api/fasting/${id}`, { method: 'DELETE' });
+  return res.json();
+}
+
 export async function requestCoach(question) {
   const res = await fetch(`${BASE}/api/ai/coach`, {
     method: 'POST',
