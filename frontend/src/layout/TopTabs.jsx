@@ -25,7 +25,7 @@ export function TopTabs() {
     else setParams({ tab: key }, { replace: false });
   };
   return (
-    <div className="px-5 pt-3.5 pb-2.5 flex gap-5 items-center shrink-0 bg-bg border-b border-line/50">
+    <div className="px-5 pt-3.5 pb-2.5 flex justify-between items-center shrink-0 bg-bg border-b border-line/50">
       {TABS.map(t => {
         const active = cur === t.key;
         return (
@@ -36,7 +36,7 @@ export function TopTabs() {
             className={`relative bg-transparent border-none p-0 cursor-pointer text-[15px] tracking-[-0.3px] transition-colors ${active ? 'text-text font-semibold' : 'text-text-dim font-normal'}`}
           >
             {t.label}
-            {active && <span className="absolute left-0 right-0 -bottom-2 h-0.5 bg-accent rounded-sm"/>}
+            {active && <span className="absolute -left-1 -right-1 -bottom-2 h-0.5 bg-accent rounded-sm"/>}
           </button>
         );
       })}
