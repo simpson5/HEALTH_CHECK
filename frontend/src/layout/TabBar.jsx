@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../design/Icon';
 
 const TABS = [
-  { key: 'home',  label: '대시보드', to: '/',         match: (p) => p === '/',             render: (s) => <Icon.home s={s}/> },
+  { key: 'home',  label: '홈',       to: '/',         match: (p) => p === '/',             render: (s) => <Icon.home s={s}/> },
   { key: 'cal',   label: '달력',     to: '/calendar', match: (p) => p.startsWith('/calendar'), render: (s) => <Icon.calendar s={s}/> },
   { key: 'guide', label: '가이드',   to: '/guide',    match: (p) => p.startsWith('/guide'),    render: (s) => <Icon.book s={s}/> },
   { key: 'set',   label: '설정',     to: '/settings', match: (p) => p.startsWith('/settings'), render: (s) => <Icon.gear s={s}/> },

@@ -10,7 +10,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 const TABS = [
-  { key: 'home',     label: '홈' },
+  { key: 'home',     label: '대시보드' },
   { key: 'diet',     label: '식단' },
   { key: 'weight',   label: '체중' },
   { key: 'exercise', label: '운동' },
